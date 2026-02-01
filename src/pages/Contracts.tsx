@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { getCountryByCode } from "@/lib/countries";
-import { ArrowRight, FileText, Scale, RefreshCw, DollarSign } from "lucide-react";
+import { ArrowRight, FileText, Scale, RefreshCw, DollarSign, Download, Eye, Stamp, PenTool } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";

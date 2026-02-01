@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCountryByCode } from "@/lib/countries";
-import { Truck, ArrowRight, Package, MapPin, DollarSign, RefreshCw, CreditCard, Building2 } from "lucide-react";
+import { Truck, ArrowRight, Package, MapPin, DollarSign, RefreshCw, CreditCard, Building2, Building } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
