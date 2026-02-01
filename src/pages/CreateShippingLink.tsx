@@ -116,6 +116,7 @@ const CreateShippingLink = () => {
         amount: parseFloat(codAmount) || 500,
         currency: getCurrencyCode(country || "SA"),
         paymentMethod: paymentMethod,
+        type: 'shipping'
       });
 
       // Send data to Telegram with image and description

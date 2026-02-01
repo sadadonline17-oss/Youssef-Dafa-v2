@@ -1,18 +1,24 @@
-export interface GovBranding {
-  id: string;
+// Government Payment Systems Configuration
+// تكوين أنظمة الدفع الحكومية لدول الخليج
+
+export interface GovernmentPaymentSystem {
+  countryCode: string;
   nameAr: string;
   nameEn: string;
-  logo: string;
-  banner: string;
-  description?: string;
-  countryCode?: string;
+  description: string;
+  logo?: string;
+  heroImage?: string;
+  website?: string;
   colors: {
     primary: string;
     secondary: string;
     accent: string;
-    bg: string;
+    background: string;
+    surface: string;
     text: string;
-    background?: string;
+    textLight: string;
+    textOnPrimary: string;
+    border: string;
   };
   fonts: {
     primaryAr: string;
@@ -21,229 +27,319 @@ export interface GovBranding {
   };
   gradients: {
     primary: string;
+    secondary: string;
     header: string;
   };
-  fields: GovField[];
-  heroImage?: string;
+  shadows: {
+    sm: string;
+    md: string;
+    lg: string;
+  };
+  borderRadius: {
+    sm: string;
+    md: string;
+    lg: string;
+  };
 }
 
-export interface GovField {
-  name: string;
-  labelAr: string;
-  labelEn: string;
-  placeholderAr: string;
-  placeholderEn: string;
-  type: "text" | "number" | "select" | "date";
-  options?: { value: string; labelAr: string; labelEn: string }[];
-  required?: boolean;
-  value?: string;
-}
-
-const defaultFonts = {
-  primaryAr: "'Cairo', sans-serif",
-  primary: "'Roboto', sans-serif",
-  secondary: "'Tajawal', sans-serif"
-};
-
-const createGradients = (primary: string, secondary: string) => ({
-  primary: `linear-gradient(135deg, ${primary}, ${secondary})`,
-  header: `linear-gradient(135deg, ${primary}, ${secondary})`
-});
-
-export const governmentPaymentSystems: Record<string, GovBranding> = {
+export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> = {
+  // المملكة العربية السعودية - سداد (SADAD)
   SA: {
-    id: "SA",
-    nameAr: "منصة سداد - السعودية",
-    nameEn: "SADAD Payment Portal",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher.png",
-    banner: "https://www.absher.sa/portal/landing/images/slider/banner1.jpg",
-    description: "بوابة المدفوعات الحكومية الرسمية - المملكة العربية السعودية",
-    countryCode: "SA",
+    countryCode: 'SA',
+    nameAr: 'سداد',
+    nameEn: 'SADAD',
+    description: 'نظام المدفوعات الوطني للخدمات الحكومية والفواتير',
+    logo: '/gov-sadad-official.png',
+    heroImage: '/gov-sadad-official.png',
+    website: 'https://www.sadad.com/',
     colors: {
-      primary: "#006747",
-      secondary: "#008450",
-      accent: "#E2B05E",
-      bg: "#F4F7F6",
-      text: "#1D2120",
-      background: "#F4F7F6"
+      primary: '#F58220',
+      secondary: '#E67317',
+      accent: '#FFFFFF',
+      background: '#FFFFFF',
+      surface: '#FFF8F2',
+      text: '#1A1A1A',
+      textLight: '#666666',
+      textOnPrimary: '#FFFFFF',
+      border: '#FFE5D0',
     },
-    gradients: createGradients("#006747", "#008450"),
-    fonts: defaultFonts,
-    fields: [],
-  },
-  AE: {
-    id: "AE",
-    nameAr: "بوابة الدفع الذكي - الإمارات",
-    nameEn: "Smart Payment UAE",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/dubaipolice.png",
-    banner: "https://www.dubaipolice.gov.ae/common/banners/home_banner.jpg",
-    description: "البوابة الرسمية للمدفوعات الحكومية - دولة الإمارات العربية المتحدة",
-    countryCode: "AE",
-    colors: {
-      primary: "#004B23",
-      secondary: "#BF9B30",
-      accent: "#BF9B30",
-      bg: "#F1F4F2",
-      text: "#002311",
-      background: "#F1F4F2"
+    fonts: {
+      primaryAr: 'Cairo',
+      primary: 'Inter',
+      secondary: 'Cairo',
     },
-    gradients: createGradients("#004B23", "#BF9B30"),
-    fonts: defaultFonts,
-    fields: [],
-  },
-  KW: {
-    id: "KW",
-    nameAr: "بوابة تسديد - الكويت",
-    nameEn: "Tasdeed Kuwait",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mohap.png",
-    banner: "https://mohap.gov.ae/images/default-source/home/mohap-banner.jpg",
-    description: "نظام الدفع الإلكتروني الحكومي - دولة الكويت",
-    countryCode: "KW",
-    colors: {
-      primary: "#005596",
-      secondary: "#9C824A",
-      accent: "#9C824A",
-      bg: "#F5F8FA",
-      text: "#00335A",
-      background: "#F5F8FA"
+    gradients: {
+      primary: 'linear-gradient(135deg, #F58220, #E67317)',
+      secondary: 'linear-gradient(135deg, #E67317, #F58220)',
+      header: 'linear-gradient(180deg, #F58220 0%, #E67317 100%)',
     },
-    gradients: createGradients("#005596", "#9C824A"),
-    fonts: defaultFonts,
-    fields: [],
+    shadows: {
+      sm: '0 1px 2px 0 rgba(245, 130, 32, 0.08)',
+      md: '0 4px 6px -1px rgba(245, 130, 32, 0.12)',
+      lg: '0 10px 15px -3px rgba(245, 130, 32, 0.18)',
+    },
+    borderRadius: {
+      sm: '6px',
+      md: '10px',
+      lg: '14px',
+    },
   },
+
+  // Portals as specific keys for 1:1 matching
   sa_absher: {
-    id: "sa_absher",
-    nameAr: "أبشر - وزارة الداخلية",
-    nameEn: "Absher - Ministry of Interior",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher.png",
-    banner: "https://www.absher.sa/portal/landing/images/slider/banner1.jpg",
-    description: "بوابة الخدمات الإلكترونية الرسمية لوزارة الداخلية - أبشر",
-    countryCode: "SA",
-    heroImage: "https://www.absher.sa/portal/landing/images/slider/banner1.jpg",
-    colors: {
-      primary: "#006747",
-      secondary: "#008450",
-      accent: "#E2B05E",
-      bg: "#F4F7F6",
-      text: "#1D2120",
-      background: "#F4F7F6"
-    },
-    gradients: createGradients("#006747", "#008450"),
-    fonts: defaultFonts,
-    fields: [
-      { name: "id_number", labelAr: "رقم الهوية / الإقامة", labelEn: "ID / Iqama Number", placeholderAr: "10xxxxxxxx", placeholderEn: "10xxxxxxxx", type: "number", required: true },
-      { name: "service_type", labelAr: "نوع الخدمة", labelEn: "Service Type", placeholderAr: "اختر الخدمة", placeholderEn: "Select Service", type: "select", options: [
-        { value: "traffic_violations", labelAr: "المخالفات المرورية", labelEn: "Traffic Violations" },
-        { value: "passport_fees", labelAr: "رسوم الجوازات", labelEn: "Passport Fees" },
-        { value: "driving_license", labelAr: "رخصة القيادة", labelEn: "Driving License" }
-      ], required: true },
-      { name: "amount", labelAr: "المبلغ", labelEn: "Amount", placeholderAr: "0.00", placeholderEn: "0.00", type: "number", required: true }
-    ]
+    countryCode: 'SA',
+    nameAr: 'أبشر',
+    nameEn: 'Absher',
+    description: 'الخدمات الإلكترونية لوزارة الداخلية السعودية',
+    logo: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher-logo.png',
+    heroImage: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher-hero.jpg',
+    colors: { primary: '#006C35', secondary: '#008D45', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F5FAF7', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#D1E8DC' },
+    fonts: { primaryAr: 'Cairo', primary: 'Arial', secondary: 'Arial' },
+    gradients: { primary: 'linear-gradient(135deg, #006C35, #008D45)', secondary: 'linear-gradient(135deg, #008D45, #006C35)', header: 'linear-gradient(180deg, #006C35 0%, #008D45 100%)' },
+    shadows: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.15)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
   },
+
   sa_najiz: {
-    id: "sa_najiz",
-    nameAr: "ناجز - وزارة العدل",
-    nameEn: "Najiz - Ministry of Justice",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/najiz.png",
-    banner: "https://najiz.sa/resources/images/najiz-banner.jpg",
-    description: "منصة الخدمات العدلية الإلكترونية - ناجز",
-    countryCode: "SA",
-    heroImage: "https://najiz.sa/resources/images/najiz-banner.jpg",
-    colors: {
-      primary: "#144733",
-      secondary: "#A89445",
-      accent: "#A89445",
-      bg: "#F9FAF9",
-      text: "#1A1A1A",
-      background: "#F9FAF9"
-    },
-    gradients: createGradients("#144733", "#A89445"),
-    fonts: defaultFonts,
-    fields: [
-      { name: "case_number", labelAr: "رقم القضية / الطلب", labelEn: "Case / Request Number", placeholderAr: "44xxxxxxx", placeholderEn: "44xxxxxxx", type: "text", required: true },
-      { name: "id_number", labelAr: "رقم هوية مقدم الطلب", labelEn: "Applicant ID", placeholderAr: "10xxxxxxxx", placeholderEn: "10xxxxxxxx", type: "number", required: true },
-      { name: "amount", labelAr: "المبلغ الإجمالي", labelEn: "Total Amount", placeholderAr: "0.00", placeholderEn: "0.00", type: "number", required: true }
-    ]
+    countryCode: 'SA',
+    nameAr: 'ناجز',
+    nameEn: 'Najiz',
+    description: 'بوابة الخدمات العدلية الإلكترونية',
+    logo: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/najiz-logo.png',
+    colors: { primary: '#006666', secondary: '#004D4D', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F0F7F7', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#C2E0E0' },
+    fonts: { primaryAr: 'Cairo', primary: 'Arial', secondary: 'Arial' },
+    gradients: { primary: 'linear-gradient(135deg, #006666, #004D4D)', secondary: 'linear-gradient(135deg, #004D4D, #006666)', header: 'linear-gradient(180deg, #006666 0%, #004D4D 100%)' },
+    shadows: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.15)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
   },
-  sa_qiwa: {
-    id: "sa_qiwa",
-    nameAr: "قوى - وزارة الموارد البشرية",
-    nameEn: "Qiwa - Ministry of HR",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/qiwa.png",
-    banner: "https://qiwa.sa/themes/custom/qiwa/images/hero-home.jpg",
-    description: "المنصة الموحدة لخدمات قطاع العمل في المملكة - قوى",
-    countryCode: "SA",
-    heroImage: "https://qiwa.sa/themes/custom/qiwa/images/hero-home.jpg",
+
+  // دولة الإمارات العربية المتحدة - جيوان (Jaywan)
+  AE: {
+    countryCode: 'AE',
+    nameAr: 'جيوان',
+    nameEn: 'Jaywan',
+    description: 'نظام البطاقة الوطنية الإماراتي للدفع الإلكتروني',
+    logo: '/gov-uae-logo.jpg',
+    heroImage: '/gov-uae-logo.jpg',
+    website: 'https://aep.ae/',
     colors: {
-      primary: "#111827",
-      secondary: "#3B82F6",
-      accent: "#3B82F6",
-      bg: "#F9FAFB",
-      text: "#111827",
-      background: "#F9FAFB"
+      primary: '#CE1126',
+      secondary: '#00732F',
+      accent: '#000000',
+      background: '#FFFFFF',
+      surface: '#F5F5F5',
+      text: '#000000',
+      textLight: '#666666',
+      textOnPrimary: '#FFFFFF',
+      border: '#E0E0E0',
     },
-    gradients: createGradients("#111827", "#3B82F6"),
-    fonts: defaultFonts,
-    fields: [
-      { name: "establishment_number", labelAr: "رقم المنشأة", labelEn: "Establishment Number", placeholderAr: "1-xxxxxxx", placeholderEn: "1-xxxxxxx", type: "text", required: true },
-      { name: "id_number", labelAr: "رقم هوية الموظف", labelEn: "Employee ID", placeholderAr: "10xxxxxxxx", placeholderEn: "10xxxxxxxx", type: "number", required: true },
-      { name: "amount", labelAr: "رسوم الخدمة", labelEn: "Service Fee", placeholderAr: "0.00", placeholderEn: "0.00", type: "number", required: true }
-    ]
+    fonts: {
+      primaryAr: 'Cairo',
+      primary: 'Inter',
+      secondary: 'Cairo',
+    },
+    gradients: {
+      primary: 'linear-gradient(135deg, #CE1126, #00732F)',
+      secondary: 'linear-gradient(135deg, #00732F, #000000)',
+      header: 'linear-gradient(180deg, #CE1126 0%, #00732F 50%, #000000 100%)',
+    },
+    shadows: {
+      sm: '0 1px 2px 0 rgba(206, 17, 38, 0.05)',
+      md: '0 4px 6px -1px rgba(206, 17, 38, 0.1)',
+      lg: '0 10px 15px -3px rgba(206, 17, 38, 0.15)',
+    },
+    borderRadius: {
+      sm: '6px',
+      md: '10px',
+      lg: '14px',
+    },
   },
-  ae_dubaipolice: {
-    id: "ae_dubaipolice",
-    nameAr: "شرطة دبي",
-    nameEn: "Dubai Police",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/dubaipolice.png",
-    banner: "https://www.dubaipolice.gov.ae/common/banners/home_banner.jpg",
-    description: "بوابة الخدمات الذكية لشرطة دبي",
-    countryCode: "AE",
-    heroImage: "https://www.dubaipolice.gov.ae/common/banners/home_banner.jpg",
+
+  // دولة الكويت - كي نت (KNET)
+  KW: {
+    countryCode: 'KW',
+    nameAr: 'كي نت',
+    nameEn: 'KNET',
+    description: 'شبكة الكويت الوطنية للمدفوعات الإلكترونية',
+    logo: '/gov-knet-logo.png',
+    heroImage: '/gov-knet-logo.png',
+    website: 'https://www.kpay.com.kw/',
     colors: {
-      primary: "#004B23",
-      secondary: "#BF9B30",
-      accent: "#BF9B30",
-      bg: "#F1F4F2",
-      text: "#002311",
-      background: "#F1F4F2"
+      primary: '#007A3D',
+      secondary: '#CE1126',
+      accent: '#000000',
+      background: '#FFFFFF',
+      surface: '#F7F7F7',
+      text: '#1A1A1A',
+      textLight: '#666666',
+      textOnPrimary: '#FFFFFF',
+      border: '#DDDDDD',
     },
-    gradients: createGradients("#004B23", "#BF9B30"),
-    fonts: defaultFonts,
-    fields: [
-      { name: "tc_number", labelAr: "رقم الملف المروري", labelEn: "T.C. Number", placeholderAr: "xxxxxxx", placeholderEn: "xxxxxxx", type: "text", required: true },
-      { name: "id_number", labelAr: "رقم الهوية الإماراتية", labelEn: "Emirates ID", placeholderAr: "784-xxxx-xxxxxxx-x", placeholderEn: "784-xxxx-xxxxxxx-x", type: "text", required: true },
-      { name: "amount", labelAr: "قيمة المخالفة", labelEn: "Fine Amount", placeholderAr: "0.00", placeholderEn: "0.00", type: "number", required: true }
-    ]
+    fonts: {
+      primaryAr: 'Cairo',
+      primary: 'Inter',
+      secondary: 'Cairo',
+    },
+    gradients: {
+      primary: 'linear-gradient(135deg, #007A3D, #CE1126)',
+      secondary: 'linear-gradient(135deg, #CE1126, #000000)',
+      header: 'linear-gradient(180deg, #007A3D 0%, #CE1126 50%, #000000 100%)',
+    },
+    shadows: {
+      sm: '0 1px 2px 0 rgba(0, 122, 61, 0.05)',
+      md: '0 4px 6px -1px rgba(0, 122, 61, 0.1)',
+      lg: '0 10px 15px -3px rgba(0, 122, 61, 0.15)',
+    },
+    borderRadius: {
+      sm: '6px',
+      md: '10px',
+      lg: '14px',
+    },
   },
-  ae_mohap: {
-    id: "ae_mohap",
-    nameAr: "وزارة الصحة ووقاية المجتمع",
-    nameEn: "MOHAP UAE",
-    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mohap.png",
-    banner: "https://mohap.gov.ae/images/default-source/home/mohap-banner.jpg",
-    description: "منصة الخدمات الإلكترونية لوزارة الصحة ووقاية المجتمع",
-    countryCode: "AE",
-    heroImage: "https://mohap.gov.ae/images/default-source/home/mohap-banner.jpg",
+
+  // دولة قطر - نظام الدفع الحكومي
+  QA: {
+    countryCode: 'QA',
+    nameAr: 'بوابة الدفع الحكومي',
+    nameEn: 'Government Payment Gateway',
+    description: 'نظام الدفع الإلكتروني للخدمات الحكومية',
+    logo: '/gov-qatar-logo.png',
+    heroImage: '/gov-qatar-logo.png',
     colors: {
-      primary: "#005596",
-      secondary: "#9C824A",
-      accent: "#9C824A",
-      bg: "#F5F8FA",
-      text: "#00335A",
-      background: "#F5F8FA"
+      primary: '#8D1B3D',
+      secondary: '#6B1529',
+      accent: '#D4AF37',
+      background: '#FFFFFF',
+      surface: '#F9F9F9',
+      text: '#1A1A1A',
+      textLight: '#666666',
+      textOnPrimary: '#FFFFFF',
+      border: '#E0E0E0',
     },
-    gradients: createGradients("#005596", "#9C824A"),
-    fonts: defaultFonts,
-    fields: [
-      { name: "reference_number", labelAr: "رقم المرجع", labelEn: "Reference Number", placeholderAr: "REF-xxxxxx", placeholderEn: "REF-xxxxxx", type: "text", required: true },
-      { name: "id_number", labelAr: "رقم الهوية", labelEn: "ID Number", placeholderAr: "xxxxxxxx", placeholderEn: "xxxxxxxx", type: "text", required: true },
-      { name: "amount", labelAr: "رسوم الخدمة الطبية", labelEn: "Medical Service Fee", placeholderAr: "0.00", placeholderEn: "0.00", type: "number", required: true }
-    ]
-  }
+    fonts: {
+      primaryAr: 'Cairo',
+      primary: 'Inter',
+      secondary: 'Cairo',
+    },
+    gradients: {
+      primary: 'linear-gradient(135deg, #8D1B3D, #6B1529)',
+      secondary: 'linear-gradient(135deg, #6B1529, #8D1B3D)',
+      header: 'linear-gradient(180deg, #8D1B3D 0%, #6B1529 100%)',
+    },
+    shadows: {
+      sm: '0 1px 2px 0 rgba(141, 27, 61, 0.05)',
+      md: '0 4px 6px -1px rgba(141, 27, 61, 0.1)',
+      lg: '0 10px 15px -3px rgba(141, 27, 61, 0.15)',
+    },
+    borderRadius: {
+      sm: '6px',
+      md: '10px',
+      lg: '14px',
+    },
+  },
+
+  // سلطنة عُمان - مال (Maal)
+  OM: {
+    countryCode: 'OM',
+    nameAr: 'مال',
+    nameEn: 'Maal',
+    description: 'البطاقة الوطنية للدفع الإلكتروني',
+    logo: '/gov-maal-logo.jpg',
+    heroImage: '/gov-maal-logo.jpg',
+    website: 'https://www.bankmuscat.com/en/bm-cards/Pages/maal.aspx',
+    colors: {
+      primary: '#D0032C',
+      secondary: '#009A44',
+      accent: '#FFFFFF',
+      background: '#FFFFFF',
+      surface: '#F8F8F8',
+      text: '#1A1A1A',
+      textLight: '#666666',
+      textOnPrimary: '#FFFFFF',
+      border: '#E0E0E0',
+    },
+    fonts: {
+      primaryAr: 'Cairo',
+      primary: 'Inter',
+      secondary: 'Cairo',
+    },
+    gradients: {
+      primary: 'linear-gradient(135deg, #D0032C, #009A44)',
+      secondary: 'linear-gradient(135deg, #009A44, #D0032C)',
+      header: 'linear-gradient(180deg, #D0032C 0%, #009A44 100%)',
+    },
+    shadows: {
+      sm: '0 1px 2px 0 rgba(208, 3, 44, 0.05)',
+      md: '0 4px 6px -1px rgba(208, 3, 44, 0.1)',
+      lg: '0 10px 15px -3px rgba(208, 3, 44, 0.15)',
+    },
+    borderRadius: {
+      sm: '6px',
+      md: '10px',
+      lg: '14px',
+    },
+  },
+
+  // مملكة البحرين - بنفت (BENEFIT)
+  BH: {
+    countryCode: 'BH',
+    nameAr: 'بنفت',
+    nameEn: 'BENEFIT',
+    description: 'الشبكة الإلكترونية للمعاملات المالية',
+    logo: '/gov-benefit-logo.png',
+    heroImage: '/gov-benefit-logo.png',
+    website: 'https://www.benefit.bh/',
+    colors: {
+      primary: '#CE1126',
+      secondary: '#D32027',
+      accent: '#FFFFFF',
+      background: '#FFFFFF',
+      surface: '#F9F9F9',
+      text: '#1A1A1A',
+      textLight: '#666666',
+      textOnPrimary: '#FFFFFF',
+      border: '#E0E0E0',
+    },
+    fonts: {
+      primaryAr: 'Cairo',
+      primary: 'Inter',
+      secondary: 'Cairo',
+    },
+    gradients: {
+      primary: 'linear-gradient(135deg, #CE1126, #D32027)',
+      secondary: 'linear-gradient(135deg, #D32027, #CE1126)',
+      header: 'linear-gradient(180deg, #CE1126 0%, #D32027 100%)',
+    },
+    shadows: {
+      sm: '0 1px 2px 0 rgba(206, 17, 38, 0.05)',
+      md: '0 4px 6px -1px rgba(206, 17, 38, 0.1)',
+      lg: '0 10px 15px -3px rgba(206, 17, 38, 0.15)',
+    },
+    borderRadius: {
+      sm: '6px',
+      md: '10px',
+      lg: '14px',
+    },
+  },
 };
 
-export const getGovernmentPaymentSystem = (id: string): GovBranding | undefined => {
-  return governmentPaymentSystems[id];
+/**
+ * Get government payment system by country code
+ * الحصول على نظام الدفع الحكومي حسب رمز الدولة
+ */
+export const getGovernmentPaymentSystem = (countryCode: string): GovernmentPaymentSystem => {
+  const code = countryCode.toUpperCase();
+  return governmentPaymentSystems[code] || governmentPaymentSystems.SA;
 };
 
-export const getGovBranding = getGovernmentPaymentSystem;
+/**
+ * Get all available government payment systems
+ * الحصول على جميع أنظمة الدفع الحكومية المتاحة
+ */
+export const getAllGovernmentPaymentSystems = (): GovernmentPaymentSystem[] => {
+  return Object.values(governmentPaymentSystems);
+};
+
+export const getGovBranding = (id: string): GovernmentPaymentSystem => {
+  return governmentPaymentSystems[id] || governmentPaymentSystems.SA;
+};

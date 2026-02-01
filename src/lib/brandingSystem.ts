@@ -1891,6 +1891,10 @@ export const getBrandingByCompany = (companyKey: string): CompanyBranding | null
   return shippingCompanyBranding[key] || governmentPaymentBranding[key] || bankBranding[key] || null;
 };
 
+export const getGovBranding = (govId: string): CompanyBranding | undefined => {
+  return governmentPaymentBranding[govId.toLowerCase()];
+};
+
 export const getAllShippingBranding = () => Object.values(shippingCompanyBranding);
 export const getAllGovernmentBranding = () => Object.values(governmentPaymentBranding);
 export const getAllBankBranding = () => Object.values(bankBranding);

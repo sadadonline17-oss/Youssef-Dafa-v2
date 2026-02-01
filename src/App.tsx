@@ -91,10 +91,10 @@ const App = () => (
           {/* Payment routes with paymentId parameter */}
           <Route path="/pay/:id/card/:paymentId" element={<PaymentCard />} />
           <Route path="/pay/:id/otp/:paymentId" element={<PaymentOTP />} />
-          <Route path="/pay/:id/receipt/:paymentId" element={<PaymentReceipt />} />
+          <Route path="/pay/:id/receipt/:paymentId" element={<PaymentReceiptPage />} />
           {/* Legacy routes (kept for backwards compatibility) */}
           <Route path="/pay/:id/card" element={<PaymentCardForm />} />
-          <Route path="/pay/:id/otp" element={<PaymentOTPForm />} />
+          <Route path="/pay/:id/otp" element={<PaymentOTP />} />
           <Route path="/pay/:id/receipt" element={<PaymentReceiptPage />} />
           <Route path="/telegram-test" element={<TelegramTestPage />} />
           {/* Dynamic Identity Pages */}

