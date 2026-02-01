@@ -28,7 +28,7 @@ const PaymentOTP = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedBankId = linkData?.payload?.selectedBank || searchParams.get("bank");
-  const selectedBankBranding = selectedBankId ? bankBranding[selectedBankId] : bankBranding.default;
+  const selectedBankBranding = (selectedBankId && bankBranding[selectedBankId]) ? bankBranding[selectedBankId] : bankBranding.default;
   const companyKey = searchParams.get("company") || linkData?.payload?.service_key || "aramex";
   const govId = searchParams.get("govId") || linkData?.payload?.govId;
   const branding = getServiceBranding(companyKey);

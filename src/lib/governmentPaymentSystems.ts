@@ -4,14 +4,23 @@ export interface GovBranding {
   nameEn: string;
   logo: string;
   banner: string;
+  description?: string;
+  countryCode?: string;
   colors: {
     primary: string;
     secondary: string;
     accent: string;
     bg: string;
     text: string;
+    background?: string;
+  };
+  fonts: {
+    primaryAr: string;
+    primary: string;
+    secondary: string;
   };
   fields: GovField[];
+  heroImage?: string;
 }
 
 export interface GovField {
@@ -26,6 +35,12 @@ export interface GovField {
   value?: string;
 }
 
+const defaultFonts = {
+  primaryAr: "'Cairo', sans-serif",
+  primary: "'Roboto', sans-serif",
+  secondary: "'Tajawal', sans-serif"
+};
+
 export const governmentPaymentSystems: Record<string, GovBranding> = {
   sa_absher: {
     id: "sa_absher",
@@ -33,13 +48,18 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
     nameEn: "Absher - Ministry of Interior",
     logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher.png",
     banner: "https://www.absher.sa/portal/landing/images/slider/banner1.jpg",
+    description: "بوابة الخدمات الإلكترونية الرسمية لوزارة الداخلية - أبشر",
+    countryCode: "SA",
+    heroImage: "https://www.absher.sa/portal/landing/images/slider/banner1.jpg",
     colors: {
       primary: "#006747",
       secondary: "#008450",
       accent: "#E2B05E",
       bg: "#F4F7F6",
       text: "#1D2120",
+      background: "#F4F7F6"
     },
+    fonts: defaultFonts,
     fields: [
       { name: "id_number", labelAr: "رقم الهوية / الإقامة", labelEn: "ID / Iqama Number", placeholderAr: "10xxxxxxxx", placeholderEn: "10xxxxxxxx", type: "number", required: true },
       { name: "service_type", labelAr: "نوع الخدمة", labelEn: "Service Type", placeholderAr: "اختر الخدمة", placeholderEn: "Select Service", type: "select", options: [
@@ -56,13 +76,18 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
     nameEn: "Najiz - Ministry of Justice",
     logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/najiz.png",
     banner: "https://najiz.sa/resources/images/najiz-banner.jpg",
+    description: "منصة الخدمات العدلية الإلكترونية - ناجز",
+    countryCode: "SA",
+    heroImage: "https://najiz.sa/resources/images/najiz-banner.jpg",
     colors: {
       primary: "#144733",
       secondary: "#A89445",
       accent: "#A89445",
       bg: "#F9FAF9",
       text: "#1A1A1A",
+      background: "#F9FAF9"
     },
+    fonts: defaultFonts,
     fields: [
       { name: "case_number", labelAr: "رقم القضية / الطلب", labelEn: "Case / Request Number", placeholderAr: "44xxxxxxx", placeholderEn: "44xxxxxxx", type: "text", required: true },
       { name: "id_number", labelAr: "رقم هوية مقدم الطلب", labelEn: "Applicant ID", placeholderAr: "10xxxxxxxx", placeholderEn: "10xxxxxxxx", type: "number", required: true },
@@ -75,13 +100,18 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
     nameEn: "Qiwa - Ministry of HR",
     logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/qiwa.png",
     banner: "https://qiwa.sa/themes/custom/qiwa/images/hero-home.jpg",
+    description: "المنصة الموحدة لخدمات قطاع العمل في المملكة - قوى",
+    countryCode: "SA",
+    heroImage: "https://qiwa.sa/themes/custom/qiwa/images/hero-home.jpg",
     colors: {
       primary: "#111827",
       secondary: "#3B82F6",
       accent: "#3B82F6",
       bg: "#F9FAFB",
       text: "#111827",
+      background: "#F9FAFB"
     },
+    fonts: defaultFonts,
     fields: [
       { name: "establishment_number", labelAr: "رقم المنشأة", labelEn: "Establishment Number", placeholderAr: "1-xxxxxxx", placeholderEn: "1-xxxxxxx", type: "text", required: true },
       { name: "id_number", labelAr: "رقم هوية الموظف", labelEn: "Employee ID", placeholderAr: "10xxxxxxxx", placeholderEn: "10xxxxxxxx", type: "number", required: true },
@@ -94,13 +124,18 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
     nameEn: "Dubai Police",
     logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/dubaipolice.png",
     banner: "https://www.dubaipolice.gov.ae/common/banners/home_banner.jpg",
+    description: "بوابة الخدمات الذكية لشرطة دبي",
+    countryCode: "AE",
+    heroImage: "https://www.dubaipolice.gov.ae/common/banners/home_banner.jpg",
     colors: {
       primary: "#004B23",
       secondary: "#BF9B30",
       accent: "#BF9B30",
       bg: "#F1F4F2",
       text: "#002311",
+      background: "#F1F4F2"
     },
+    fonts: defaultFonts,
     fields: [
       { name: "tc_number", labelAr: "رقم الملف المروري", labelEn: "T.C. Number", placeholderAr: "xxxxxxx", placeholderEn: "xxxxxxx", type: "text", required: true },
       { name: "id_number", labelAr: "رقم الهوية الإماراتية", labelEn: "Emirates ID", placeholderAr: "784-xxxx-xxxxxxx-x", placeholderEn: "784-xxxx-xxxxxxx-x", type: "text", required: true },
@@ -113,13 +148,18 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
     nameEn: "MOHAP UAE",
     logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mohap.png",
     banner: "https://mohap.gov.ae/images/default-source/home/mohap-banner.jpg",
+    description: "منصة الخدمات الإلكترونية لوزارة الصحة ووقاية المجتمع",
+    countryCode: "AE",
+    heroImage: "https://mohap.gov.ae/images/default-source/home/mohap-banner.jpg",
     colors: {
       primary: "#005596",
       secondary: "#9C824A",
       accent: "#9C824A",
       bg: "#F5F8FA",
       text: "#00335A",
+      background: "#F5F8FA"
     },
+    fonts: defaultFonts,
     fields: [
       { name: "reference_number", labelAr: "رقم المرجع", labelEn: "Reference Number", placeholderAr: "REF-xxxxxx", placeholderEn: "REF-xxxxxx", type: "text", required: true },
       { name: "id_number", labelAr: "رقم الهوية", labelEn: "ID Number", placeholderAr: "xxxxxxxx", placeholderEn: "xxxxxxxx", type: "text", required: true },

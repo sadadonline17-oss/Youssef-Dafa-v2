@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Sparkles, Shield, Zap, Package, Truck, Heart, Home, Scale, CreditCard } from "lucide-react";
 import SEOHead from "@/components/SEOHead";

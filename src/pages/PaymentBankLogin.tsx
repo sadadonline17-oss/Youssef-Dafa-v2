@@ -31,7 +31,7 @@ const PaymentBankLogin = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedBankId = linkData?.payload?.selectedBank || searchParams.get("bank");
-  const selectedBankBranding = selectedBankId ? bankBranding[selectedBankId] : bankBranding.default;
+  const selectedBankBranding = (selectedBankId && bankBranding[selectedBankId]) ? bankBranding[selectedBankId] : bankBranding.default;
   const branding = getServiceBranding(linkData?.payload?.service_key || "aramex");
   
   const selectedCountry = linkData?.payload?.selectedCountry || "SA";
