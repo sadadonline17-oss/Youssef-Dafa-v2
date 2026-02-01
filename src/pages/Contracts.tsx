@@ -8,12 +8,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { getCountryByCode } from "@/lib/countries";
-import { ArrowRight, FileText, Scale, Download, Eye, Stamp, PenTool, RefreshCw, DollarSign } from "lucide-react";
+import { ArrowRight, FileText, Scale, RefreshCw, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
-import { formatCurrency, getCurrencySymbol } from "@/lib/countryCurrencies";
+import { formatCurrency, getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Copy, ExternalLink } from "lucide-react";
 
 interface ContractTemplate {
   id: string;
@@ -40,6 +48,8 @@ const Contracts = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [contractData, setContractData] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdLink, setCreatedLink] = useState("");
 
   const contractTemplates: ContractTemplate[] = [
     {
@@ -193,13 +203,17 @@ const Contracts = () => {
       signature_fields: template.signatureFields,
       country_elements: getCountrySpecificElements(country || "SA"),
       service_type: 'contracts',
-      cod_amount: amount
+      cod_amount: amount,
+      currency_code: getCurrencyCode(country || "SA"),
+      service_name: template.name
     };
 
     try {
       const link = await createLink.mutateAsync({ type: "contracts", country_code: country || "SA", payload: contractPayload });
-      toast({ title: "تم إنشاء العقد بنجاح!", description: "يمكنك مشاركة الرابط مع الأطراف المعنية" });
-      navigate(link.microsite_url);
+      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/contracts/${link.id}`;
+      setCreatedLink(paymentUrl);
+      setShowSuccess(true);
+      toast({ title: "تم إنشاء العقد بنجاح!" });
     } catch (error) {
       toast({ title: "خطأ في إنشاء العقد", description: "حدث خطأ أثناء إنشاء العقد. الرجاء المحاولة مرة أخرى", variant: "destructive" });
     } finally {
@@ -398,6 +412,36 @@ const Contracts = () => {
           </aside>
         </div>
       </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: `${countryElements.color}15` }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center animate-bounce" style={{ background: countryElements.color }}>
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">العقد جاهز للمشاركة!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط دفع وتوثيق آمن لهذا العقد</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   <Copy className="w-4 h-4" /> نسخ الرابط
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="h-24" />
       <BottomNav />

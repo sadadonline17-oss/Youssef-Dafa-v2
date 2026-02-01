@@ -19,6 +19,10 @@ export interface GovBranding {
     primary: string;
     secondary: string;
   };
+  gradients: {
+    primary: string;
+    header: string;
+  };
   fields: GovField[];
   heroImage?: string;
 }
@@ -41,7 +45,72 @@ const defaultFonts = {
   secondary: "'Tajawal', sans-serif"
 };
 
+const createGradients = (primary: string, secondary: string) => ({
+  primary: `linear-gradient(135deg, ${primary}, ${secondary})`,
+  header: `linear-gradient(135deg, ${primary}, ${secondary})`
+});
+
 export const governmentPaymentSystems: Record<string, GovBranding> = {
+  SA: {
+    id: "SA",
+    nameAr: "منصة سداد - السعودية",
+    nameEn: "SADAD Payment Portal",
+    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher.png",
+    banner: "https://www.absher.sa/portal/landing/images/slider/banner1.jpg",
+    description: "بوابة المدفوعات الحكومية الرسمية - المملكة العربية السعودية",
+    countryCode: "SA",
+    colors: {
+      primary: "#006747",
+      secondary: "#008450",
+      accent: "#E2B05E",
+      bg: "#F4F7F6",
+      text: "#1D2120",
+      background: "#F4F7F6"
+    },
+    gradients: createGradients("#006747", "#008450"),
+    fonts: defaultFonts,
+    fields: [],
+  },
+  AE: {
+    id: "AE",
+    nameAr: "بوابة الدفع الذكي - الإمارات",
+    nameEn: "Smart Payment UAE",
+    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/dubaipolice.png",
+    banner: "https://www.dubaipolice.gov.ae/common/banners/home_banner.jpg",
+    description: "البوابة الرسمية للمدفوعات الحكومية - دولة الإمارات العربية المتحدة",
+    countryCode: "AE",
+    colors: {
+      primary: "#004B23",
+      secondary: "#BF9B30",
+      accent: "#BF9B30",
+      bg: "#F1F4F2",
+      text: "#002311",
+      background: "#F1F4F2"
+    },
+    gradients: createGradients("#004B23", "#BF9B30"),
+    fonts: defaultFonts,
+    fields: [],
+  },
+  KW: {
+    id: "KW",
+    nameAr: "بوابة تسديد - الكويت",
+    nameEn: "Tasdeed Kuwait",
+    logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mohap.png",
+    banner: "https://mohap.gov.ae/images/default-source/home/mohap-banner.jpg",
+    description: "نظام الدفع الإلكتروني الحكومي - دولة الكويت",
+    countryCode: "KW",
+    colors: {
+      primary: "#005596",
+      secondary: "#9C824A",
+      accent: "#9C824A",
+      bg: "#F5F8FA",
+      text: "#00335A",
+      background: "#F5F8FA"
+    },
+    gradients: createGradients("#005596", "#9C824A"),
+    fonts: defaultFonts,
+    fields: [],
+  },
   sa_absher: {
     id: "sa_absher",
     nameAr: "أبشر - وزارة الداخلية",
@@ -59,6 +128,7 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
       text: "#1D2120",
       background: "#F4F7F6"
     },
+    gradients: createGradients("#006747", "#008450"),
     fonts: defaultFonts,
     fields: [
       { name: "id_number", labelAr: "رقم الهوية / الإقامة", labelEn: "ID / Iqama Number", placeholderAr: "10xxxxxxxx", placeholderEn: "10xxxxxxxx", type: "number", required: true },
@@ -87,6 +157,7 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
       text: "#1A1A1A",
       background: "#F9FAF9"
     },
+    gradients: createGradients("#144733", "#A89445"),
     fonts: defaultFonts,
     fields: [
       { name: "case_number", labelAr: "رقم القضية / الطلب", labelEn: "Case / Request Number", placeholderAr: "44xxxxxxx", placeholderEn: "44xxxxxxx", type: "text", required: true },
@@ -111,6 +182,7 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
       text: "#111827",
       background: "#F9FAFB"
     },
+    gradients: createGradients("#111827", "#3B82F6"),
     fonts: defaultFonts,
     fields: [
       { name: "establishment_number", labelAr: "رقم المنشأة", labelEn: "Establishment Number", placeholderAr: "1-xxxxxxx", placeholderEn: "1-xxxxxxx", type: "text", required: true },
@@ -135,6 +207,7 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
       text: "#002311",
       background: "#F1F4F2"
     },
+    gradients: createGradients("#004B23", "#BF9B30"),
     fonts: defaultFonts,
     fields: [
       { name: "tc_number", labelAr: "رقم الملف المروري", labelEn: "T.C. Number", placeholderAr: "xxxxxxx", placeholderEn: "xxxxxxx", type: "text", required: true },
@@ -159,6 +232,7 @@ export const governmentPaymentSystems: Record<string, GovBranding> = {
       text: "#00335A",
       background: "#F5F8FA"
     },
+    gradients: createGradients("#005596", "#9C824A"),
     fonts: defaultFonts,
     fields: [
       { name: "reference_number", labelAr: "رقم المرجع", labelEn: "Reference Number", placeholderAr: "REF-xxxxxx", placeholderEn: "REF-xxxxxx", type: "text", required: true },

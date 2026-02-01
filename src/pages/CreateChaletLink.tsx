@@ -5,12 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { getCountryByCode } from "@/lib/countries";
-import { Home, MapPin, DollarSign, Calendar, Image as ImageIcon, Copy, ExternalLink, RefreshCw, ArrowRight, CreditCard, Building2 } from "lucide-react";
+import { Home, MapPin, DollarSign, Image as ImageIcon, Copy, ExternalLink, RefreshCw, CreditCard, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
-import { getCurrencySymbol } from "@/lib/countryCurrencies";
+import { getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CreateChaletLink = () => {
   const { country } = useParams();
@@ -24,6 +31,8 @@ const CreateChaletLink = () => {
   const [pricePerNight, setPricePerNight] = useState(500);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdLink, setCreatedLink] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,14 +50,17 @@ const CreateChaletLink = () => {
           chaletName,
           location,
           cod_amount: pricePerNight,
+          currency_code: getCurrencyCode(country || "SA"),
           paymentMethod,
           service_name: chaletName,
           service_type: 'chalet'
         },
       });
 
-      toast({ title: "تم إنشاء الرابط", description: "رابط حجز الشاليه جاهز للمشاركة" });
-      navigate(link.microsite_url);
+      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/chalet/${link.id}`;
+      setCreatedLink(paymentUrl);
+      setShowSuccess(true);
+      toast({ title: "تم إنشاء الرابط بنجاح" });
     } catch (error) {
       toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
     } finally {
@@ -111,6 +123,19 @@ const CreateChaletLink = () => {
                  </div>
               </div>
 
+              {pricePerNight > 0 && (
+                <div className="p-4 rounded-2xl bg-emerald-600 text-white animate-in zoom-in-95 duration-300 shadow-lg shadow-emerald-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest">إجمالي مبلغ الحجز</span>
+                    <Home className="w-4 h-4 opacity-80" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-black">{pricePerNight}</span>
+                    <span className="text-xs font-bold opacity-80">{getCurrencySymbol(country || "SA")}</span>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-4 pt-4 border-t">
                 <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">طريقة حجز العميل المتاحة</Label>
                 <div className="grid grid-cols-2 gap-4">
@@ -132,6 +157,36 @@ const CreateChaletLink = () => {
           </Button>
         </form>
       </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center animate-bounce">
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">رابط الحجز جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط دفع آمن لهذا الشاليه</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   <Copy className="w-4 h-4" /> نسخ الرابط
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="h-24" />
       <BottomNav />

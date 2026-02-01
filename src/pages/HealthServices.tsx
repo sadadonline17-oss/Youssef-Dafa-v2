@@ -6,12 +6,20 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCountryByCode } from "@/lib/countries";
-import { Heart, ArrowRight, User, Phone, Mail, Calendar, Stethoscope, RefreshCw, DollarSign, CreditCard, Building2 } from "lucide-react";
+import { Heart, ArrowRight, Stethoscope, RefreshCw, DollarSign, CreditCard, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
-import { getCurrencySymbol } from "@/lib/countryCurrencies";
+import { getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Copy, ExternalLink } from "lucide-react";
 
 const HealthServices = () => {
   const { country } = useParams();
@@ -21,6 +29,8 @@ const HealthServices = () => {
   const selectedCountry = getCountryByCode(country || "SA");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdLink, setCreatedLink] = useState("");
   const [bookingData, setBookingData] = useState({
     patientName: "",
     phone: "",
@@ -48,19 +58,23 @@ const HealthServices = () => {
 
     setIsSubmitting(true);
     try {
+      const selectedService = services.find(s => s.id === bookingData.serviceType);
       const link = await createLink.mutateAsync({
         type: "health",
         country_code: country || "SA",
         payload: {
           ...bookingData,
-          service_name: services.find(s => s.id === bookingData.serviceType)?.name,
+          service_name: selectedService?.name,
           cod_amount: parseFloat(bookingData.amount),
+          currency_code: getCurrencyCode(country || "SA"),
           service_type: 'health'
         },
       });
 
-      toast({ title: "تم إنشاء الرابط", description: "يمكنك الآن مشاركة رابط الدفع الطبي" });
-      navigate(link.microsite_url);
+      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/health/${link.id}`;
+      setCreatedLink(paymentUrl);
+      setShowSuccess(true);
+      toast({ title: "تم إنشاء الرابط بنجاح" });
     } catch (error) {
       toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
     } finally {
@@ -146,6 +160,19 @@ const HealthServices = () => {
                 </div>
               </div>
 
+              {parseFloat(bookingData.amount) > 0 && (
+                <div className="p-4 rounded-2xl bg-rose-500 text-white animate-in zoom-in-95 duration-300 shadow-lg shadow-rose-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest">رسوم الكشف الطبي</span>
+                    <Heart className="w-4 h-4 opacity-80" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-black">{bookingData.amount}</span>
+                    <span className="text-xs font-bold opacity-80">{getCurrencySymbol(country || "SA")}</span>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-3 pt-4 border-t">
                 <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">طريقة السداد</Label>
                 <div className="grid grid-cols-2 gap-4">
@@ -163,10 +190,40 @@ const HealthServices = () => {
           </Card>
 
           <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-[2rem] font-black text-lg shadow-2xl bg-gray-900 hover:bg-black text-white transition-all active:scale-95">
-             {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : "إصدار رابط الموعد"}
+             {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : "إصدار رابط الموعد الطبي"}
           </Button>
         </form>
       </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="w-12 h-12 bg-rose-500 rounded-full flex items-center justify-center animate-bounce">
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">رابط الموعد جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط دفع آمن لهذا الموعد الطبي</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   <Copy className="w-4 h-4" /> نسخ الرابط
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="h-24" />
       <BottomNav />

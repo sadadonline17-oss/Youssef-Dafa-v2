@@ -24,7 +24,7 @@ const BottomNav = () => {
     {
       icon: Settings,
       label: "المزيد",
-      path: "/services",
+      path: "/settings",
     },
   ];
 

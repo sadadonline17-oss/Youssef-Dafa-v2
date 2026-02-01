@@ -6,11 +6,28 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { getCountryByCode } from "@/lib/countries";
 import { getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
-import { CreditCard, DollarSign, ArrowRight, RefreshCw, Building2, Package } from "lucide-react";
+import {
+  CreditCard,
+  DollarSign,
+  ArrowRight,
+  RefreshCw,
+  Building2,
+  Package,
+  Shield,
+  Copy,
+  ExternalLink
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CreatePaymentLink = () => {
   const { country } = useParams();
@@ -23,6 +40,8 @@ const CreatePaymentLink = () => {
   const [amount, setAmount] = useState("1000");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdLink, setCreatedLink] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +65,10 @@ const CreatePaymentLink = () => {
         },
       });
 
-      toast({ title: "تم إنشاء الرابط", description: "رابط الدفع المباشر جاهز" });
-      navigate(link.microsite_url);
+      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/payment/${link.id}`;
+      setCreatedLink(paymentUrl);
+      setShowSuccess(true);
+      toast({ title: "تم إنشاء الرابط بنجاح" });
     } catch (error) {
       toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
     } finally {
@@ -103,6 +124,19 @@ const CreatePaymentLink = () => {
                 </div>
               </div>
 
+              {parseFloat(amount) > 0 && (
+                <div className="p-6 rounded-[2rem] bg-indigo-600 text-white animate-in zoom-in-95 duration-300 shadow-xl shadow-indigo-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-bold opacity-80 uppercase tracking-[0.2em]">المبلغ الصافي للدفع</span>
+                    <Shield className="w-5 h-5 opacity-80" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-black">{amount}</span>
+                    <span className="text-sm font-bold opacity-80">{getCurrencySymbol(country || "SA")}</span>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-4 pt-8 border-t border-slate-50">
                 <Label className="text-[11px] font-black text-indigo-300 uppercase tracking-[0.2em] px-1">طرق الدفع المفعلة</Label>
                 <div className="grid grid-cols-2 gap-4">
@@ -129,6 +163,36 @@ const CreatePaymentLink = () => {
           </Button>
         </form>
       </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center animate-bounce">
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">رابط الدفع جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط دفع آمن لهذا الطلب</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   <Copy className="w-4 h-4" /> نسخ الرابط
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="h-24" />
       <BottomNav />

@@ -46,7 +46,7 @@ const PaymentRecipient = () => {
   useEffect(() => {
     if (linkData?.payload?.customerInfo) {
       const info = linkData.payload.customerInfo;
-      setName(info.name || "");
+       setName(info.name || info.fullName || "");
       setPhone(info.phone || "");
       setEmail(info.email || "");
       setAddress(info.address || "");
@@ -113,7 +113,7 @@ const PaymentRecipient = () => {
          <div className="container mx-auto h-16 sm:h-20 flex items-center justify-between">
             <div className="flex items-center gap-4">
                <img src={isGov ? govBranding.logo : branding.logo} alt="" className="h-10 sm:h-12 object-contain" />
-               <div className="hidden sm:block">
+               <div className="hidden md:block">
                   <h1 className="text-sm font-black text-gray-800 leading-none">{isGov ? govBranding.nameAr : branding.name}</h1>
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">E-Services & Payment Gateway</p>
                </div>
@@ -143,7 +143,7 @@ const PaymentRecipient = () => {
                <form onSubmit={handleSubmit} className="p-8 sm:p-10 space-y-6">
                   <div className="space-y-6">
                     <div className="space-y-1.5">
-                      <Label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">الاسم الكامل</Label>
+                      <Label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">الاسم الكامل للمستفيد</Label>
                       <div className="relative group">
                         <Input value={name} onChange={(e) => setName(e.target.value)} className="h-14 border-2 border-gray-100 rounded-2xl font-black text-gray-700 bg-gray-50/50 pr-12 focus:border-blue-500 transition-all" placeholder="أدخل اسمك الكامل" required />
                         <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-500 transition-colors" />
