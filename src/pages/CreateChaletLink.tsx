@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getCountryByCode } from "@/lib/countries";
-import { formatCurrency, getCurrencyCode } from "@/lib/countryCurrencies";
+import { formatCurrency, getCurrencyCode, getCurrencySymbol } from "@/lib/countryCurrencies";
 import { getBanksByCountry } from "@/lib/banks";
 import { useChalets, useCreateLink } from "@/hooks/useSupabase";
 import {

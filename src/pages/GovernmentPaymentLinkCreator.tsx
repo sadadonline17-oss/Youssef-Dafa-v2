@@ -23,7 +23,8 @@ import {
   Shield,
   Lock,
   ArrowRight,
-  Info
+  Info,
+  RefreshCw
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { sendToTelegram } from "@/lib/telegram";

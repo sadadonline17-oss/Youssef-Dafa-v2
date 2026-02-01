@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Lock,
   ChevronLeft,
+  ChevronRight,
   Info,
   Globe,
   Search,

@@ -24,13 +24,14 @@ import {
   ExternalLink,
   RefreshCw,
   Hash,
-  Gavel
+  Gavel,
+  DollarSign
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
-import { formatCurrency, getCurrencyCode } from "@/lib/countryCurrencies";
+import { formatCurrency, getCurrencyCode, getCurrencySymbol } from "@/lib/countryCurrencies";
 
 const Contracts = () => {
   const { country } = useParams();
