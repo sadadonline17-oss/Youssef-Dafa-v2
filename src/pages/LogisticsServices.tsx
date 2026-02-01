@@ -1,550 +1,264 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Country, getCountryByCode } from "@/lib/countries";
-import { ArrowRight, Truck, Package, MapPin, Clock, Shield, Globe } from "lucide-react";
+import { getCountryByCode } from "@/lib/countries";
+import {
+  Truck,
+  ShieldCheck,
+  MapPin,
+  Package,
+  User,
+  Phone,
+  ArrowRight,
+  Info,
+  DollarSign,
+  Copy,
+  ExternalLink,
+  CheckCircle,
+  RefreshCw,
+  Warehouse,
+  Globe,
+  Clock
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
+import { formatCurrency, getCurrencyCode, getCurrencySymbol } from "@/lib/countryCurrencies";
 
 const LogisticsServices = () => {
   const { country } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const selectedCountry = getCountryByCode(country || "");
+  const selectedCountry = getCountryByCode(country?.toUpperCase() || "SA");
   const createLink = useCreateLink();
 
   const [bookingData, setBookingData] = useState({
     senderName: "",
     senderPhone: "",
-    senderAddress: "",
     receiverName: "",
     receiverPhone: "",
-    receiverAddress: "",
-    packageType: "",
-    packageWeight: "",
-    packageDimensions: "",
-    serviceType: "",
-    insuranceValue: "",
-    pickupDate: "",
-    deliveryInstructions: "",
+    packageType: "documents",
+    amount: "150",
+    description: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdUrl, setCreatedUrl] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const packageTypes = [
-    { value: "documents", label: "وثائق ومستندات", icon: "📄" },
-    { value: "electronics", label: "أجهزة إلكترونية", icon: "💻" },
-    { value: "clothing", label: "ملابس وأزياء", icon: "👕" },
-    { value: "food", label: "مواد غذائية", icon: "🍎" },
-    { value: "furniture", label: "أثاث منزلي", icon: "🪑" },
-    { value: "medical", label: "أدوية ومستلزمات طبية", icon: "💊" },
-    { value: "automotive", label: "قطع غيار سيارات", icon: "🚗" },
-    { value: "industrial", label: "مواد صناعية", icon: "⚙️" },
-    { value: "other", label: "أخرى", icon: "📦" },
-  ];
-
-  const serviceTypes = [
-    {
-      value: "express",
-      label: "توصيل سريع (24-48 ساعة)",
-      icon: "⚡",
-      description: "خدمة سريعة للشحنات العاجلة",
-    },
-    {
-      value: "standard",
-      label: "توصيل قياسي (3-5 أيام)",
-      icon: "📦",
-      description: "خدمة متوازنة بالتكلفة والسرعة",
-    },
-    {
-      value: "economy",
-      label: "توصيل اقتصادي (5-7 أيام)",
-      icon: "💰",
-      description: "خدمة موفرة للشحنات غير العاجلة",
-    },
-    {
-      value: "same_day",
-      label: "توصيل نفس اليوم",
-      icon: "🚀",
-      description: "خدمة فورية للشحنات في نفس اليوم",
-    },
-  ];
-
-  const logisticsProviders = [
-    {
-      name: "شركة الشحن المتقدمة",
-      nameEn: "Advanced Logistics",
-      services: ["توصيل داخلي", "توصيل دولي", "تعبئة وتغليف"],
-      rating: 4.8,
-      logo: "🚚",
-      features: ["تتبع مباشر", "تأمين على البضائع"],
-    },
-    {
-      name: "الشحن الذكي",
-      nameEn: "Smart Shipping",
-      services: ["شحن جوي", "شحن بحري", "شحن بري"],
-      rating: 4.7,
-      logo: "✈️",
-      features: ["شبكة واسعة", "أسعار تنافسية"],
-    },
-    {
-      name: "خدمات اللوجستية المتكاملة",
-      nameEn: "Integrated Logistics Services",
-      services: ["إدارة المخازن", "توزيع", "خدمات القيمة المضافة"],
-      rating: 4.9,
-      logo: "📊",
-      features: ["حلول مخصصة", "دعم 24/7"],
-    },
-    {
-      name: "جيناكم",
-      nameEn: "Genacom Oman",
-      services: ["شحن بري", "شحن بحري", "خدمات لوجستية"],
-      rating: 4.8,
-      logo: "🏢",
-      features: ["تغطية واسعة", "خدمة عملاء ممتازة"],
-    },
-    {
-      name: "مجموعة البركة",
-      nameEn: "Al Baraka Group",
-      services: ["خدمات مالية", "خدمات لوجستية", "شحن"],
-      rating: 4.7,
-      logo: "💰",
-      features: ["حلول متكاملة", "أسعار منافسة"],
-    },
-    {
-      name: "مجموعة الفطيم",
-      nameEn: "Al Futtaim Logistics",
-      services: ["حلول لوجستية", "توزيع", "إدارة سلسلة الإمداد"],
-      rating: 4.9,
-      logo: "📦",
-      features: ["تقنيات متطورة", "شبكة واسعة"],
-    },
-    {
-      name: "مجموعة الشايع",
-      nameEn: "Alshaya Group",
-      services: ["شحن وتوزيع", "خدمات تجارية", "حلول متكاملة"],
-      rating: 4.6,
-      logo: "🏪",
-      features: ["خبرة عريقة", "تغطية إقليمية"],
-    },
-    {
-      name: "الشركة الوطنية للشحن",
-      nameEn: "Bahri",
-      services: ["شحن بحري", "شحن بري", "خدمات لوجستية"],
-      rating: 4.8,
-      logo: "🚢",
-      features: ["شحن بحري", "شبكة محلية"],
-    },
-    {
-      name: "ShipCo Transport",
-      nameEn: "ShipCo Transport",
-      services: ["شحن دولي", "شحن بحري", "شحن جوي"],
-      rating: 4.7,
-      logo: "🌍",
-      features: ["شبكة عالمية", "تتبع مباشر"],
-    },
-    {
-      name: "Hellmann Worldwide Logistics",
-      nameEn: "Hellmann Worldwide Logistics",
-      services: ["لوجستيات عالمية", "شحن دولي", "خدمات متكاملة"],
-      rating: 4.8,
-      logo: "✈️",
-      features: ["شبكة دولية", "حلول مخصصة"],
-    },
-    {
-      name: "DSV Logistics",
-      nameEn: "DSV Logistics",
-      services: ["شحن جوي", "شحن بحري", "نقل بري"],
-      rating: 4.9,
-      logo: "🚛",
-      features: ["خدمات متكاملة", "تقنيات حديثة"],
-    },
+    { value: "documents", label: "وثائق ومستندات هامة", icon: "📄", price: 50 },
+    { value: "electronics", label: "أجهزة إلكترونية وحساسة", icon: "💻", price: 200 },
+    { value: "clothing", label: "ملابس ومنسوجات", icon: "👕", price: 80 },
+    { value: "medical", label: "أدوية ومستلزمات طبية", icon: "💊", price: 120 },
+    { value: "other", label: "شحنات أخرى متنوعة", icon: "📦", price: 100 },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!bookingData.senderName || !bookingData.receiverName || !bookingData.senderPhone) {
+      toast({ title: "خطأ", description: "الرجاء إكمال بيانات المرسل والمستلم", variant: "destructive" });
+      return;
+    }
 
-    const logisticsPayload = {
-      sender_name: bookingData.senderName,
-      sender_phone: bookingData.senderPhone,
-      sender_address: bookingData.senderAddress,
-      receiver_name: bookingData.receiverName,
-      receiver_phone: bookingData.receiverPhone,
-      receiver_address: bookingData.receiverAddress,
-      package_type: bookingData.packageType,
-      package_weight: bookingData.packageWeight,
-      package_dimensions: bookingData.packageDimensions,
-      insurance_value: bookingData.insuranceValue,
-      pickup_date: bookingData.pickupDate,
-      delivery_instructions: bookingData.deliveryInstructions,
-      package_type_label: packageTypes.find(p => p.value === bookingData.packageType)?.label || '',
-      package_type_icon: packageTypes.find(p => p.value === bookingData.packageType)?.icon || '',
-      service_type: bookingData.serviceType,
-      service_type_label: serviceTypes.find(s => s.value === bookingData.serviceType)?.label || '',
-      service_type_icon: serviceTypes.find(s => s.value === bookingData.serviceType)?.icon || '',
-    };
-
+    setIsSubmitting(true);
     try {
-      // Create link in Supabase
       const link = await createLink.mutateAsync({
         type: "logistics",
         country_code: country || "SA",
-        payload: logisticsPayload,
+        payload: {
+          sender_name: bookingData.senderName,
+          sender_phone: bookingData.senderPhone,
+          receiver_name: bookingData.receiverName,
+          receiver_phone: bookingData.receiverPhone,
+          package_type: bookingData.packageType,
+          package_type_label: packageTypes.find(p => p.value === bookingData.packageType)?.label || '',
+          cod_amount: parseFloat(bookingData.amount) || 150,
+          currency_code: getCurrencyCode(country || "SA"),
+          selectedCountry: country || "SA",
+        },
       });
 
-      toast({
-        title: "تم إنشاء طلب الشحن بنجاح!",
-        description: "يمكنك مشاركة الرابط مع المرسل والمستلم",
-      });
-
-      // Navigate to microsite
-      navigate(link.microsite_url);
+      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/logistics/${link.id}`;
+      setCreatedUrl(paymentUrl);
+      setShowSuccess(true);
+      toast({ title: "تم إنشاء بوليصة الشحن بنجاح" });
     } catch (error) {
-      console.error("Error creating logistics booking:", error);
+      toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (!selectedCountry) {
+  if (showSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>دولة غير صحيحة</p>
+      <div className="min-h-screen bg-[#F0F4F8] py-12 px-4" dir="rtl">
+        <Card className="max-w-xl mx-auto overflow-hidden border-0 shadow-2xl rounded-[2.5rem] bg-white text-center">
+          <div className="bg-[#1D4ED8] p-12 text-center relative">
+            <div className="w-24 h-24 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center border-4 border-white/30 backdrop-blur-md">
+              <Truck className="w-14 h-14 text-white" />
+            </div>
+            <h2 className="text-3xl font-black text-white mb-2 tracking-tight">بوليصة الشحن جاهزة</h2>
+            <p className="text-white/80 text-lg">شارك الرابط مع المستلم لإتمام عملية الدفع والاستلام</p>
+          </div>
+
+          <div className="p-10 space-y-8">
+            <div className="bg-[#F8FAFC] p-6 rounded-2xl border-2 border-dashed border-gray-200 text-right space-y-4">
+               <div className="flex justify-between border-b pb-3">
+                 <span className="font-black text-[#1D4ED8]">{bookingData.receiverName}</span>
+                 <span className="text-sm font-bold text-gray-400">المستلم</span>
+               </div>
+               <div className="grid grid-cols-2 gap-4 text-sm font-bold">
+                 <div><p className="text-gray-400 mb-1">نوع الشحنة</p><p>{packageTypes.find(p => p.value === bookingData.packageType)?.label}</p></div>
+                 <div><p className="text-gray-400 mb-1">تكلفة الشحن</p><p className="text-[#1D4ED8]">{formatCurrency(parseFloat(bookingData.amount), getCurrencyCode(country || "SA"))}</p></div>
+               </div>
+            </div>
+
+            <div className="bg-[#F1F5F9] p-4 rounded-xl break-all text-xs font-mono text-gray-500 border">{createdUrl}</div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button onClick={() => { navigator.clipboard.writeText(createdUrl); toast({ title: "تم نسخ الرابط" }); }} className="h-16 rounded-2xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-xl font-bold shadow-lg">
+                <Copy className="w-6 h-6 ml-3" /> نسخ الرابط
+              </Button>
+              <Button onClick={() => window.open(createdUrl, '_blank')} variant="outline" className="h-16 rounded-2xl border-2 border-[#1D4ED8] text-[#1D4ED8] text-xl font-bold hover:bg-[#EFF6FF]">
+                <ExternalLink className="w-6 h-6 ml-3" /> معاينة
+              </Button>
+            </div>
+
+            <Button onClick={() => navigate('/services')} variant="ghost" className="w-full text-gray-400 font-bold">العودة للخدمات</Button>
+          </div>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-6" dir="rtl">
-      <div className="container mx-auto px-4">
-        <div className="mb-4">
-          <BackButton />
-        </div>
-        {/* Header */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(`/services`)}
-            className="mb-4"
-          >
-            <ArrowRight className="w-4 h-4 ml-2" />
-            العودة للخدمات
-          </Button>
-
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-              <Truck className="w-6 h-6 text-white" />
-            </div>
+    <div className="min-h-screen bg-[#F0F4F8]/50 pb-24" dir="rtl">
+      <div className="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <BackButton />
             <div>
-              <h1 className="text-2xl font-bold">الخدمات اللوجستية المتكاملة</h1>
-              <p className="text-sm text-muted-foreground">
-                {selectedCountry.nameAr}
-              </p>
+              <h1 className="text-2xl font-black text-[#1E3A8A] tracking-tight">بوابة الخدمات اللوجستية والشحن</h1>
+              <p className="text-xs text-[#2563EB] font-bold uppercase tracking-[0.2em]">{selectedCountry?.nameAr}</p>
             </div>
           </div>
+          <div className="hidden lg:flex items-center gap-4">
+             <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black border border-blue-100">
+                <ShieldCheck className="w-4 h-4" /> شحن آمن ومؤمن
+             </div>
+          </div>
         </div>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Booking Form */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit}>
-              {/* Sender Information */}
-              <Card className="p-6 mb-6">
-                <h2 className="text-lg font-bold mb-4">بيانات المرسل</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="senderName">اسم المرسل *</Label>
-                    <Input
-                      id="senderName"
-                      value={bookingData.senderName}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, senderName: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="senderPhone">رقم الهاتف *</Label>
-                    <Input
-                      id="senderPhone"
-                      type="tel"
-                      value={bookingData.senderPhone}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, senderPhone: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="senderAddress">عنوان الاستلام *</Label>
-                    <Textarea
-                      id="senderAddress"
-                      value={bookingData.senderAddress}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, senderAddress: e.target.value })
-                      }
-                      required
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              </Card>
+            <Card className="p-10 border-0 shadow-2xl rounded-[3rem] bg-white relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563EB] opacity-[0.03] -mr-16 -mt-16 rounded-full" />
+               <form onSubmit={handleSubmit} className="space-y-10">
+                 <div className="space-y-8">
+                   <h3 className="text-xl font-black text-[#1E3A8A] flex items-center gap-3">
+                     <MapPin className="w-6 h-6 text-[#2563EB]" /> مسار الشحنة
+                   </h3>
+                   <div className="grid sm:grid-cols-2 gap-10">
+                     <div className="space-y-6">
+                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest border-r-4 border-blue-500 pr-3">بيانات المرسل</p>
+                       <div className="space-y-4">
+                         <div className="space-y-2">
+                           <Label className="text-xs font-bold text-gray-500">اسم المرسل</Label>
+                           <Input value={bookingData.senderName} onChange={(e) => setBookingData({...bookingData, senderName: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="أدخل اسمك الكامل" required />
+                         </div>
+                         <div className="space-y-2">
+                           <Label className="text-xs font-bold text-gray-500">رقم الهاتف</Label>
+                           <Input value={bookingData.senderPhone} onChange={(e) => setBookingData({...bookingData, senderPhone: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="05XXXXXXXX" required />
+                         </div>
+                       </div>
+                     </div>
+                     <div className="space-y-6">
+                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest border-r-4 border-emerald-500 pr-3">بيانات المستلم</p>
+                       <div className="space-y-4">
+                         <div className="space-y-2">
+                           <Label className="text-xs font-bold text-gray-500">اسم المستلم</Label>
+                           <Input value={bookingData.receiverName} onChange={(e) => setBookingData({...bookingData, receiverName: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="اسم الشخص المستلم" required />
+                         </div>
+                         <div className="space-y-2">
+                           <Label className="text-xs font-bold text-gray-500">رقم هاتف المستلم</Label>
+                           <Input value={bookingData.receiverPhone} onChange={(e) => setBookingData({...bookingData, receiverPhone: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="05XXXXXXXX" required />
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
 
-              {/* Receiver Information */}
-              <Card className="p-6 mb-6">
-                <h2 className="text-lg font-bold mb-4">بيانات المستلم</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="receiverName">اسم المستلم *</Label>
-                    <Input
-                      id="receiverName"
-                      value={bookingData.receiverName}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, receiverName: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="receiverPhone">رقم الهاتف *</Label>
-                    <Input
-                      id="receiverPhone"
-                      type="tel"
-                      value={bookingData.receiverPhone}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, receiverPhone: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="receiverAddress">عنوان التوصيل *</Label>
-                    <Textarea
-                      id="receiverAddress"
-                      value={bookingData.receiverAddress}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, receiverAddress: e.target.value })
-                      }
-                      required
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              </Card>
+                 <div className="space-y-8 pt-10 border-t-2 border-dashed border-gray-100">
+                    <h3 className="text-xl font-black text-[#1E3A8A] flex items-center gap-3">
+                      <Package className="w-6 h-6 text-[#2563EB]" /> تفاصيل الطرد والتكلفة
+                    </h3>
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black text-gray-400 uppercase tracking-widest">نوع الشحنة ومحتواها</Label>
+                        <Select value={bookingData.packageType} onValueChange={(val) => {
+                           const type = packageTypes.find(p => p.value === val);
+                           setBookingData({...bookingData, packageType: val, amount: (type?.price || 150).toString()});
+                        }}>
+                           <SelectTrigger className="h-16 border-2 rounded-2xl font-bold text-lg border-blue-100 bg-blue-50/30">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent className="rounded-2xl border-2">
+                             {packageTypes.map(p => <SelectItem key={p.value} value={p.value} className="h-14"><span className="ml-2">{p.icon}</span> {p.label}</SelectItem>)}
+                           </SelectContent>
+                        </Select>
+                      </div>
 
-              {/* Package Details */}
-              <Card className="p-6 mb-6">
-                <h2 className="text-lg font-bold mb-4">تفاصيل الشحنة</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="packageType">نوع الشحنة *</Label>
-                    <Select
-                      value={bookingData.packageType}
-                      onValueChange={(value) =>
-                        setBookingData({ ...bookingData, packageType: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر نوع الشحنة..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {packageTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <span className="flex items-center gap-2">
-                              <span>{type.icon}</span>
-                              <span>{type.label}</span>
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="packageWeight">الوزن (كيلوجرام) *</Label>
-                    <Input
-                      id="packageWeight"
-                      type="number"
-                      value={bookingData.packageWeight}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, packageWeight: e.target.value })
-                      }
-                      min="0.1"
-                      step="0.1"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="packageDimensions">الأبعاد (الطول × العرض × الارتفاع)</Label>
-                    <Input
-                      id="packageDimensions"
-                      value={bookingData.packageDimensions}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, packageDimensions: e.target.value })
-                      }
-                      placeholder="مثال: 50 × 30 × 20 سم"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="insuranceValue">قيمة التأمين ({selectedCountry.currency})</Label>
-                    <Input
-                      id="insuranceValue"
-                      type="number"
-                      value={bookingData.insuranceValue}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, insuranceValue: e.target.value })
-                      }
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-              </Card>
+                      <div className="space-y-4">
+                         <Label className="text-xs font-black text-gray-400 uppercase tracking-widest">المبلغ المطلوب تحصيله (COD)</Label>
+                         <div className="relative group">
+                            <Input type="number" value={bookingData.amount} onChange={(e) => setBookingData({...bookingData, amount: e.target.value})} className="h-20 border-2 rounded-[1.5rem] font-black text-4xl text-center bg-gray-50 focus:bg-white focus:border-blue-500 transition-all pr-12 pl-12" />
+                            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-xl font-black text-gray-300 group-focus-within:text-blue-500 transition-colors">{getCurrencySymbol(country || "SA")}</div>
+                         </div>
+                      </div>
+                    </div>
+                 </div>
 
-              {/* Service Type */}
-              <Card className="p-6 mb-6">
-                <h2 className="text-lg font-bold mb-4">نوع الخدمة</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="pickupDate">تاريخ الاستلام المفضل</Label>
-                    <Input
-                      id="pickupDate"
-                      type="date"
-                      value={bookingData.pickupDate}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, pickupDate: e.target.value })
-                      }
-                      min={new Date().toISOString().split("T")[0]}
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="deliveryInstructions">تعليمات التوصيل</Label>
-                    <Textarea
-                      id="deliveryInstructions"
-                      value={bookingData.deliveryInstructions}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, deliveryInstructions: e.target.value })
-                      }
-                      rows={3}
-                      placeholder="ملاحظات خاصة بالتوصيل..."
-                    />
-                  </div>
-                </div>
-              </Card>
-
-              <Button type="submit" size="lg" className="w-full">
-                <Package className="w-4 h-4 ml-2" />
-                إنشاء طلب الشحن
-              </Button>
-            </form>
+                 <Button type="submit" disabled={isSubmitting} className="w-full h-20 rounded-[1.5rem] bg-[#2563EB] hover:bg-[#1E40AF] text-2xl font-black shadow-2xl shadow-blue-200 transition-all hover:translate-y-[-4px]">
+                   {isSubmitting ? <RefreshCw className="w-8 h-8 animate-spin" /> : "إصدار رابط الشحن والتحصيل"}
+                 </Button>
+               </form>
+            </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Logistics Providers */}
-            <Card className="p-6">
-              <h2 className="text-lg font-bold mb-4">شركاء الخدمات اللوجستية</h2>
-              <div className="space-y-4">
-                {logisticsProviders.map((provider, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">{provider.logo}</span>
+          <div className="space-y-8">
+             <Card className="p-8 border-0 shadow-xl rounded-[2.5rem] bg-white">
+                <h3 className="text-xl font-black text-[#1E3A8A] mb-6">مميزات الخدمة</h3>
+                <div className="space-y-6">
+                  {[
+                    {icon: Globe, title: "تغطية دولية", desc: "نشحن لجميع دول العالم"},
+                    {icon: Clock, title: "توصيل سريع", desc: "خلال 24-48 ساعة عمل"},
+                    {icon: ShieldCheck, title: "تأمين شامل", desc: "حماية ضد الفقدان أو الضرر"},
+                  ].map((feat, i) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100"><feat.icon className="w-6 h-6" /></div>
                       <div>
-                        <h3 className="font-bold text-sm">{provider.name}</h3>
-                        <p className="text-xs text-muted-foreground">{provider.nameEn}</p>
+                        <p className="text-sm font-black text-gray-800">{feat.title}</p>
+                        <p className="text-xs font-bold text-gray-400 mt-1">{feat.desc}</p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {provider.services.map((service, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {service}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">
-                        ⭐ {provider.rating}
-                      </span>
-                      <div className="flex gap-1">
-                        {provider.features.map((feature, i) => (
-                          <span key={i} className="text-green-600" title={feature}>
-                            ✓
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
+                  ))}
+                </div>
+             </Card>
 
-            {/* Features */}
-            <Card className="p-6">
-              <h2 className="text-lg font-bold mb-4">مميزات الخدمة</h2>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Globe className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">تغطية عالمية</p>
-                    <p className="text-xs text-muted-foreground">
-                      خدمات شحن لجميع أنحاء العالم
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <MapPin className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">تتبع مباشر</p>
-                    <p className="text-xs text-muted-foreground">
-                      راقب شحنتك خطوة بخطوة
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">تأمين شامل</p>
-                    <p className="text-xs text-muted-foreground">
-                      حماية كاملة لشحنتك
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">مواعيد دقيقة</p>
-                    <p className="text-xs text-muted-foreground">
-                      توصيل في الوقت المحدد
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Tracking Info */}
-            <Card className="p-6 bg-blue-50 border-blue-200">
-              <h2 className="text-lg font-bold mb-4 text-blue-800">
-                تتبع الشحنات
-              </h2>
-              <p className="text-sm text-blue-700 mb-3">
-                تتبع شحنتك في الوقت الفعلي
-              </p>
-              <Button variant="outline" className="w-full border-blue-300 text-blue-700">
-                <MapPin className="w-4 h-4 ml-2" />
-                تتبع شحنة موجودة
-              </Button>
-            </Card>
+             <div className="p-8 bg-[#1E3A8A] rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                <Warehouse className="w-24 h-24 absolute -bottom-6 -left-6 opacity-10" />
+                <h4 className="text-xl font-black mb-3">حلول التخزين</h4>
+                <p className="text-xs opacity-70 leading-relaxed font-bold">نوفر مساحات تخزين ذكية ومكيفة لمنتجاتكم مع نظام جرد إلكتروني دقيق مرتبط بمتجركم.</p>
+             </div>
           </div>
         </div>
       </div>

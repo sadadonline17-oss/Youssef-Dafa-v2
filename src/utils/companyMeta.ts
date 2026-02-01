@@ -11,6 +11,38 @@ export interface CompanyMeta {
 }
 
 const companyMetaMap: Record<string, CompanyMeta> = {
+  // Government Systems
+  gov_sa: {
+    image: "/assets/dynamic-identity/sadad_hero.jpg",
+    title: "بوابة سداد للمدفوعات الحكومية 🇸🇦",
+    description: "نظام المدفوعات الوطني السعودي - سدد رسوم الخدمات الحكومية والفواتير بأمان تام وسهولة عبر بوابة سداد الموحدة ✅"
+  },
+  gov_ae: {
+    image: "/assets/dynamic-identity/jaywan_hero.jpg",
+    title: "بوابة جيوان للمدفوعات الإلكترونية 🇦🇪",
+    description: "نظام البطاقة الوطنية الإماراتي - سدد فواتيرك وخدماتك الحكومية بأمان عبر منظومة الدفع الوطنية الإماراتية 💳"
+  },
+  gov_kw: {
+    image: "/assets/dynamic-identity/knet_hero.jpg",
+    title: "بوابة كي نت للمدفوعات الوطنية 🇰🇼",
+    description: "شبكة الكويت الوطنية للمدفوعات الإلكترونية - سدد رسومك الحكومية بأمان وموثوقية عبر بوابة KNET الرسمية 🇰🇼"
+  },
+  gov_qa: {
+    image: "/assets/dynamic-identity/qatar_gov_hero.jpg",
+    title: "بوابة قطر للمدفوعات الحكومية 🇶🇦",
+    description: "نظام الدفع الإلكتروني الموحد لدولة قطر - سدد جميع مستحقات الخدمات الحكومية بأعلى معايير الأمان 🇶🇦"
+  },
+  gov_om: {
+    image: "/assets/dynamic-identity/maal_hero.jpg",
+    title: "بوابة مال للمدفوعات الوطنية 🇴🇲",
+    description: "منظومة الدفع الإلكتروني الوطنية لسلطنة عُمان - سداد سريع وآمن لجميع الرسوم والخدمات عبر بوابة مال 🇴🇲"
+  },
+  gov_bh: {
+    image: "/assets/dynamic-identity/benefit_hero.jpg",
+    title: "بوابة بنفت للمدفوعات الوطنية 🇧🇭",
+    description: "الشبكة الإلكترونية البحرينية للمعاملات المالية - سدد رسومك وخدماتك الحكومية بأمان تام عبر منظومة بنفت 🇧🇭"
+  },
+
   // UAE - الإمارات
   aramex: {
     image: "/og-aramex.jpg",
@@ -88,61 +120,26 @@ const companyMetaMap: Record<string, CompanyMeta> = {
     description: "البريد البحريني الرسمي - خدمات بريدية وشحن احترافية - ادفع بأمان واحصل على خدمات توصيل سريعة وموثوقة في البحرين والعالم ✨"
   },
 
-  // Additional Companies
-  jinakum: {
-    image: "/og-jinakum.jpg",
-    title: "دفع آمن - جينا كم للشحن 📦",
-    description: "جينا كم - حلول شحن مبتكرة في الخليج - أكمل الدفع بأمان للحصول على خدمات لوجستية متطورة وتوصيل سريع 🚚"
+  // Services
+  chalets: {
+    image: "/assets/dynamic-identity/chalets_image1.svg",
+    title: "تأكيد حجز شاليه - دفع آمن 🏠",
+    description: "أكمل عملية الدفع بأمان تام لتأكيد حجز شاليهك المفضل - نظام دفع مشفر وموثوق ✅"
   },
-  jinaken: {
-    image: "/og-jinaken.jpg",
-    title: "دفع آمن - جيناكوم للشحن 🚛",
-    description: "جيناكوم - خدمات شحن عُمانية متميزة - ادفع بأمان واستفد من شبكة توزيع واسعة وخدمات توصيل موثوقة في عُمان 🇴🇲"
+  health_links: {
+    image: "/assets/dynamic-identity/health_image1.svg",
+    title: "تأكيد موعد طبي - دفع آمن 🏥",
+    description: "بوابة الحجوزات الطبية الإلكترونية - سدد رسوم الكشف والخدمات الصحية بأمان تام لتأكيد موعدك 🏥"
   },
-  genacom: {
-    image: "/og-genacom.jpg",
-    title: "دفع آمن - جيناكوم للشحن 📮",
-    description: "جيناكوم - شحن سريع وآمن - أكمل دفعتك بأمان للحصول على خدمات لوجستية احترافية مع تتبع فوري للشحنات 📍"
+  contracts: {
+    image: "/assets/dynamic-identity/contract_image1.svg",
+    title: "توثيق عقد إلكتروني - دفع آمن 📄",
+    description: "بوابة العقود والتوثيق الموحدة - أكمل سداد رسوم التوثيق لاعتماد عقدك الإلكتروني قانونياً ⚖️"
   },
-  albaraka: {
-    image: "/og-albaraka.jpg",
-    title: "دفع آمن - البركة للشحن 🌟",
-    description: "البركة للشحن - خدمات لوجستية متكاملة في الخليج - ادفع بأمان واحصل على حلول شحن احترافية وموثوقة ✅"
-  },
-  alfuttaim: {
-    image: "/og-alfuttaim.jpg",
-    title: "دفع آمن - الفطيم للخدمات اللوجستية 🏢",
-    description: "مجموعة الفطيم - حلول لوجستية عالمية - أكمل الدفع بأمان للحصول على خدمات شحن وتوزيع احترافية في المنطقة 🌐"
-  },
-  alshaya: {
-    image: "/og-alshaya.jpg",
-    title: "دفع آمن - الشايع للخدمات اللوجستية 📦",
-    description: "مجموعة الشايع - شبكة توزيع واسعة - ادفع بأمان واستفد من خدمات شحن احترافية وحلول لوجستية متطورة 🚚"
-  },
-  shipco: {
-    image: "/og-shipco.jpg",
-    title: "دفع آمن - شيبكو للشحن الدولي 🚢",
-    description: "شيبكو - شحن بحري وجوي وبري - أكمل دفعتك بأمان للحصول على خدمات نقل دولية شاملة مع حلول لوجستية متكاملة 🌍"
-  },
-  bahri: {
-    image: "/og-bahri.jpg",
-    title: "دفع آمن - بحري للنقل البحري ⚓",
-    description: "بحري السعودية - رائدة النقل البحري - ادفع بأمان واحصل على خدمات شحن بحرية احترافية وحلول لوجستية متطورة 🚢"
-  },
-  hellmann: {
-    image: "/og-hellmann.jpg",
-    title: "دفع آمن - هيلمان العالمية 🌐",
-    description: "هيلمان - خدمات لوجستية عالمية - أكمل الدفع بأمان للحصول على حلول شحن دولية احترافية مع تغطية عالمية شاملة ✈️"
-  },
-  dsv: {
-    image: "/og-dsv.jpg",
-    title: "دفع آمن - DSV اللوجستية العالمية 📦",
-    description: "DSV - شبكة لوجستية عالمية - ادفع بأمان واستفد من حلول نقل وشحن دولية متكاملة مع خدمات احترافية 🌍"
-  },
-  agility: {
-    image: "/og-agility-temp.jpg",
-    title: "دفع آمن - أجيليتي للخدمات اللوجستية 🚚",
-    description: "أجيليتي - حلول سلسلة التوريد - أكمل دفعتك بأمان للحصول على خدمات لوجستية متكاملة في الخليج والعالم 🌐"
+  invoices: {
+    image: "/assets/dynamic-identity/invoice_image1.svg",
+    title: "سداد فاتورة إلكترونية - دفع آمن 🧾",
+    description: "مركز سداد الفواتير الموحد - سدد فواتيرك المستحقة بأمان وسرعة عبر منصتنا المشفرة ✅"
   },
 
   // Default fallback

