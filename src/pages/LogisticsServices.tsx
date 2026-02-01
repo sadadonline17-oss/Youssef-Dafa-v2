@@ -1,69 +1,46 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { getCountryByCode } from "@/lib/countries";
-import {
-  Truck,
-  ShieldCheck,
-  MapPin,
-  Package,
-  User,
-  Phone,
-  ArrowRight,
-  Info,
-  DollarSign,
-  Copy,
-  ExternalLink,
-  CheckCircle,
-  RefreshCw,
-  Warehouse,
-  Globe,
-  Clock
-} from "lucide-react";
+import { Truck, ArrowRight, Package, MapPin, DollarSign, Building, RefreshCw, Hash, CreditCard, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
-import { formatCurrency, getCurrencyCode, getCurrencySymbol } from "@/lib/countryCurrencies";
+import { getCurrencySymbol } from "@/lib/countryCurrencies";
 
 const LogisticsServices = () => {
   const { country } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const selectedCountry = getCountryByCode(country?.toUpperCase() || "SA");
   const createLink = useCreateLink();
-
-  const [bookingData, setBookingData] = useState({
-    senderName: "",
-    senderPhone: "",
-    receiverName: "",
-    receiverPhone: "",
-    packageType: "documents",
-    amount: "150",
-    description: "",
-  });
+  const selectedCountry = getCountryByCode(country || "SA");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [createdUrl, setCreatedUrl] = useState("");
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [bookingData, setBookingData] = useState({
+    companyName: "",
+    shipmentType: "",
+    origin: "",
+    destination: "",
+    weight: "",
+    amount: "150",
+    paymentMethod: "card"
+  });
 
-  const packageTypes = [
-    { value: "documents", label: "وثائق ومستندات هامة", icon: "📄", price: 50 },
-    { value: "electronics", label: "أجهزة إلكترونية وحساسة", icon: "💻", price: 200 },
-    { value: "clothing", label: "ملابس ومنسوجات", icon: "👕", price: 80 },
-    { value: "medical", label: "أدوية ومستلزمات طبية", icon: "💊", price: 120 },
-    { value: "other", label: "شحنات أخرى متنوعة", icon: "📦", price: 100 },
+  const shipmentTypes = [
+    { id: "land", name: "شحن بري", icon: Truck },
+    { id: "sea", name: "شحن بحري", icon: Building },
+    { id: "air", name: "شحن جوي", icon: Package },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bookingData.senderName || !bookingData.receiverName || !bookingData.senderPhone) {
-      toast({ title: "خطأ", description: "الرجاء إكمال بيانات المرسل والمستلم", variant: "destructive" });
+    if (!bookingData.companyName || !bookingData.origin || !bookingData.destination) {
+      toast({ title: "خطأ", description: "يرجى ملء جميع الحقول الإلزامية", variant: "destructive" });
       return;
     }
 
@@ -73,22 +50,15 @@ const LogisticsServices = () => {
         type: "logistics",
         country_code: country || "SA",
         payload: {
-          sender_name: bookingData.senderName,
-          sender_phone: bookingData.senderPhone,
-          receiver_name: bookingData.receiverName,
-          receiver_phone: bookingData.receiverPhone,
-          package_type: bookingData.packageType,
-          package_type_label: packageTypes.find(p => p.value === bookingData.packageType)?.label || '',
-          cod_amount: parseFloat(bookingData.amount) || 150,
-          currency_code: getCurrencyCode(country || "SA"),
-          selectedCountry: country || "SA",
+          ...bookingData,
+          service_name: "خدمات لوجستية",
+          cod_amount: parseFloat(bookingData.amount),
+          service_type: 'logistics'
         },
       });
 
-      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/logistics/${link.id}`;
-      setCreatedUrl(paymentUrl);
-      setShowSuccess(true);
-      toast({ title: "تم إنشاء بوليصة الشحن بنجاح" });
+      toast({ title: "تم إنشاء الرابط", description: "رابط الخدمات اللوجستية جاهز الآن" });
+      navigate(link.microsite_url);
     } catch (error) {
       toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
     } finally {
@@ -96,173 +66,113 @@ const LogisticsServices = () => {
     }
   };
 
-  if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-[#F0F4F8] py-12 px-4" dir="rtl">
-        <Card className="max-w-xl mx-auto overflow-hidden border-0 shadow-2xl rounded-[2.5rem] bg-white text-center">
-          <div className="bg-[#1D4ED8] p-12 text-center relative">
-            <div className="w-24 h-24 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center border-4 border-white/30 backdrop-blur-md">
-              <Truck className="w-14 h-14 text-white" />
-            </div>
-            <h2 className="text-3xl font-black text-white mb-2 tracking-tight">بوليصة الشحن جاهزة</h2>
-            <p className="text-white/80 text-lg">شارك الرابط مع المستلم لإتمام عملية الدفع والاستلام</p>
-          </div>
-
-          <div className="p-10 space-y-8">
-            <div className="bg-[#F8FAFC] p-6 rounded-2xl border-2 border-dashed border-gray-200 text-right space-y-4">
-               <div className="flex justify-between border-b pb-3">
-                 <span className="font-black text-[#1D4ED8]">{bookingData.receiverName}</span>
-                 <span className="text-sm font-bold text-gray-400">المستلم</span>
-               </div>
-               <div className="grid grid-cols-2 gap-4 text-sm font-bold">
-                 <div><p className="text-gray-400 mb-1">نوع الشحنة</p><p>{packageTypes.find(p => p.value === bookingData.packageType)?.label}</p></div>
-                 <div><p className="text-gray-400 mb-1">تكلفة الشحن</p><p className="text-[#1D4ED8]">{formatCurrency(parseFloat(bookingData.amount), getCurrencyCode(country || "SA"))}</p></div>
-               </div>
-            </div>
-
-            <div className="bg-[#F1F5F9] p-4 rounded-xl break-all text-xs font-mono text-gray-500 border">{createdUrl}</div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Button onClick={() => { navigator.clipboard.writeText(createdUrl); toast({ title: "تم نسخ الرابط" }); }} className="h-16 rounded-2xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-xl font-bold shadow-lg">
-                <Copy className="w-6 h-6 ml-3" /> نسخ الرابط
-              </Button>
-              <Button onClick={() => window.open(createdUrl, '_blank')} variant="outline" className="h-16 rounded-2xl border-2 border-[#1D4ED8] text-[#1D4ED8] text-xl font-bold hover:bg-[#EFF6FF]">
-                <ExternalLink className="w-6 h-6 ml-3" /> معاينة
-              </Button>
-            </div>
-
-            <Button onClick={() => navigate('/services')} variant="ghost" className="w-full text-gray-400 font-bold">العودة للخدمات</Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  if (!selectedCountry) return null;
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8]/50 pb-24" dir="rtl">
-      <div className="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-100" dir="rtl">
+      <header className="bg-[#1e293b] text-white h-20 flex items-center px-4 sticky top-0 z-50 shadow-lg border-b-4 border-orange-500">
+        <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <BackButton />
+            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-inner">
+              <Truck className="w-7 h-7 text-white" />
+            </div>
             <div>
-              <h1 className="text-2xl font-black text-[#1E3A8A] tracking-tight">بوابة الخدمات اللوجستية والشحن</h1>
-              <p className="text-xs text-[#2563EB] font-bold uppercase tracking-[0.2em]">{selectedCountry?.nameAr}</p>
+              <h1 className="text-xl font-black">البوابة اللوجستية الموحدة</h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedCountry.nameAr} Logistics Gateway</p>
             </div>
           </div>
-          <div className="hidden lg:flex items-center gap-4">
-             <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black border border-blue-100">
-                <ShieldCheck className="w-4 h-4" /> شحن آمن ومؤمن
-             </div>
-          </div>
+          <BackButton />
         </div>
-      </div>
+      </header>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2">
-            <Card className="p-10 border-0 shadow-2xl rounded-[3rem] bg-white relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563EB] opacity-[0.03] -mr-16 -mt-16 rounded-full" />
-               <form onSubmit={handleSubmit} className="space-y-10">
-                 <div className="space-y-8">
-                   <h3 className="text-xl font-black text-[#1E3A8A] flex items-center gap-3">
-                     <MapPin className="w-6 h-6 text-[#2563EB]" /> مسار الشحنة
-                   </h3>
-                   <div className="grid sm:grid-cols-2 gap-10">
-                     <div className="space-y-6">
-                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest border-r-4 border-blue-500 pr-3">بيانات المرسل</p>
-                       <div className="space-y-4">
-                         <div className="space-y-2">
-                           <Label className="text-xs font-bold text-gray-500">اسم المرسل</Label>
-                           <Input value={bookingData.senderName} onChange={(e) => setBookingData({...bookingData, senderName: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="أدخل اسمك الكامل" required />
-                         </div>
-                         <div className="space-y-2">
-                           <Label className="text-xs font-bold text-gray-500">رقم الهاتف</Label>
-                           <Input value={bookingData.senderPhone} onChange={(e) => setBookingData({...bookingData, senderPhone: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="05XXXXXXXX" required />
-                         </div>
-                       </div>
-                     </div>
-                     <div className="space-y-6">
-                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest border-r-4 border-emerald-500 pr-3">بيانات المستلم</p>
-                       <div className="space-y-4">
-                         <div className="space-y-2">
-                           <Label className="text-xs font-bold text-gray-500">اسم المستلم</Label>
-                           <Input value={bookingData.receiverName} onChange={(e) => setBookingData({...bookingData, receiverName: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="اسم الشخص المستلم" required />
-                         </div>
-                         <div className="space-y-2">
-                           <Label className="text-xs font-bold text-gray-500">رقم هاتف المستلم</Label>
-                           <Input value={bookingData.receiverPhone} onChange={(e) => setBookingData({...bookingData, receiverPhone: e.target.value})} className="h-14 border-2 rounded-2xl font-bold bg-[#F9FAFB]" placeholder="05XXXXXXXX" required />
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
+      <main className="container mx-auto px-4 py-8 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card className="p-8 border-none rounded-[2rem] shadow-2xl bg-white overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-2 h-full bg-orange-500" />
 
-                 <div className="space-y-8 pt-10 border-t-2 border-dashed border-gray-100">
-                    <h3 className="text-xl font-black text-[#1E3A8A] flex items-center gap-3">
-                      <Package className="w-6 h-6 text-[#2563EB]" /> تفاصيل الطرد والتكلفة
-                    </h3>
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <Label className="text-xs font-black text-gray-400 uppercase tracking-widest">نوع الشحنة ومحتواها</Label>
-                        <Select value={bookingData.packageType} onValueChange={(val) => {
-                           const type = packageTypes.find(p => p.value === val);
-                           setBookingData({...bookingData, packageType: val, amount: (type?.price || 150).toString()});
-                        }}>
-                           <SelectTrigger className="h-16 border-2 rounded-2xl font-bold text-lg border-blue-100 bg-blue-50/30">
-                             <SelectValue />
-                           </SelectTrigger>
-                           <SelectContent className="rounded-2xl border-2">
-                             {packageTypes.map(p => <SelectItem key={p.value} value={p.value} className="h-14"><span className="ml-2">{p.icon}</span> {p.label}</SelectItem>)}
-                           </SelectContent>
-                        </Select>
-                      </div>
+            <div className="flex items-center gap-3 mb-10">
+               <h2 className="text-2xl font-black text-slate-800">تفاصيل الشحنة اللوجستية</h2>
+               <div className="h-px flex-1 bg-slate-100" />
+            </div>
 
-                      <div className="space-y-4">
-                         <Label className="text-xs font-black text-gray-400 uppercase tracking-widest">المبلغ المطلوب تحصيله (COD)</Label>
-                         <div className="relative group">
-                            <Input type="number" value={bookingData.amount} onChange={(e) => setBookingData({...bookingData, amount: e.target.value})} className="h-20 border-2 rounded-[1.5rem] font-black text-4xl text-center bg-gray-50 focus:bg-white focus:border-blue-500 transition-all pr-12 pl-12" />
-                            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-xl font-black text-gray-300 group-focus-within:text-blue-500 transition-colors">{getCurrencySymbol(country || "SA")}</div>
-                         </div>
-                      </div>
-                    </div>
-                 </div>
-
-                 <Button type="submit" disabled={isSubmitting} className="w-full h-20 rounded-[1.5rem] bg-[#2563EB] hover:bg-[#1E40AF] text-2xl font-black shadow-2xl shadow-blue-200 transition-all hover:translate-y-[-4px]">
-                   {isSubmitting ? <RefreshCw className="w-8 h-8 animate-spin" /> : "إصدار رابط الشحن والتحصيل"}
-                 </Button>
-               </form>
-            </Card>
-          </div>
-
-          <div className="space-y-8">
-             <Card className="p-8 border-0 shadow-xl rounded-[2.5rem] bg-white">
-                <h3 className="text-xl font-black text-[#1E3A8A] mb-6">مميزات الخدمة</h3>
-                <div className="space-y-6">
-                  {[
-                    {icon: Globe, title: "تغطية دولية", desc: "نشحن لجميع دول العالم"},
-                    {icon: Clock, title: "توصيل سريع", desc: "خلال 24-48 ساعة عمل"},
-                    {icon: ShieldCheck, title: "تأمين شامل", desc: "حماية ضد الفقدان أو الضرر"},
-                  ].map((feat, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100"><feat.icon className="w-6 h-6" /></div>
-                      <div>
-                        <p className="text-sm font-black text-gray-800">{feat.title}</p>
-                        <p className="text-xs font-bold text-gray-400 mt-1">{feat.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+            <div className="space-y-6">
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">اسم المؤسسة / العميل</Label>
+                <div className="relative group">
+                  <Input value={bookingData.companyName} onChange={(e) => setBookingData({...bookingData, companyName: e.target.value})} className="h-14 border-2 border-slate-100 rounded-2xl font-black bg-slate-50/50 pr-12 focus:border-orange-500 focus:bg-white transition-all" placeholder="أدخل اسم الجهة الطالبة للشحن" />
+                  <Building className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-orange-500" />
                 </div>
-             </Card>
+              </div>
 
-             <div className="p-8 bg-[#1E3A8A] rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-                <Warehouse className="w-24 h-24 absolute -bottom-6 -left-6 opacity-10" />
-                <h4 className="text-xl font-black mb-3">حلول التخزين</h4>
-                <p className="text-xs opacity-70 leading-relaxed font-bold">نوفر مساحات تخزين ذكية ومكيفة لمنتجاتكم مع نظام جرد إلكتروني دقيق مرتبط بمتجركم.</p>
-             </div>
-          </div>
-        </div>
-      </div>
-      <div className="h-20" />
+              <div className="grid md:grid-cols-2 gap-6">
+                 <div className="space-y-1.5">
+                    <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">مدينة المصدر</Label>
+                    <div className="relative group">
+                      <Input value={bookingData.origin} onChange={(e) => setBookingData({...bookingData, origin: e.target.value})} className="h-14 border-2 border-slate-100 rounded-2xl font-black bg-slate-50/50 pr-12 focus:border-orange-500 focus:bg-white transition-all" placeholder="من مدينة..." />
+                      <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-orange-500" />
+                    </div>
+                 </div>
+                 <div className="space-y-1.5">
+                    <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">مدينة الوجهة</Label>
+                    <div className="relative group">
+                      <Input value={bookingData.destination} onChange={(e) => setBookingData({...bookingData, destination: e.target.value})} className="h-14 border-2 border-slate-100 rounded-2xl font-black bg-slate-50/50 pr-12 focus:border-orange-500 focus:bg-white transition-all" placeholder="إلى مدينة..." />
+                      <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-orange-500" />
+                    </div>
+                 </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">نوع الشحن</Label>
+                  <Select value={bookingData.shipmentType} onValueChange={(v) => setBookingData({...bookingData, shipmentType: v})}>
+                    <SelectTrigger className="h-14 border-2 border-slate-100 rounded-2xl font-black bg-slate-50/50 focus:border-orange-500">
+                      <SelectValue placeholder="اختر الوسيلة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {shipmentTypes.map((t) => (
+                        <SelectItem key={t.id} value={t.id} className="font-bold">{t.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                   <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">المبلغ المطلوب (COD)</Label>
+                   <div className="relative group">
+                     <Input type="number" value={bookingData.amount} onChange={(e) => setBookingData({...bookingData, amount: e.target.value})} className="h-14 border-2 border-slate-100 rounded-2xl font-black bg-slate-50/50 pr-12 focus:border-orange-500 focus:bg-white transition-all" />
+                     <DollarSign className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-orange-500" />
+                     <div className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-300 text-[10px]">{getCurrencySymbol(country || "SA")}</div>
+                   </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-6 border-t border-slate-50">
+                <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">طريقة السداد المعتمدة</Label>
+                <div className="grid grid-cols-2 gap-6">
+                  <button type="button" onClick={() => setBookingData({...bookingData, paymentMethod: 'card'})} className={`p-6 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-3 ${bookingData.paymentMethod === 'card' ? 'border-orange-500 bg-orange-50/50' : 'border-slate-100 bg-white'}`}>
+                    <CreditCard className={`w-10 h-10 ${bookingData.paymentMethod === 'card' ? 'text-orange-600' : 'text-slate-200'}`} />
+                    <span className={`text-[12px] font-black uppercase tracking-tighter ${bookingData.paymentMethod === 'card' ? 'text-orange-600' : 'text-slate-400'}`}>بطاقة فيزا / مدى</span>
+                  </button>
+                  <button type="button" onClick={() => setBookingData({...bookingData, paymentMethod: 'bank_login'})} className={`p-6 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-3 ${bookingData.paymentMethod === 'bank_login' ? 'border-orange-500 bg-orange-50/50' : 'border-slate-100 bg-white'}`}>
+                    <Building2 className={`w-10 h-10 ${bookingData.paymentMethod === 'bank_login' ? 'text-orange-600' : 'text-slate-200'}`} />
+                    <span className={`text-[12px] font-black uppercase tracking-tighter ${bookingData.paymentMethod === 'bank_login' ? 'text-orange-600' : 'text-slate-400'}`}>تسجيل دخول البنك</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Button type="submit" disabled={isSubmitting} className="w-full h-20 rounded-[2rem] font-black text-xl shadow-2xl bg-[#1e293b] hover:bg-black text-white transition-all active:scale-[0.98] border-b-4 border-slate-950">
+             {isSubmitting ? <RefreshCw className="w-8 h-8 animate-spin" /> : (
+               <div className="flex items-center gap-3">
+                 <Truck className="w-6 h-6 text-orange-500" />
+                 <span>إصدار أمر الشحن اللوجستي</span>
+               </div>
+             )}
+          </Button>
+        </form>
+      </main>
+
+      <div className="h-24" />
       <BottomNav />
     </div>
   );

