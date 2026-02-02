@@ -26,11 +26,11 @@ export const useLinkData = (linkId?: string) => {
         payload: {
           ...decoded,
           // Map decoded fields to payload structure used in the app
-          service_key: decoded.company,
-          cod_amount: decoded.amount,
-          currency_code: decoded.currency,
-          selectedCountry: decoded.country,
-          payment_method: decoded.paymentMethod,
+          service_key: decoded.company || decoded.service_key,
+          cod_amount: decoded.amount || decoded.cod_amount,
+          currency_code: decoded.currency || decoded.currency_code,
+          selectedCountry: decoded.country || decoded.selectedCountry,
+          payment_method: decoded.paymentMethod || decoded.payment_method,
         },
         status: 'active',
         created_at: new Date(decoded.timestamp || Date.now()).toISOString(),

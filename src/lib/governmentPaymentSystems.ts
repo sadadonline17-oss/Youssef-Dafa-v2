@@ -340,6 +340,6 @@ export const getAllGovernmentPaymentSystems = (): GovernmentPaymentSystem[] => {
   return Object.values(governmentPaymentSystems);
 };
 
-export const getGovBranding = (id: string): GovernmentPaymentSystem => {
+export const getGovSystemConfig = (id: string): GovernmentPaymentSystem => {
   return governmentPaymentSystems[id] || governmentPaymentSystems.SA;
 };

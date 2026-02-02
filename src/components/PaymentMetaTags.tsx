@@ -152,14 +152,14 @@ interface PaymentMetaTagsProps {
 }
 
 export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
-  serviceKey,
-  serviceName,
+  serviceKey = 'default',
+  serviceName = '',
   amount,
   title,
   customDescription,
   description,
 }) => {
-  const branding = getServiceBranding(serviceKey);
+  const branding = getServiceBranding(serviceKey || 'default');
   
   const detectedEntity = detectEntityFromURL();
   const entityIdentity = detectedEntity ? getEntityIdentity(detectedEntity) : null;
@@ -167,12 +167,12 @@ export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
   const entityDescription = entityIdentity?.payment_share_description;
   
   const urlParams = new URLSearchParams(window.location.search);
-  const companyParam = urlParams.get('company') || serviceKey;
+  const companyParam = urlParams.get('company') || serviceKey || 'default';
   const companyMetaData = companyMeta[companyParam.toLowerCase()] || companyMeta.default;
   
   let ogImagePath = entityShareImage || companyMetaData.image || branding.ogImage;
   
-  if (serviceKey.startsWith('bank_')) {
+  if (serviceKey && serviceKey.startsWith('bank_')) {
     const bankId = serviceKey.replace('bank_', '');
     ogImagePath = getBankOGImage(bankId) || companyMeta.bank_pages.image;
   }

