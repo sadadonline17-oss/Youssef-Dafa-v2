@@ -1884,6 +1884,46 @@ export const bankBranding: Record<string, CompanyBranding> = {
     },
     description: 'البنك الأهلي - بنك بحريني رائد في الخدمات المصرفية',
   },
+
+  stc_bank: {
+    id: 'stc_bank',
+    nameEn: 'stc bank',
+    nameAr: 'stc bank',
+    colors: {
+      primary: '#FF0000',
+      secondary: '#4F008C',
+      accent: '#FFFFFF',
+      background: '#FFFFFF',
+      surface: '#FFF5F5',
+      text: '#1A1A1A',
+      textLight: '#666666',
+      textOnPrimary: '#FFFFFF',
+      border: '#FFD6D6',
+    },
+    fonts: {
+      primary: 'Arial, sans-serif',
+      secondary: 'Helvetica, sans-serif',
+      arabic: 'Cairo, Tajawal, sans-serif',
+    },
+    gradients: {
+      primary: 'linear-gradient(135deg, #FF0000 0%, #4F008C 100%)',
+      secondary: 'linear-gradient(180deg, #FF0000 0%, #B30000 100%)',
+      hero: 'linear-gradient(to right, #FF0000 0%, #4F008C 100%)',
+    },
+    shadows: {
+      sm: '0 1px 2px 0 rgba(255, 0, 0, 0.08)',
+      md: '0 4px 6px -1px rgba(255, 0, 0, 0.15)',
+      lg: '0 10px 15px -3px rgba(255, 0, 0, 0.20)',
+    },
+    borderRadius: {
+      sm: '8px',
+      md: '12px',
+      lg: '16px',
+    },
+    logoUrl: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/stc-bank.png',
+    websiteUrl: 'https://www.stcbank.com.sa',
+    description: 'المصرف الرقمي الرائد في المملكة العربية السعودية',
+  },
 };
 
 export const getBrandingByCompany = (companyKey: string): CompanyBranding | null => {

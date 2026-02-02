@@ -34,6 +34,16 @@ const companyMeta: Record<string, { title: string; description: string; image: s
     description: "الشبكة الإلكترونية البحرينية للمعاملات المالية - سدد رسومك وخدماتك الحكومية بأمان تام عبر منظومة بنفت 🇧🇭",
     image: "/assets/dynamic-identity/benefit_hero.jpg"
   },
+  sa_absher: {
+    title: "بوابة أبشر للمدفوعات الإلكترونية 🇸🇦",
+    description: "سدد رسوم خدمات وزارة الداخلية السعودية بأمان وسهولة عبر بوابة أبشر الموحدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher-hero.jpg"
+  },
+  sa_najiz: {
+    title: "بوابة ناجز للمدفوعات العدلية ⚖️",
+    description: "سدد رسوم الخدمات العدلية السعودية بأمان عبر بوابة ناجز التابعة لوزارة العدل ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/najiz-logo.png"
+  },
 
   aramex: {
     title: "دفع آمن - أرامكس للشحن السريع 🚚",
@@ -168,7 +178,9 @@ export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
   
   const urlParams = new URLSearchParams(window.location.search);
   const companyParam = urlParams.get('company') || serviceKey || 'default';
-  const companyMetaData = companyMeta[companyParam.toLowerCase()] || companyMeta.default;
+  const govId = urlParams.get('govId');
+  const metaKey = (govId && companyMeta[`gov_${govId.toLowerCase()}`]) ? `gov_${govId.toLowerCase()}` : companyParam.toLowerCase();
+  const companyMetaData = companyMeta[metaKey] || companyMeta.default;
   
   let ogImagePath = entityShareImage || companyMetaData.image || branding.ogImage;
   

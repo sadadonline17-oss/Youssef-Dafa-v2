@@ -82,6 +82,13 @@ export const BANKS_BY_COUNTRY: BanksByCountry = {
       logo: "/bank-logos/aljazira-bank.png",
       color: "#005EB8",
     },
+    {
+      id: "stc_bank",
+      name: "stc bank",
+      nameAr: "stc bank",
+      logo: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/stc-bank.png",
+      color: "#FF0000",
+    },
   ],
   AE: [
     {
