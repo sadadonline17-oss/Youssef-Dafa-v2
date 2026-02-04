@@ -186,13 +186,22 @@ export default async (request: Request, context: Context) => {
     // نعتمد فقط على Content-Type من الـ response
     
     const response = await context.next();
-    const contentType = response.headers.get("content-type") || "";
     
-    if (!contentType.includes("text/html")) {
+    // Check if the response is valid and is an HTML document
+    const contentType = response.headers.get("content-type") || "";
+    if (!response.ok || !contentType.includes("text/html")) {
       return response;
     }
 
-    let html = await response.text();
+    // Clone the response if we need to read it multiple times, 
+    // though here we just read it once.
+    let html = "";
+    try {
+      html = await response.text();
+    } catch (e) {
+      console.error("Error reading response text:", e);
+      return response;
+    }
 
     // استخراج company من Path Parameters أولاً (دعم /p/:id/:company/:currency/:amount)
     const pathParts = url.pathname.split('/');
