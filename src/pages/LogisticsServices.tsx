@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,27 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
+import { DynamicIdentityProvider, DynamicIdentityWrapper, useDynamicIdentity } from "@/components/DynamicIdentityProvider";
+import { getServiceBranding } from "@/lib/serviceLogos";
 
 const LogisticsServices = () => {
+  const [selectedShippingCompany, setSelectedShippingCompany] = useState<string | null>(null);
+  const { setEntity } = useDynamicIdentity();
+
+  useEffect(() => {
+    // This is a placeholder. In a real app, you'd determine the shipping company
+    // based on URL params, user selection, or other logic.
+    // For now, let's assume a default or extract from a hypothetical param.
+    const companyFromUrl = new URLSearchParams(window.location.search).get('company');
+    if (companyFromUrl) {
+      setSelectedShippingCompany(companyFromUrl);
+      setEntity(companyFromUrl);
+    } else {
+      // Default to Aramex for demonstration if no company is specified
+      setSelectedShippingCompany('aramex');
+      setEntity('aramex');
+    }
+  }, [setEntity]);
   const { country } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -219,61 +238,51 @@ const LogisticsServices = () => {
   }
 
   return (
-    <div className="min-h-screen py-6" dir="rtl">
-      <div className="container mx-auto px-4">
-        <div className="mb-4">
-          <BackButton />
-        </div>
-        {/* Header */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(`/services`)}
-            className="mb-4"
-          >
-            <ArrowRight className="w-4 h-4 ml-2" />
-            العودة للخدمات
-          </Button>
-
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-              <Truck className="w-6 h-6 text-white" />
+      <div className="min-h-screen py-6" dir="rtl">
+        <DynamicIdentityProvider entityKey={selectedShippingCompany || 'aramex'} showLogo={true} showAnimatedHeader={true} variant="full">
+          <div className="container mx-auto px-4">
+            <div className="mb-4">
+              <BackButton />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">الخدمات اللوجستية المتكاملة</h1>
-              <p className="text-sm text-muted-foreground">
-                {selectedCountry.nameAr}
-              </p>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center dynamic-bg-secondary">
+                <Truck className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold dynamic-primary-text">الخدمات اللوجستية المتكاملة</h1>
+                <p className="text-sm text-muted-foreground dynamic-secondary-text">
+                  {selectedCountry.nameAr}
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Booking Form */}
-          <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit}>
-              {/* Sender Information */}
-              <Card className="p-6 mb-6">
-                <h2 className="text-lg font-bold mb-4">بيانات المرسل</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="senderName">اسم المرسل *</Label>
-                    <Input
-                      id="senderName"
-                      value={bookingData.senderName}
-                      onChange={(e) =>
-                        setBookingData({ ...bookingData, senderName: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="senderPhone">رقم الهاتف *</Label>
-                    <Input
-                      id="senderPhone"
-                      type="tel"
-                      value={bookingData.senderPhone}
-                      onChange={(e) =>
+
+              <div className="grid lg:grid-cols-3 gap-6">
+                {/* Booking Form */}
+                <div className="lg:col-span-2">
+                  <form onSubmit={handleSubmit}>
+                    {/* Sender Information */}
+                    <Card className="p-6 mb-6">
+                      <h2 className="text-lg font-bold mb-4">بيانات المرسل</h2>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="senderName">اسم المرسل *</Label>
+                          <Input
+                            id="senderName"
+                            value={bookingData.senderName}
+                            onChange={(e) =>
+                              setBookingData({ ...bookingData, senderName: e.target.value })
+                            }
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="senderPhone">رقم الهاتف *</Label>
+                          <Input
+                            id="senderPhone"
+                            type="tel"
+                            value={bookingData.senderPhone}
+                            onChange={(e) =>
                         setBookingData({ ...bookingData, senderPhone: e.target.value })
                       }
                       required
@@ -445,32 +454,32 @@ const LogisticsServices = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Logistics Providers */}
-            <Card className="p-6">
-              <h2 className="text-lg font-bold mb-4">شركاء الخدمات اللوجستية</h2>
+            <Card className="p-6 dynamic-card">
+              <h2 className="text-lg font-bold mb-4 dynamic-primary-text">شركاء الخدمات اللوجستية</h2>
               <div className="space-y-4">
                 {logisticsProviders.map((provider, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
+                  <div key={index} className="p-4 border rounded-lg dynamic-border">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-2xl">{provider.logo}</span>
                       <div>
-                        <h3 className="font-bold text-sm">{provider.name}</h3>
-                        <p className="text-xs text-muted-foreground">{provider.nameEn}</p>
+                        <h3 className="font-bold text-sm dynamic-primary-text">{provider.name}</h3>
+                        <p className="text-xs text-muted-foreground dynamic-secondary-text">{provider.nameEn}</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1 mb-2">
                       {provider.services.map((service, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
+                        <Badge key={i} variant="secondary" className="text-xs dynamic-badge">
                           {service}
                         </Badge>
                       ))}
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground dynamic-secondary-text">
                         ⭐ {provider.rating}
                       </span>
                       <div className="flex gap-1">
                         {provider.features.map((feature, i) => (
-                          <span key={i} className="text-green-600" title={feature}>
+                          <span key={i} className="text-green-600 dynamic-success-text" title={feature}>
                             ✓
                           </span>
                         ))}
@@ -482,49 +491,49 @@ const LogisticsServices = () => {
             </Card>
 
             {/* Features */}
-            <Card className="p-6">
-              <h2 className="text-lg font-bold mb-4">مميزات الخدمة</h2>
+            <Card className="p-6 dynamic-card">
+              <h2 className="text-lg font-bold mb-4 dynamic-primary-text">مميزات الخدمة</h2>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Globe className="w-4 h-4 text-blue-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                    <Globe className="w-4 h-4 text-blue-600 dynamic-primary-text" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">تغطية عالمية</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold text-sm dynamic-primary-text">تغطية عالمية</p>
+                    <p className="text-xs text-muted-foreground dynamic-secondary-text">
                       خدمات شحن لجميع أنحاء العالم
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <MapPin className="w-4 h-4 text-green-600" />
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                    <MapPin className="w-4 h-4 text-green-600 dynamic-primary-text" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">تتبع مباشر</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold text-sm dynamic-primary-text">تتبع مباشر</p>
+                    <p className="text-xs text-muted-foreground dynamic-secondary-text">
                       راقب شحنتك خطوة بخطوة
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-purple-600" />
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                    <Shield className="w-4 h-4 text-purple-600 dynamic-primary-text" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">تأمين شامل</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold text-sm dynamic-primary-text">تأمين شامل</p>
+                    <p className="text-xs text-muted-foreground dynamic-secondary-text">
                       حماية كاملة لشحنتك
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-orange-600" />
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                    <Clock className="w-4 h-4 text-orange-600 dynamic-primary-text" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">مواعيد دقيقة</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold text-sm dynamic-primary-text">مواعيد دقيقة</p>
+                    <p className="text-xs text-muted-foreground dynamic-secondary-text">
                       توصيل في الوقت المحدد
                     </p>
                   </div>
@@ -533,24 +542,131 @@ const LogisticsServices = () => {
             </Card>
 
             {/* Tracking Info */}
-            <Card className="p-6 bg-blue-50 border-blue-200">
-              <h2 className="text-lg font-bold mb-4 text-blue-800">
+            <Card className="p-6 bg-blue-50 border-blue-200 dynamic-card dynamic-border dynamic-bg-secondary">
+              <h2 className="text-lg font-bold mb-4 text-blue-800 dynamic-primary-text">
                 تتبع الشحنات
               </h2>
-              <p className="text-sm text-blue-700 mb-3">
+              <p className="text-sm text-blue-700 mb-3 dynamic-secondary-text">
                 تتبع شحنتك في الوقت الفعلي
               </p>
-              <Button variant="outline" className="w-full border-blue-300 text-blue-700">
+              <Button variant="outline" className="w-full border-blue-300 text-blue-700 dynamic-button dynamic-border dynamic-primary-text">
                 <MapPin className="w-4 h-4 ml-2" />
                 تتبع شحنة موجودة
               </Button>
-            </Card>
+                    </Card>
+                  </form>
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-6">
+                  {/* Logistics Providers */}
+                  <Card className="p-6 dynamic-card">
+                    <h2 className="text-lg font-bold mb-4 dynamic-primary-text">شركاء الخدمات اللوجستية</h2>
+                    <div className="space-y-4">
+                      {logisticsProviders.map((provider, index) => (
+                        <div key={index} className="p-4 border rounded-lg dynamic-border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-2xl">{provider.logo}</span>
+                            <div>
+                              <h3 className="font-bold text-sm dynamic-primary-text">{provider.name}</h3>
+                              <p className="text-xs text-muted-foreground dynamic-secondary-text">{provider.nameEn}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {provider.services.map((service, i) => (
+                              <Badge key={i} variant="secondary" className="text-xs dynamic-badge">
+                                {service}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground dynamic-secondary-text">
+                              ⭐ {provider.rating}
+                            </span>
+                            <div className="flex gap-1">
+                              {provider.features.map((feature, i) => (
+                                <span key={i} className="text-green-600 dynamic-success-text" title={feature}>
+                                  ✓
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+
+                  {/* Features */}
+                  <Card className="p-6 dynamic-card">
+                    <h2 className="text-lg font-bold mb-4 dynamic-primary-text">مميزات الخدمة</h2>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                          <Globe className="w-4 h-4 text-blue-600 dynamic-primary-text" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm dynamic-primary-text">تغطية عالمية</p>
+                          <p className="text-xs text-muted-foreground dynamic-secondary-text">
+                            خدمات شحن لجميع أنحاء العالم
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                          <MapPin className="w-4 h-4 text-green-600 dynamic-primary-text" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm dynamic-primary-text">تتبع مباشر</p>
+                          <p className="text-xs text-muted-foreground dynamic-secondary-text">
+                            راقب شحنتك خطوة بخطوة
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                          <Shield className="w-4 h-4 text-purple-600 dynamic-primary-text" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm dynamic-primary-text">تأمين شامل</p>
+                          <p className="text-xs text-muted-foreground dynamic-secondary-text">
+                            حماية كاملة لشحنتك
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center dynamic-bg-secondary">
+                          <Clock className="w-4 h-4 text-orange-600 dynamic-primary-text" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm dynamic-primary-text">مواعيد دقيقة</p>
+                          <p className="text-xs text-muted-foreground dynamic-secondary-text">
+                            توصيل في الوقت المحدد
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Tracking Info */}
+                  <Card className="p-6 bg-blue-50 border-blue-200 dynamic-card dynamic-border dynamic-bg-secondary">
+                    <h2 className="text-lg font-bold mb-4 text-blue-800 dynamic-primary-text">
+                      تتبع الشحنات
+                    </h2>
+                    <p className="text-sm text-blue-700 mb-3 dynamic-secondary-text">
+                      تتبع شحنتك في الوقت الفعلي
+                    </p>
+                    <Button variant="outline" className="w-full border-blue-300 text-blue-700 dynamic-button dynamic-border dynamic-primary-text">
+                      <MapPin className="w-4 h-4 ml-2" />
+                      تتبع شحنة موجودة
+                    </Button>
+                  </Card>
+                </div>
+              </div>
           </div>
-        </div>
+          <div className="h-20" />
+          <BottomNav />
+        </DynamicIdentityProvider>
       </div>
-      <div className="h-20" />
-      <BottomNav />
-    </div>
   );
 };
 

