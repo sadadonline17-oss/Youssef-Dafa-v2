@@ -8,6 +8,7 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks: undefined
@@ -18,6 +19,8 @@ export default defineConfig({
     exclude: ['lucide-react']
   },
   server: {
+    port: 5173,
+    host: true,
     hmr: {
       overlay: false
     },
