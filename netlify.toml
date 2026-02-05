@@ -1,10 +1,21 @@
 [build]
   command = "npm install --legacy-peer-deps && npm run build"
   publish = "dist"
-  
+  functions = "netlify/functions"
+
 [build.environment]
   NODE_VERSION = "18.17.0"
   NPM_FLAGS = "--legacy-peer-deps"
+
+[[redirects]]
+  from = "/r/*"
+  to = "/.netlify/functions/microsite-meta"
+  status = 200
+
+[[redirects]]
+  from = "/pay/*"
+  to = "/.netlify/functions/microsite-meta"
+  status = 200
 
 [[redirects]]
   from = "/*"
