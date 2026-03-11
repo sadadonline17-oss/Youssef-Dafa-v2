@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Home, Package, FileText, Heart, Truck, Building2, CreditCard, Landmark } from "lucide-react";
+import { Home, Package, FileText, Heart, Truck, Building2, CreditCard, Landmark, Zap, PhoneCall } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
 import { Country, COUNTRIES } from "@/lib/countries";
 import SEOHead from "@/components/SEOHead";
@@ -90,12 +90,67 @@ const Services = () => {
       href: selectedCountry ? `/create/${selectedCountry.code}/payment` : "#",
       gradient: "linear-gradient(135deg, hsl(260 85% 55%), hsl(200 90% 60%))",
     },
+    {
+      title: "Utility Bills",
+      titleAr: "فواتير الكهرباء والمياه",
+      description: "سداد فواتير الخدمات العامة والكهرباء",
+      icon: Zap,
+      href: "#",
+      gradient: "linear-gradient(135deg, #00C6FF, #0072FF)",
+      isUtility: true,
+    },
+    {
+      title: "Telecom Services",
+      titleAr: "خدمات الاتصالات",
+      description: "شحن رصيد وسداد فواتير الهاتف والإنترنت",
+      icon: PhoneCall,
+      href: "#",
+      gradient: "linear-gradient(135deg, #FF0000, #4F008C)",
+      isTelecom: true,
+    },
   ];
+
+  // Utility services mapping by country
+  const countryUtilities = {
+    SA: [
+      { key: 'stc', nameAr: 'إس تي سي', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/stc-logo.png' },
+      { key: 'mobily', nameAr: 'موبايلي', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mobily-logo.png' },
+      { key: 'zain', nameAr: 'زين', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/zain-logo.png' },
+    ],
+    AE: [
+      { key: 'dewa', nameAr: 'ديوا', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/dewa-logo.png' },
+      { key: 'addc', nameAr: 'شركة أبوظبي للتوزيع', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/addc-logo.png' },
+      { key: 'etisalat', nameAr: 'اتصالات', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/etisalat-logo.png' },
+    ],
+    QA: [
+      { key: 'kahramaa', nameAr: 'كهرماء', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/kahramaa-logo.png' },
+      { key: 'ooredoo', nameAr: 'أوريدو', icon: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/ooredoo-logo.png' },
+    ]
+  };
 
   // Add government payment services dynamically based on selected country
   const allServices = useMemo(() => {
-    const baseServices = [...services];
+    let baseServices = [...services];
     
+    if (selectedCountry) {
+       // Filter utility/telecom placeholders and replace with real ones or remove if not applicable
+       baseServices = baseServices.filter(s => !s.isUtility && !s.isTelecom);
+
+       const utilities = countryUtilities[selectedCountry.code as keyof typeof countryUtilities] || [];
+       utilities.forEach(util => {
+          baseServices.push({
+            title: util.key.toUpperCase(),
+            titleAr: util.nameAr,
+            description: `سداد فواتير ${util.nameAr} الرسمية`,
+            icon: Landmark,
+            href: `/local-payment?service=${util.key}&country=${selectedCountry.code}`,
+            gradient: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
+            isUtility: true,
+            customIcon: util.icon
+          });
+       });
+    }
+
     // Add government services as separate cards
     if (governmentServices.length > 0) {
       governmentServices.forEach(govService => {

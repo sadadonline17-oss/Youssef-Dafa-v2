@@ -15,6 +15,7 @@ interface ServiceCardProps {
   href: string;
   gradient: string;
   sublinks?: SubLink[];
+  customIcon?: string;
 }
 
 const ServiceCard = ({
@@ -25,6 +26,7 @@ const ServiceCard = ({
   href,
   gradient,
   sublinks,
+  customIcon,
 }: ServiceCardProps) => {
   if (sublinks && sublinks.length > 0) {
     return (
@@ -43,10 +45,14 @@ const ServiceCard = ({
 
         <div className="relative p-5">
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg"
-            style={{ background: gradient }}
+            className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg overflow-hidden"
+            style={{ background: customIcon ? 'white' : gradient }}
           >
-            <Icon className="w-7 h-7 text-white" />
+            {customIcon ? (
+              <img src={customIcon} alt={titleAr} className="w-full h-full object-contain p-2" />
+            ) : (
+              <Icon className="w-7 h-7 text-white" />
+            )}
           </div>
 
           <h3 
@@ -106,10 +112,14 @@ const ServiceCard = ({
 
         <div className="relative p-5">
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg"
-            style={{ background: gradient }}
+            className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg overflow-hidden"
+            style={{ background: customIcon ? 'white' : gradient }}
           >
-            <Icon className="w-7 h-7 text-white" />
+            {customIcon ? (
+              <img src={customIcon} alt={titleAr} className="w-full h-full object-contain p-2" />
+            ) : (
+              <Icon className="w-7 h-7 text-white" />
+            )}
           </div>
 
           <h3 

