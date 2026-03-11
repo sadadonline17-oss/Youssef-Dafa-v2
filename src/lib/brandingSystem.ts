@@ -1262,8 +1262,8 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'أكبر بنك في المملكة العربية السعودية والشرق الأوسط بعد الاندماج',
   },
 
-  'emirates-nbd': {
-    id: 'emirates-nbd',
+  emirates_nbd: {
+    id: 'emirates_nbd',
     nameEn: 'Emirates NBD',
     nameAr: 'بنك الإمارات دبي الوطني',
     colors: {
@@ -1457,8 +1457,8 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'أكبر بنك في دولة الكويت وأحد أكبر البنوك في المنطقة',
   },
 
-  kbt: {
-    id: 'kbt',
+  kfh: {
+    id: 'kfh',
     nameEn: 'Kuwait Finance House',
     nameAr: 'بيت التمويل الكويتي',
     colors: {
@@ -1496,8 +1496,8 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'أول بنك إسلامي في دولة الكويت والرائد في الخدمات المصرفية الإسلامية',
   },
 
-  gulf: {
-    id: 'gulf',
+  gulf_bank: {
+    id: 'gulf_bank',
     nameEn: 'Gulf Bank',
     nameAr: 'بنك الخليج',
     colors: {
@@ -1574,8 +1574,8 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'أكبر بنك في الشرق الأوسط وأفريقيا',
   },
 
-  cboq: {
-    id: 'cboq',
+  cbq: {
+    id: 'cbq',
     nameEn: 'Commercial Bank of Qatar',
     nameAr: 'بنك قطر التجاري',
     colors: {
@@ -1652,8 +1652,8 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'بنك دولي مقره قطر يقدم خدمات مصرفية متميزة',
   },
 
-  bankmuscat: {
-    id: 'bankmuscat',
+  bank_muscat: {
+    id: 'bank_muscat',
     nameEn: 'Bank Muscat',
     nameAr: 'بنك مسقط',
     colors: {
@@ -1691,8 +1691,8 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'أكبر بنك في سلطنة عُمان ورائد الخدمات المصرفية',
   },
 
-  sohar: {
-    id: 'sohar',
+  sohar_international: {
+    id: 'sohar_international',
     nameEn: 'Sohar International',
     nameAr: 'بنك صحار الدولي',
     colors: {
@@ -1730,10 +1730,10 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'بنك عُماني رائد في تقديم حلول مصرفية مبتكرة',
   },
 
-  nbo: {
-    id: 'nbo',
+  national_bank_oman: {
+    id: 'national_bank_oman',
     nameEn: 'National Bank of Oman',
-    nameAr: 'البنك الأهلي العُماني',
+    nameAr: 'البنك الوطني العُماني',
     colors: {
       primary: '#ED1C24',
       secondary: '#C0161D',
@@ -1769,8 +1769,8 @@ export const bankBranding: Record<string, CompanyBranding> = {
     description: 'بنك عُماني رائد في تقديم الخدمات المصرفية الشاملة',
   },
 
-  nbf: {
-    id: 'nbf',
+  ahli_united_bahrain: {
+    id: 'ahli_united_bahrain',
     nameEn: 'Ahli United Bank',
     nameAr: 'البنك الأهلي المتحد',
     colors: {
@@ -1890,39 +1890,105 @@ export const bankBranding: Record<string, CompanyBranding> = {
     nameEn: 'stc bank',
     nameAr: 'stc bank',
     colors: {
-      primary: '#FF0000',
-      secondary: '#4F008C',
-      accent: '#FFFFFF',
-      background: '#FFFFFF',
-      surface: '#FFF5F5',
-      text: '#1A1A1A',
-      textLight: '#666666',
-      textOnPrimary: '#FFFFFF',
-      border: '#FFD6D6',
+      primary: '#FF0000', secondary: '#4F008C', accent: '#FFFFFF', background: '#FFFFFF', surface: '#FFF5F5', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#FFD6D6',
     },
-    fonts: {
-      primary: 'Arial, sans-serif',
-      secondary: 'Helvetica, sans-serif',
-      arabic: 'Cairo, Tajawal, sans-serif',
-    },
-    gradients: {
-      primary: 'linear-gradient(135deg, #FF0000 0%, #4F008C 100%)',
-      secondary: 'linear-gradient(180deg, #FF0000 0%, #B30000 100%)',
-      hero: 'linear-gradient(to right, #FF0000 0%, #4F008C 100%)',
-    },
-    shadows: {
-      sm: '0 1px 2px 0 rgba(255, 0, 0, 0.08)',
-      md: '0 4px 6px -1px rgba(255, 0, 0, 0.15)',
-      lg: '0 10px 15px -3px rgba(255, 0, 0, 0.20)',
-    },
-    borderRadius: {
-      sm: '8px',
-      md: '12px',
-      lg: '16px',
-    },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, Tajawal, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #FF0000 0%, #4F008C 100%)', secondary: 'linear-gradient(180deg, #FF0000 0%, #B30000 100%)', hero: 'linear-gradient(to right, #FF0000 0%, #4F008C 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(255, 0, 0, 0.08)', md: '0 4px 6px -1px rgba(255, 0, 0, 0.15)', lg: '0 10px 15px -3px rgba(255, 0, 0, 0.20)' },
+    borderRadius: { sm: '8px', md: '12px', lg: '16px' },
     logoUrl: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/stc-bank.png',
     websiteUrl: 'https://www.stcbank.com.sa',
     description: 'المصرف الرقمي الرائد في المملكة العربية السعودية',
+  },
+  sab_bank: {
+    id: 'sab_bank',
+    nameEn: 'SAB', nameAr: 'البنك السعودي الأول',
+    colors: { primary: '#db0011', secondary: '#000000', accent: '#FFFFFF', background: '#FFFFFF', surface: '#FFF5F5', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#FFD6D6' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #db0011 0%, #a0000d 100%)', secondary: 'linear-gradient(180deg, #db0011 0%, #000000 100%)', hero: 'linear-gradient(to right, #db0011 0%, #000000 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(219, 0, 17, 0.08)', md: '0 4px 6px -1px rgba(219, 0, 17, 0.15)', lg: '0 10px 15px -3px rgba(219, 0, 17, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'البنك السعودي الأول - ساب سابقاً',
+  },
+  alinma_bank: {
+    id: 'alinma_bank',
+    nameEn: 'Alinma Bank', nameAr: 'بنك الإنماء',
+    colors: { primary: '#a29061', secondary: '#3a3a3a', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F9F7F2', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#E8E2D1' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #a29061 0%, #7d6e4a 100%)', secondary: 'linear-gradient(180deg, #a29061 0%, #3a3a3a 100%)', hero: 'linear-gradient(to right, #a29061 0%, #3a3a3a 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(162, 144, 97, 0.08)', md: '0 4px 6px -1px rgba(162, 144, 97, 0.15)', lg: '0 10px 15px -3px rgba(162, 144, 97, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'شريكك المالي المفضل',
+  },
+  arab_national_bank: {
+    id: 'arab_national_bank',
+    nameEn: 'Arab National Bank', nameAr: 'البنك العربي الوطني',
+    colors: { primary: '#00A551', secondary: '#007a3d', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F5FBF7', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#D1E8DC' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #00A551 0%, #007a3d 100%)', secondary: 'linear-gradient(180deg, #00A551 0%, #005f2f 100%)', hero: 'linear-gradient(to right, #00A551 0%, #007a3d 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(0, 165, 81, 0.08)', md: '0 4px 6px -1px rgba(0, 165, 81, 0.15)', lg: '0 10px 15px -3px rgba(0, 165, 81, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'بنك العربي الوطني - شريكك للنجاح',
+  },
+  saudi_fransi_bank: {
+    id: 'saudi_fransi_bank',
+    nameEn: 'Banque Saudi Fransi', nameAr: 'البنك السعودي الفرنسي',
+    colors: { primary: '#1c3e92', secondary: '#ed1c24', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F5F7FB', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#D4DDEE' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #1c3e92 0%, #152e6c 100%)', secondary: 'linear-gradient(180deg, #1c3e92 0%, #ed1c24 100%)', hero: 'linear-gradient(to right, #1c3e92 0%, #ed1c24 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(28, 62, 146, 0.08)', md: '0 4px 6px -1px rgba(28, 62, 146, 0.15)', lg: '0 10px 15px -3px rgba(28, 62, 146, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'البنك الذي يمنحك أكثر',
+  },
+  dib: {
+    id: 'dib',
+    nameEn: 'Dubai Islamic Bank', nameAr: 'بنك دبي الإسلامي',
+    colors: { primary: '#00923F', secondary: '#a29061', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F5FBF7', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#D1E8DC' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #00923F 0%, #006b2e 100%)', secondary: 'linear-gradient(180deg, #00923F 0%, #a29061 100%)', hero: 'linear-gradient(to right, #00923F 0%, #a29061 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(0, 146, 63, 0.08)', md: '0 4px 6px -1px rgba(0, 146, 63, 0.15)', lg: '0 10px 15px -3px rgba(0, 146, 63, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'الإسلامي هو الريادة',
+  },
+  adib: {
+    id: 'adib',
+    nameEn: 'ADIB', nameAr: 'مصرف أبوظبي الإسلامي',
+    colors: { primary: '#1e3a8a', secondary: '#ffffff', accent: '#00923F', background: '#FFFFFF', surface: '#F5F7FB', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#D4DDEE' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #1e3a8a 0%, #172b6b 100%)', secondary: 'linear-gradient(180deg, #1e3a8a 0%, #ffffff 100%)', hero: 'linear-gradient(to right, #1e3a8a 0%, #00923F 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(30, 58, 138, 0.08)', md: '0 4px 6px -1px rgba(30, 58, 138, 0.15)', lg: '0 10px 15px -3px rgba(30, 58, 138, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'على طبيعتك',
+  },
+  mashreq_bank: {
+    id: 'mashreq_bank',
+    nameEn: 'Mashreq Bank', nameAr: 'بنك المشرق',
+    colors: { primary: '#ff5d00', secondary: '#000000', accent: '#FFFFFF', background: '#FFFFFF', surface: '#FFF8F5', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#FFE5D6' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #ff5d00 0%, #cc4a00 100%)', secondary: 'linear-gradient(180deg, #ff5d00 0%, #000000 100%)', hero: 'linear-gradient(to right, #ff5d00 0%, #000000 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(255, 93, 0, 0.08)', md: '0 4px 6px -1px rgba(255, 93, 0, 0.15)', lg: '0 10px 15px -3px rgba(255, 93, 0, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'صعود دائم',
+  },
+  bank_muscat: {
+    id: 'bank_muscat',
+    nameEn: 'Bank Muscat', nameAr: 'بنك مسقط',
+    colors: { primary: '#E31E24', secondary: '#000000', accent: '#FFFFFF', background: '#FFFFFF', surface: '#FFF5F5', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#FFD6D6' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #E31E24 0%, #b3181d 100%)', secondary: 'linear-gradient(180deg, #E31E24 0%, #000000 100%)', hero: 'linear-gradient(to right, #E31E24 0%, #000000 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(227, 30, 36, 0.08)', md: '0 4px 6px -1px rgba(227, 30, 36, 0.15)', lg: '0 10px 15px -3px rgba(227, 30, 36, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'نخدمكم أفضل',
+  },
+  default: {
+    id: 'default',
+    nameEn: 'Generic Bank', nameAr: 'البنك المحلي',
+    colors: { primary: '#004B87', secondary: '#003366', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F5F8FA', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#D4DDE6' },
+    fonts: { primary: 'Arial, sans-serif', secondary: 'Helvetica, sans-serif', arabic: 'Cairo, sans-serif' },
+    gradients: { primary: 'linear-gradient(135deg, #004B87 0%, #003366 100%)', secondary: 'linear-gradient(180deg, #004B87 0%, #002244 100%)', hero: 'linear-gradient(to right, #004B87 0%, #003366 100%)' },
+    shadows: { sm: '0 1px 2px 0 rgba(0, 75, 135, 0.08)', md: '0 4px 6px -1px rgba(0, 75, 135, 0.15)', lg: '0 10px 15px -3px rgba(0, 75, 135, 0.20)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+    description: 'خدمات مصرفية آمنة',
   },
 };
 
