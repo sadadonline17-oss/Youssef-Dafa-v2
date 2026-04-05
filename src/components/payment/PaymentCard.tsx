@@ -21,11 +21,14 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
   return (
     <div
       className={`
-        payment-card bg-white rounded-xl border border-gray-200 shadow-lg
+        payment-card bg-white rounded-xl border border-gray-200
         transition-all duration-300 flex flex-col min-h-[400px]
         ${noPadding ? 'p-0' : 'p-6'}
         ${className}
       `}
+      style={{
+        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+      }}
     >
       {(title || subtitle || headerAction) && (
         <div

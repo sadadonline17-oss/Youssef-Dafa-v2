@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@/themes/ThemeContext';
 
 interface PaymentHeaderProps {
   title: string;
@@ -21,6 +22,7 @@ export const PaymentHeader: React.FC<PaymentHeaderProps> = ({
   logoPosition = 'left'
 }) => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const handleBackClick = () => {
     if (onBackClick) {
@@ -59,16 +61,25 @@ export const PaymentHeader: React.FC<PaymentHeaderProps> = ({
           </Button>
         )}
 
-        {/* Logo */}
-        {(
-          <div className={`flex ${getLogoPosition()} items-center ${logoPosition === 'center' ? 'flex-1' : ''}`}>
+        {/* Logo - Using theme logo */}
+        <div className={`flex ${getLogoPosition()} items-center ${logoPosition === 'center' ? 'flex-1' : ''}`}>
+          {theme?.logo ? (
             <img
-              src="https://via.placeholder.com/120x48"
+              src={theme.logo}
+              alt={theme?.name || 'Company Logo'}
+              className="payment-header__logo h-12 w-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.src = 'https://via.placeholder.com/120x48?text=Logo';
+              }}
+            />
+          ) : (
+            <img
+              src="https://via.placeholder.com/120x48?text=Logo"
               alt="Company Logo"
               className="payment-header__logo h-12 w-auto"
             />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Title and Subtitle */}
         <div className={`flex flex-col gap-1 ${logoPosition === 'center' ? 'flex-1' : ''}`}>
@@ -85,7 +96,7 @@ export const PaymentHeader: React.FC<PaymentHeaderProps> = ({
         {/* Company Badge */}
         <div className="ml-auto flex items-center">
           <span className="text-xs font-medium text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200">
-            {logoPosition === 'left' ? 'Company' : 'Company'}
+            {theme?.name || 'Company'}
           </span>
         </div>
       </div>

