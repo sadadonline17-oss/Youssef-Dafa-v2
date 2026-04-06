@@ -126,7 +126,7 @@ export const DynamicIdentityWrapper: React.FC<DynamicIdentityWrapperProps> = ({
         </div>
       )}
       
-      {showAnimatedHeader && currentIdentity.animated_header_images.length > 0 && (
+      {showAnimatedHeader && (currentIdentity.animated_header_images?.length ?? 0) > 0 && (
         <AnimatedHeader images={currentIdentity.animated_header_images} entityKey={entityKey} />
       )}
       
