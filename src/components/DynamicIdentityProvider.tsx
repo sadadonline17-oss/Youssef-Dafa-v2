@@ -126,7 +126,7 @@ export const DynamicIdentityWrapper: React.FC<DynamicIdentityWrapperProps> = ({
         </div>
       )}
       
-      {showAnimatedHeader && currentIdentity.animated_header_images.length > 0 && (
+      {showAnimatedHeader && (currentIdentity.animated_header_images?.length ?? 0) > 0 && (
         <AnimatedHeader images={currentIdentity.animated_header_images} entityKey={entityKey} />
       )}
       
@@ -145,21 +145,23 @@ interface AnimatedHeaderProps {
 const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({ images, entityKey }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const safeImages = images ?? [];
+
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (safeImages.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % safeImages.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [images]);
+  }, [safeImages]);
 
-  if (images.length === 0) return null;
+  if (safeImages.length === 0) return null;
 
   return (
     <div className="relative w-full h-48 overflow-hidden rounded-lg mb-6">
-      {images.map((image, index) => (
+      {safeImages.map((image, index) => (
         <img
           key={index}
           src={`/assets/dynamic-identity/${image}`}
