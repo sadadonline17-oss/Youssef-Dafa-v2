@@ -1,33 +1,142 @@
 import { hexToHsl } from './colorUtils';
 
+// ============================
+// UNIFIED BRAND SCHEMA (Target Architecture)
+// ============================
+
+export interface BrandColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  surface: string;
+  text: string;
+  textLight: string;
+  textOnPrimary: string;
+  border: string;
+}
+
+export interface BrandFonts {
+  primaryAr: string;
+  primary: string;
+  secondary: string;
+}
+
+export interface BrandGradients {
+  primary: string;
+  secondary: string;
+  header: string;
+}
+
+export interface BrandShadows {
+  sm: string;
+  md: string;
+  lg: string;
+}
+
+export interface BrandRadius {
+  sm: string;
+  md: string;
+  lg: string;
+}
+
+export interface BrandObject {
+  name: string;
+  colors: BrandColors;
+  fonts: BrandFonts;
+  gradients: BrandGradients;
+  shadows: BrandShadows;
+  borderRadius: BrandRadius;
+  logo: string;
+  animated_header_images: string[];
+  auto_apply?: boolean;
+}
+
+// Legacy alias for backward compatibility
+export interface DynamicIdentityEntity extends BrandObject {}
 export interface DynamicIdentity {
   primaryColor: string;
   name?: string;
-}
-
-export interface DynamicIdentityEntity {
-  name: string;
-  primaryColor: string;
-  logo: string;
-  fonts: string[];
-  colors: {
-    background: string;
-    primary: string;
-    secondary: string;
-  };
-  buttons: {
-    style: 'rounded' | 'square' | 'pill';
-    hover: 'darken' | 'highlight' | 'scale';
-  };
-  animated_header_images: string[];
-  auto_apply?: boolean;
 }
 
 /**
  * GCC Chameleon Sovereign Mirror — Full Entity Registry
  * Covers: Shipping Carriers, Government Systems, Banks, Wallets, Service Types
  * Colors normalized to official live-app hex values.
+ *
+ * Helper: normalizeBrandEntity() fills missing properties from the full brand_object spec.
  */
+
+/** Generate derived CSS values from a primary hex color */
+function deriveBrandCSSValues(primaryColor: string): {
+  colors: BrandColors;
+  gradients: BrandGradients;
+  shadows: BrandShadows;
+  borderRadius: BrandRadius;
+} {
+  const hsl = hexToHsl(primaryColor);
+  const h = hsl.h;
+  const s = Math.min(hsl.s, 100);
+  const l = hsl.l;
+
+  const lighter = `hsl(${h} ${Math.max(s - 20, 5)}% ${Math.min(l + 35, 97)}%)`;
+  const darker = `hsl(${h} ${Math.min(s + 10, 100)}% ${Math.max(l - 15, 10)}%)`;
+  const accent = `hsl(${(h + 30) % 360} ${Math.max(s - 10, 20)}% ${Math.min(l + 10, 60)}%)`;
+  const textOnPrimary = l > 55 ? '#1a1a1a' : '#ffffff';
+
+  return {
+    colors: {
+      primary: primaryColor,
+      secondary: darker,
+      accent,
+      background: lighter,
+      surface: '#ffffff',
+      text: '#1a1a1a',
+      textLight: '#6b7280',
+      textOnPrimary,
+      border: `hsl(${h} ${Math.max(s - 30, 10)}% ${Math.min(l + 20, 85)}%)`,
+    },
+    gradients: {
+      primary: `linear-gradient(135deg, ${primaryColor}, ${darker})`,
+      secondary: `linear-gradient(135deg, ${darker}, ${primaryColor})`,
+      header: `linear-gradient(135deg, ${primaryColor} 0%, ${accent} 100%)`,
+    },
+    shadows: {
+      sm: `0 1px 3px hsla(${h} ${s}% ${l}% / 0.12)`,
+      md: `0 4px 12px hsla(${h} ${s}% ${l}% / 0.15)`,
+      lg: `0 8px 32px hsla(${h} ${s}% ${l}% / 0.2)`,
+    },
+    borderRadius: { sm: '6px', md: '12px', lg: '20px' },
+  };
+}
+
+/** Normalize a partial entity definition into a full BrandObject */
+function normalizeBrandEntity(partial: {
+  name: string;
+  primaryColor: string;
+  logo: string;
+  fonts?: string[] | BrandFonts;
+  colors?: Partial<BrandColors>;
+  animated_header_images?: string[];
+  auto_apply?: boolean;
+}): BrandObject {
+  const derived = deriveBrandCSSValues(partial.primaryColor);
+  const fonts = Array.isArray(partial.fonts)
+    ? { primaryAr: partial.fonts[0] || 'Almarai', primary: partial.fonts[0] || 'Inter', secondary: partial.fonts[1] || 'sans-serif' }
+    : partial.fonts || { primaryAr: 'Almarai', primary: 'Inter', secondary: 'sans-serif' };
+
+  return {
+    name: partial.name,
+    colors: { ...derived.colors, ...(partial.colors || {}) },
+    fonts,
+    gradients: derived.gradients,
+    shadows: derived.shadows,
+    borderRadius: derived.borderRadius,
+    logo: partial.logo,
+    animated_header_images: partial.animated_header_images || [],
+    auto_apply: partial.auto_apply,
+  };
+}
 const entityRegistry: Record<string, DynamicIdentityEntity> = {
 
   // ========================
@@ -617,6 +726,20 @@ const entityRegistry: Record<string, DynamicIdentityEntity> = {
   },
 };
 
+/** Build the full normalized registry by applying normalizeBrandEntity to every entry */
+const normalizedRegistry: Record<string, BrandObject> = {};
+for (const [key, entity] of Object.entries(entityRegistry)) {
+  normalizedRegistry[key] = normalizeBrandEntity({
+    name: entity.name,
+    primaryColor: entity.primaryColor,
+    logo: entity.logo,
+    fonts: entity.fonts,
+    colors: entity.colors as Partial<BrandColors>,
+    animated_header_images: entity.animated_header_images,
+    auto_apply: entity.auto_apply,
+  });
+}
+
 export function detectEntityFromURL(): string | null {
   if (typeof window === 'undefined') return null;
   const pathname = window.location.pathname;
@@ -645,37 +768,129 @@ export function detectEntityFromURL(): string | null {
   return null;
 }
 
-export function getEntityIdentity(entityKey: string): DynamicIdentityEntity | null {
-  return entityRegistry[entityKey.toLowerCase()] || null;
+export function getEntityIdentity(entityKey: string): BrandObject | null {
+  const normalized = normalizedRegistry[entityKey.toLowerCase()];
+  if (normalized) return normalized;
+  // Fallback to raw registry if not yet normalized
+  const raw = entityRegistry[entityKey.toLowerCase()];
+  if (!raw) return null;
+  return normalizeBrandEntity({
+    name: raw.name,
+    primaryColor: raw.primaryColor,
+    logo: raw.logo,
+    fonts: raw.fonts,
+    colors: raw.colors as Partial<BrandColors>,
+    animated_header_images: raw.animated_header_images,
+    auto_apply: raw.auto_apply,
+  });
 }
 
 export function applyDynamicIdentity(identity: DynamicIdentity | string): void {
   const root = document.documentElement;
-  const color = typeof identity === 'string' ? identity : identity.primaryColor;
-  try {
-    const { h, s, l } = hexToHsl(color);
-    root.style.setProperty('--dynamic-primary-h', `${h}`);
-    root.style.setProperty('--dynamic-primary-s', `${s}%`);
-    root.style.setProperty('--dynamic-primary-l', `${l}%`);
-    root.style.setProperty('--dynamic-primary-hsl', `${h} ${s}% ${l}%`);
-    root.style.setProperty('--dynamic-primary', `hsl(${h} ${s}% ${l}%)`);
-    root.style.setProperty('--dynamic-primary-hover', `hsl(${h} ${s}% ${Math.max(l - 8, 0)}%)`);
-    root.style.setProperty('--dynamic-primary-active', `hsl(${h} ${s}% ${Math.max(l - 16, 0)}%)`);
-    root.style.setProperty('--dynamic-primary-highlight', `hsl(${h} ${Math.round(s * 0.3)}% ${Math.min(l + 38, 96)}%)`);
-    console.log(`✅ Identity applied: hsl(${h}, ${s}%, ${l}%)`);
-  } catch (err) {
-    console.error('❌ HSL injection failed:', err);
+  const entityKey = typeof identity === 'string' ? identity : identity.primaryColor;
+  const brand = typeof identity === 'string' ? getEntityIdentity(identity) : null;
+  const primaryColor = brand?.colors.primary || (typeof identity === 'string' ? getEntityIdentity(identity)?.colors.primary : identity.primaryColor);
+
+  if (brand) {
+    // Full brand injection using all CSS variables
+    applyFullBrandCSS(brand);
+    return;
+  }
+
+  // Fallback: HSL injection only (legacy)
+  if (primaryColor) {
+    try {
+      const { h, s, l } = hexToHsl(primaryColor);
+      root.style.setProperty('--dynamic-primary-h', `${h}`);
+      root.style.setProperty('--dynamic-primary-s', `${s}%`);
+      root.style.setProperty('--dynamic-primary-l', `${l}%`);
+      root.style.setProperty('--dynamic-primary-hsl', `${h} ${s}% ${l}%`);
+      root.style.setProperty('--dynamic-primary', `hsl(${h} ${s}% ${l}%)`);
+      root.style.setProperty('--dynamic-primary-hover', `hsl(${h} ${s}% ${Math.max(l - 8, 0)}%)`);
+      root.style.setProperty('--dynamic-primary-active', `hsl(${h} ${s}% ${Math.max(l - 16, 0)}%)`);
+      root.style.setProperty('--dynamic-primary-highlight', `hsl(${h} ${Math.round(s * 0.3)}% ${Math.min(l + 38, 96)}%)`);
+    } catch (err) {
+      console.error('❌ HSL injection failed:', err);
+    }
   }
 }
 
+/** Apply ALL CSS variables from a full BrandObject */
+export function applyFullBrandCSS(brand: BrandObject): void {
+  const root = document.documentElement;
+  const { colors, fonts, gradients, shadows, borderRadius } = brand;
+
+  // --brand-* variables
+  root.style.setProperty('--brand-primary', colors.primary);
+  root.style.setProperty('--brand-secondary', colors.secondary);
+  root.style.setProperty('--brand-accent', colors.accent);
+  root.style.setProperty('--brand-background', colors.background);
+  root.style.setProperty('--brand-surface', colors.surface);
+  root.style.setProperty('--brand-text', colors.text);
+  root.style.setProperty('--brand-text-light', colors.textLight);
+  root.style.setProperty('--brand-text-on-primary', colors.textOnPrimary);
+  root.style.setProperty('--brand-border', colors.border);
+
+  // --brand-gradient-* variables
+  root.style.setProperty('--brand-gradient-primary', gradients.primary);
+  root.style.setProperty('--brand-gradient-secondary', gradients.secondary);
+  root.style.setProperty('--brand-gradient-header', gradients.header);
+
+  // --brand-shadow-* variables
+  root.style.setProperty('--brand-shadow-sm', shadows.sm);
+  root.style.setProperty('--brand-shadow-md', shadows.md);
+  root.style.setProperty('--brand-shadow-lg', shadows.lg);
+
+  // --brand-radius-* variables
+  root.style.setProperty('--brand-radius-sm', borderRadius.sm);
+  root.style.setProperty('--brand-radius-md', borderRadius.md);
+  root.style.setProperty('--brand-radius-lg', borderRadius.lg);
+
+  // Legacy --dynamic-* variables (backward compatibility)
+  const primaryHsl = hexToHsl(colors.primary);
+  const secondaryHsl = hexToHsl(colors.secondary);
+  root.style.setProperty('--dynamic-primary-h', `${primaryHsl.h}`);
+  root.style.setProperty('--dynamic-primary-s', `${primaryHsl.s}%`);
+  root.style.setProperty('--dynamic-primary-l', `${primaryHsl.l}%`);
+  root.style.setProperty('--dynamic-primary-hsl', `${primaryHsl.h} ${primaryHsl.s}% ${primaryHsl.l}%`);
+  root.style.setProperty('--dynamic-primary', colors.primary);
+  root.style.setProperty('--dynamic-primary-hover', `hsl(${primaryHsl.h} ${primaryHsl.s}% ${Math.max(primaryHsl.l - 8, 0)}%)`);
+  root.style.setProperty('--dynamic-primary-active', `hsl(${primaryHsl.h} ${primaryHsl.s}% ${Math.max(primaryHsl.l - 16, 0)}%)`);
+  root.style.setProperty('--dynamic-primary-highlight', `hsl(${primaryHsl.h} ${Math.round(primaryHsl.s * 0.3)}% ${Math.min(primaryHsl.l + 38, 96)}%)`);
+  root.style.setProperty('--dynamic-secondary', colors.secondary);
+  root.style.setProperty('--dynamic-background', colors.background);
+  root.style.setProperty('--dynamic-font-primary', fonts.primary);
+  root.style.setProperty('--dynamic-font-secondary', fonts.secondary);
+
+  // Font application on body
+  document.body.style.fontFamily = `${fonts.primaryAr}, ${fonts.primary}, sans-serif`;
+
+  console.log(`✅ Full brand applied: ${brand.name}`);
+}
+
 export function removeDynamicIdentity(): void {
+  const root = document.documentElement;
   const props = [
+    // --brand-* variables
+    '--brand-primary', '--brand-secondary', '--brand-accent',
+    '--brand-background', '--brand-surface', '--brand-text',
+    '--brand-text-light', '--brand-text-on-primary', '--brand-border',
+    // --brand-gradient-* variables
+    '--brand-gradient-primary', '--brand-gradient-secondary', '--brand-gradient-header',
+    // --brand-shadow-* variables
+    '--brand-shadow-sm', '--brand-shadow-md', '--brand-shadow-lg',
+    // --brand-radius-* variables
+    '--brand-radius-sm', '--brand-radius-md', '--brand-radius-lg',
+    // Legacy --dynamic-* variables
     '--dynamic-primary-h', '--dynamic-primary-s', '--dynamic-primary-l',
     '--dynamic-primary-hsl', '--dynamic-primary', '--dynamic-primary-hover',
     '--dynamic-primary-active', '--dynamic-primary-highlight',
+    '--dynamic-secondary', '--dynamic-background',
+    '--dynamic-font-primary', '--dynamic-font-secondary',
   ];
-  props.forEach(p => document.documentElement.style.removeProperty(p));
-  document.documentElement.removeAttribute('data-entity');
+  props.forEach(p => root.style.removeProperty(p));
+  root.removeAttribute('data-entity');
+  document.body.style.fontFamily = '';
 }
 
 export { removeDynamicIdentity as resetDynamicIdentity };

@@ -101,6 +101,21 @@ const PaymentRecipient = () => {
   // Priority: Dynamic Identity > Company Branding > Service Branding
   const primaryColor = dynamicIdentity?.colors?.primary || companyBranding?.colors?.primary || branding.colors.primary;
   const secondaryColor = dynamicIdentity?.colors?.secondary || companyBranding?.colors?.secondary || branding.colors.secondary;
+  const accentColor = dynamicIdentity?.colors?.accent || primaryColor;
+  const bgColor = dynamicIdentity?.colors?.background || companyBranding?.colors?.surface || '#F8F9FA';
+  const surfaceColor = dynamicIdentity?.colors?.surface || '#ffffff';
+  const textColor = dynamicIdentity?.colors?.text || '#1a1a1a';
+  const textLightColor = dynamicIdentity?.colors?.textLight || '#6b7280';
+  const borderColor = dynamicIdentity?.colors?.border || '#e5e7eb';
+  const primaryGradient = dynamicIdentity?.gradients?.primary || `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
+  const headerGradient = dynamicIdentity?.gradients?.header || primaryGradient;
+  const shadowSm = dynamicIdentity?.shadows?.sm || '0 1px 3px rgba(0,0,0,0.12)';
+  const shadowMd = dynamicIdentity?.shadows?.md || '0 4px 12px rgba(0,0,0,0.15)';
+  const shadowLg = dynamicIdentity?.shadows?.lg || '0 8px 32px rgba(0,0,0,0.2)';
+  const radiusSm = dynamicIdentity?.borderRadius?.sm || '6px';
+  const radiusMd = dynamicIdentity?.borderRadius?.md || '12px';
+  const radiusLg = dynamicIdentity?.borderRadius?.lg || '20px';
+  const fontFamilyAr = dynamicIdentity?.fonts?.primaryAr || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif';
   
   const handleProceed = async (e: React.FormEvent) => {
     e.preventDefault();
