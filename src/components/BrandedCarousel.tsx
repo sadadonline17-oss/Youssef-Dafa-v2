@@ -162,10 +162,11 @@ const BrandedCarousel: React.FC<BrandedCarouselProps> = ({ serviceKey, className
   };
   
   const detectedEntity = detectEntityFromURL();
-  const entityImages = detectedEntity ? getEntityHeaderImages(detectedEntity) : [];
-  
+  const entityHeaderData = detectedEntity ? getEntityHeaderImages(detectedEntity) : null;
+  const entityImages = entityHeaderData?.images ?? [];
+
   let images: string[] = [];
-  
+
   if (entityImages.length > 0) {
     images = entityImages;
   } else if (serviceKey) {
@@ -173,7 +174,8 @@ const BrandedCarousel: React.FC<BrandedCarouselProps> = ({ serviceKey, className
     if (localImages.length > 0) {
       images = localImages;
     } else {
-      const entityImagesFromKey = getEntityHeaderImages(serviceKey);
+      const entityHeaderDataFromKey = getEntityHeaderImages(serviceKey);
+      const entityImagesFromKey = entityHeaderDataFromKey?.images ?? [];
       if (entityImagesFromKey.length > 0) {
         images = entityImagesFromKey;
       }
