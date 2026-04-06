@@ -1,6 +1,8 @@
-export function hexToHsl(hex: string): { h: number; s: number; l: number } {
-  const result = /^#?([a-fd]{2})([a-fd]{2})([a-fd]{2})$/i.exec(hex.trim());
-  if (!result) throw new Error(`Invalid hex color: ${hex}`);
+export function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
+  const trimmed = hex?.trim();
+  if (!trimmed) return null;
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(trimmed);
+  if (!result) return null;
   let r = parseInt(result[1], 16) / 255;
   let g = parseInt(result[2], 16) / 255;
   let b = parseInt(result[3], 16) / 255;
