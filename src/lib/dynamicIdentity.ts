@@ -166,3 +166,29 @@ export function removeDynamicIdentity(): void {
 }
 
 export { removeDynamicIdentity as resetDynamicIdentity };
+
+export function getEntityPaymentShareImage(entityKey: string): string | null {
+  const entity = entityRegistry[entityKey.toLowerCase()];
+  if (!entity) return null;
+  return `/og-${entityKey.toLowerCase()}.jpg`;
+}
+
+export function getBankOGImage(bankId: string): string | null {
+  if (!bankId) return null;
+  return `/og-bank-${bankId}.jpg`;
+}
+
+export function getEntityLogo(entityKey: string): string | null {
+  const entity = entityRegistry[entityKey.toLowerCase()];
+  if (!entity) return null;
+  return entity.logo;
+}
+
+export function getEntityHeaderImages(entityKey: string): { images: string[]; primaryColor: string } | null {
+  const entity = entityRegistry[entityKey.toLowerCase()];
+  if (!entity) return null;
+  return {
+    images: entity.animated_header_images,
+    primaryColor: entity.primaryColor,
+  };
+}
