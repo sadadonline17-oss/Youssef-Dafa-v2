@@ -15,7 +15,6 @@ import InvoiceEdit from "./pages/InvoiceEdit";
 import HealthServices from "./pages/HealthServices";
 import LogisticsServices from "./pages/LogisticsServices";
 import Contracts from "./pages/Contracts";
-import Microsite from "./pages/Microsite";
 import PaymentRecipient from "./pages/PaymentRecipient";
 import PaymentDetails from "./pages/PaymentDetails";
 import PaymentData from "./pages/PaymentData";
@@ -84,7 +83,6 @@ const App = () => (
           <Route path="/health/:country" element={<HealthServices />} />
           <Route path="/logistics/:country" element={<LogisticsServices />} />
           <Route path="/contracts/:country" element={<Contracts />} />
-          <Route path="/r/:country/:type/:id" element={<Microsite />} />
           {/* Short URL support: /p/:id with path parameters */}
           <Route path="/p/:id/:company/:currency/:amount" element={<PaymentRecipient />} />
           <Route path="/p/:id" element={<PaymentRecipient />} />
