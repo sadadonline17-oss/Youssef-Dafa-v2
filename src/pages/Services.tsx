@@ -264,7 +264,7 @@ const Services = () => {
             <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-gray-900">
               الخدمات المتاحة في {selectedCountry.nameAr}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-5xl mx-auto">
+            <div className="grid grid-cols-2 gap-4 max-w-5xl mx-auto">
               {allServices.map((service, index) => (
                 <ServiceCard key={`${service.title}-${index}`} {...service} />
               ))}

@@ -134,8 +134,8 @@ export const ARAMEX_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.25)',
   },
   assets: {
-    logo: '/assets/entities/aramex/logo_official.svg',
-    heroImage: '/assets/entities/aramex/shipping_hero.jpg',
+    logo: '/logos/aramex-logo.svg',
+    heroImage: '/og-aramex.jpg',
     background: '/assets/entities/aramex/bg_pattern.png',
     icons: '/assets/entities/aramex/icons/',
     ogImage: '/og-aramex.jpg',
@@ -200,8 +200,8 @@ export const DHL_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/dhl/logo_official.svg',
-    heroImage: '/assets/entities/dhl/shipping_hero.jpg',
+    logo: '/logos/dhl-logo.svg',
+    heroImage: '/og-dhl.jpg',
     background: '/assets/entities/dhl/bg_pattern.png',
     icons: '/assets/entities/dhl/icons/',
     ogImage: '/og-dhl.jpg',
@@ -266,8 +266,8 @@ export const FEDEX_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/fedex/logo_official.svg',
-    heroImage: '/assets/entities/fedex/shipping_hero.jpg',
+    logo: '/logos/fedex-logo.svg',
+    heroImage: '/og-fedex.jpg',
     background: '/assets/entities/fedex/bg_pattern.png',
     icons: '/assets/entities/fedex/icons/',
     ogImage: '/og-fedex.jpg',
@@ -332,8 +332,8 @@ export const UPS_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/ups/logo_official.svg',
-    heroImage: '/assets/entities/ups/shipping_hero.jpg',
+    logo: '/logos/ups-logo.svg',
+    heroImage: '/og-ups.jpg',
     background: '/assets/entities/ups/bg_pattern.png',
     icons: '/assets/entities/ups/icons/',
     ogImage: '/og-ups.jpg',
@@ -398,8 +398,8 @@ export const SMSA_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/smsa/logo_official.svg',
-    heroImage: '/assets/entities/smsa/shipping_hero.jpg',
+    logo: '/smsa-logo.svg',
+    heroImage: '/og-smsa.jpg',
     background: '/assets/entities/smsa/bg_pattern.png',
     icons: '/assets/entities/smsa/icons/',
     ogImage: '/og-smsa.jpg',
@@ -464,8 +464,8 @@ export const NAQEL_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/naqel/logo_official.svg',
-    heroImage: '/assets/entities/naqel/shipping_hero.jpg',
+    logo: '/og-naqel.jpg',
+    heroImage: '/og-naqel.jpg',
     background: '/assets/entities/naqel/bg_pattern.png',
     icons: '/assets/entities/naqel/icons/',
     ogImage: '/og-naqel.jpg',
@@ -530,8 +530,8 @@ export const ZAJIL_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/zajil/logo_official.svg',
-    heroImage: '/assets/entities/zajil/shipping_hero.jpg',
+    logo: '/og-zajil.jpg',
+    heroImage: '/og-zajil.jpg',
     background: '/assets/entities/zajil/bg_pattern.png',
     icons: '/assets/entities/zajil/icons/',
     ogImage: '/og-zajil.jpg',
@@ -596,8 +596,8 @@ export const SAUDIPOST_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/saudipost/logo_official.svg',
-    heroImage: '/assets/entities/saudipost/shipping_hero.jpg',
+    logo: '/logos/saudipost-logo.png',
+    heroImage: '/og-saudipost.jpg',
     background: '/assets/entities/saudipost/bg_pattern.png',
     icons: '/assets/entities/saudipost/icons/',
     ogImage: '/og-saudipost.jpg',
@@ -666,7 +666,7 @@ export const NAFATH_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/nafath/iam_logo_official.svg',
+    logo: '/gov-nafath.png',
     heroImage: '/assets/entities/nafath/security_badge.svg',
     background: '/assets/entities/nafath/gov_bg_light.jpg',
     icons: '/assets/entities/nafath/icons/',
@@ -732,7 +732,7 @@ export const ABSHER_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/absher/logo_official.svg',
+    logo: '/gov-absher.png',
     heroImage: '/assets/entities/absher/hero.jpg',
     background: '/assets/entities/absher/gov_bg.jpg',
     icons: '/assets/entities/absher/icons/',
@@ -798,7 +798,7 @@ export const TAWAKKALNA_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/tawakkalna/logo_official.svg',
+    logo: '/og-tawakkalna.jpg',
     heroImage: '/assets/entities/tawakkalna/hero.jpg',
     background: '/assets/entities/tawakkalna/gov_bg.jpg',
     icons: '/assets/entities/tawakkalna/icons/',
@@ -864,7 +864,7 @@ export const UAE_PASS_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/uae-pass/logo_official.svg',
+    logo: '/gov-uae-pass.png',
     heroImage: '/assets/entities/uae-pass/hero.jpg',
     background: '/assets/entities/uae-pass/gov_bg.jpg',
     icons: '/assets/entities/uae-pass/icons/',
@@ -930,7 +930,7 @@ export const DIGITAL_DUBAI_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/digital-dubai/logo_official.svg',
+    logo: '/og-digital-dubai.jpg',
     heroImage: '/assets/entities/digital-dubai/hero.jpg',
     background: '/assets/entities/digital-dubai/gov_bg.jpg',
     icons: '/assets/entities/digital-dubai/icons/',
@@ -996,7 +996,7 @@ export const TAMM_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/tamm/logo_official.svg',
+    logo: '/og-tamm.jpg',
     heroImage: '/assets/entities/tamm/hero.jpg',
     background: '/assets/entities/tamm/gov_bg.jpg',
     icons: '/assets/entities/tamm/icons/',
@@ -1062,7 +1062,7 @@ export const SAHEL_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/sahel/logo_official.svg',
+    logo: '/gov-sahel.png',
     heroImage: '/assets/entities/sahel/hero.jpg',
     background: '/assets/entities/sahel/gov_bg.jpg',
     icons: '/assets/entities/sahel/icons/',
@@ -1128,7 +1128,7 @@ export const METRASH2_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/metrash2/logo_official.svg',
+    logo: '/gov-metrash2.png',
     heroImage: '/assets/entities/metrash2/hero.jpg',
     background: '/assets/entities/metrash2/gov_bg.jpg',
     icons: '/assets/entities/metrash2/icons/',
@@ -1194,7 +1194,7 @@ export const HUKOOMI_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/hukoomi/logo_official.svg',
+    logo: '/og-hukoomi.jpg',
     heroImage: '/assets/entities/hukoomi/hero.jpg',
     background: '/assets/entities/hukoomi/gov_bg.jpg',
     icons: '/assets/entities/hukoomi/icons/',
@@ -1260,7 +1260,7 @@ export const FAWRI_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/fawri/logo_official.svg',
+    logo: '/og-fawri.jpg',
     heroImage: '/assets/entities/fawri/hero.jpg',
     background: '/assets/entities/fawri/gov_bg.jpg',
     icons: '/assets/entities/fawri/icons/',
@@ -1326,7 +1326,7 @@ export const OMANNET_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/omannet/logo_official.svg',
+    logo: '/og-omannet.jpg',
     heroImage: '/assets/entities/omannet/hero.jpg',
     background: '/assets/entities/omannet/gov_bg.jpg',
     icons: '/assets/entities/omannet/icons/',
@@ -1396,7 +1396,7 @@ export const SADAD_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/sadad/sadad_olp_official.svg',
+    logo: '/gov-sadad-official.png',
     heroImage: '/assets/entities/sadad/biller_banner.svg',
     background: '/assets/entities/sadad/sadad_bg_orange_light.png',
     icons: '/assets/entities/sadad/icons/',
@@ -1462,7 +1462,7 @@ export const KNET_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/knet/logo_official.svg',
+    logo: '/gov-knet-logo.png',
     heroImage: '/assets/entities/knet/hero.jpg',
     background: '/assets/entities/knet/bg_pattern.png',
     icons: '/assets/entities/knet/icons/',
@@ -1528,7 +1528,7 @@ export const BENEFIT_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/benefit/logo_official.svg',
+    logo: '/gov-benefit-logo.png',
     heroImage: '/assets/entities/benefit/hero.jpg',
     background: '/assets/entities/benefit/bg_pattern.png',
     icons: '/assets/entities/benefit/icons/',
@@ -1594,7 +1594,7 @@ export const DIRHAM_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/dirham/logo_official.svg',
+    logo: '/gov-dirham.png',
     heroImage: '/assets/entities/dirham/hero.jpg',
     background: '/assets/entities/dirham/bg_pattern.png',
     icons: '/assets/entities/dirham/icons/',
@@ -1660,7 +1660,7 @@ export const JAYWAN_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/jaywan/logo_official.svg',
+    logo: '/gov-jaywan.png',
     heroImage: '/assets/entities/jaywan/hero.jpg',
     background: '/assets/entities/jaywan/bg_pattern.png',
     icons: '/assets/entities/jaywan/icons/',
@@ -1726,7 +1726,7 @@ export const MAAL_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/maal/logo_official.svg',
+    logo: '/gov-maal-logo.jpg',
     heroImage: '/assets/entities/maal/hero.jpg',
     background: '/assets/entities/maal/bg_pattern.png',
     icons: '/assets/entities/maal/icons/',
@@ -1792,7 +1792,7 @@ export const DUBAIPAY_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/dubaipay/logo_official.svg',
+    logo: '/og-dubaipay.jpg',
     heroImage: '/assets/entities/dubaipay/hero.jpg',
     background: '/assets/entities/dubaipay/bg_glass.png',
     icons: '/assets/entities/dubaipay/icons/',
@@ -1858,7 +1858,7 @@ export const TASDEED_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/tasdeed/logo_official.svg',
+    logo: '/og-tasdeed.jpg',
     heroImage: '/assets/entities/tasdeed/hero.jpg',
     background: '/assets/entities/tasdeed/gov_bg.jpg',
     icons: '/assets/entities/tasdeed/icons/',
@@ -1928,7 +1928,7 @@ export const ALRAJHI_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/alrajhi/logo_official.svg',
+    logo: '/bank-logos/alrajhi-bank-new.svg',
     heroImage: '/assets/entities/alrajhi/hero.jpg',
     background: '/assets/entities/alrajhi/bg_pattern.png',
     icons: '/assets/entities/alrajhi/icons/',
@@ -1994,7 +1994,7 @@ export const SNB_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/snb/logo_official.svg',
+    logo: '/bank-logos/saudi-national-bank.png',
     heroImage: '/assets/entities/snb/hero.jpg',
     background: '/assets/entities/snb/bg_pattern.png',
     icons: '/assets/entities/snb/icons/',
@@ -2060,7 +2060,7 @@ export const STC_PAY_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/stc-pay/logo_official.svg',
+    logo: '/og-bank-stc-pay.jpg',
     heroImage: '/assets/entities/stc-pay/hero.jpg',
     background: '/assets/entities/stc-pay/bg_pattern.png',
     icons: '/assets/entities/stc-pay/icons/',
@@ -2126,7 +2126,7 @@ export const MADA_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/mada/logo_official.svg',
+    logo: '/og-bank-mada.jpg',
     heroImage: '/assets/entities/mada/hero.jpg',
     background: '/assets/entities/mada/bg_pattern.png',
     icons: '/assets/entities/mada/icons/',
@@ -2192,7 +2192,7 @@ export const URPAY_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/urpay/logo_official.svg',
+    logo: '/og-urpay.jpg',
     heroImage: '/assets/entities/urpay/hero.jpg',
     background: '/assets/entities/urpay/bg_pattern.png',
     icons: '/assets/entities/urpay/icons/',
@@ -2258,7 +2258,7 @@ export const ENBD_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/enbd/logo_official.svg',
+    logo: '/bank-logos/emirates-nbd.png',
     heroImage: '/assets/entities/enbd/hero.jpg',
     background: '/assets/entities/enbd/bg_pattern.png',
     icons: '/assets/entities/enbd/icons/',
@@ -2324,7 +2324,7 @@ export const FAB_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/fab/logo_official.svg',
+    logo: '/bank-logos/fab-uae-new.svg',
     heroImage: '/assets/entities/fab/hero.jpg',
     background: '/assets/entities/fab/bg_pattern.png',
     icons: '/assets/entities/fab/icons/',
@@ -2390,7 +2390,7 @@ export const NBK_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/nbk/logo_official.svg',
+    logo: '/bank-logos/nbk-kuwait.png',
     heroImage: '/assets/entities/nbk/hero.jpg',
     background: '/assets/entities/nbk/bg_pattern.png',
     icons: '/assets/entities/nbk/icons/',
@@ -2456,7 +2456,7 @@ export const QNB_SPEC: EntityVisualSpec = {
     modal: '0 15px 30px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/qnb/logo_official.svg',
+    logo: '/bank-logos/qnb-qatar-new.png',
     heroImage: '/assets/entities/qnb/hero.jpg',
     background: '/assets/entities/qnb/bg_pattern.png',
     icons: '/assets/entities/qnb/icons/',
@@ -2522,7 +2522,7 @@ export const BANK_MUSCAT_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/bank-muscat/logo_official.svg',
+    logo: '/bank-logos/bank-muscat-new.png',
     heroImage: '/assets/entities/bank-muscat/hero.jpg',
     background: '/assets/entities/bank-muscat/bg_pattern.png',
     icons: '/assets/entities/bank-muscat/icons/',
@@ -2588,7 +2588,7 @@ export const NBB_SPEC: EntityVisualSpec = {
     modal: '0 20px 40px rgba(0,0,0,0.2)',
   },
   assets: {
-    logo: '/assets/entities/nbb/logo_official.svg',
+    logo: '/bank-logos/nbb-bahrain.jpg',
     heroImage: '/assets/entities/nbb/hero.jpg',
     background: '/assets/entities/nbb/bg_pattern.png',
     icons: '/assets/entities/nbb/icons/',
