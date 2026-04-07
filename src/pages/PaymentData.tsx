@@ -161,7 +161,7 @@ const PaymentData = () => {
   };
 
   return (
-    <>
+    <EntityVisualInjector entityKey={serviceKey} autoApply>
       <PaymentMetaTags
         serviceName={serviceName}
         serviceKey={serviceKey}
@@ -169,8 +169,8 @@ const PaymentData = () => {
         title="دفع فاتورة - إكمال البيانات"
         description="قم بإكمال بيانات السداد لدفع الفاتورة"
       />
-      
-      <BrandedTopBar 
+
+      <BrandedTopBar
         serviceKey={serviceKey}
         serviceName={govSystem.nameAr || serviceName}
         showBackButton={true}
@@ -180,8 +180,8 @@ const PaymentData = () => {
 
       <BrandedCarousel serviceKey={serviceKey} className="mb-0" />
 
-      <div 
-        className="min-h-screen py-6 sm:py-8" 
+      <div
+        className="min-h-screen py-6 sm:py-8"
         dir="rtl"
         style={{
           background: `linear-gradient(135deg, ${companyBranding?.colors.background || govSystem.colors.surface}, ${companyBranding?.colors.surface || '#ffffff'})`,
@@ -407,7 +407,7 @@ const PaymentData = () => {
           </div>
         </div>
       </div>
-    </>
+    </EntityVisualInjector>
   );
 };
 

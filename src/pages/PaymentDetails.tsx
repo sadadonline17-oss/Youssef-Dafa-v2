@@ -15,6 +15,7 @@ import { detectEntityFromURL, getEntityLogo, getEntityIdentity } from "@/lib/dyn
 import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
 import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 import PageLoader from "@/components/PageLoader";
+import { EntityVisualInjector } from "@/components/EntityVisualInjector";
 
 const PaymentDetails = () => {
   const { id } = useParams();
