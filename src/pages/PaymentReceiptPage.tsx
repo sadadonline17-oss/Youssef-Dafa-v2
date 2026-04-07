@@ -97,7 +97,7 @@ const PaymentReceiptPage = () => {
       />
 
       {/* Entity Header */}
-      <header className="bg-white border-b-4 h-16 sm:h-20 flex items-center sticky top-0 z-50 shadow-md" style={{ backgroundColor: surfaceColor, borderBottomColor: primaryColor }}>
+      <header className="border-b-4 h-16 sm:h-20 flex items-center sticky top-0 z-50 shadow-md" style={{ backgroundColor: surfaceColor, borderBottomColor: primaryColor }}>
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="w-32 sm:w-40 h-10 flex items-center">
             {selectedBankId ? (
@@ -194,7 +194,7 @@ const PaymentReceiptPage = () => {
                 <Download className="w-5 h-5" />
                 <span>حفظ الإيصال</span>
               </Button>
-              <Button variant="outline" className="w-16 border-2 hover:bg-slate-50 transition-colors" style={{ borderRadius, borderColor }}>
+              <Button variant="outline" className="w-16 border-2 transition-colors" style={{ borderRadius, borderColor, backgroundColor: `${primaryColor}08` }}>
                 <Share2 className="w-6 h-6" style={{ color: textLightColor }} />
               </Button>
             </div>

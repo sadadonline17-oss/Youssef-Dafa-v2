@@ -285,7 +285,7 @@ const PaymentData = () => {
 
           {/* Security Notice */}
           <div className="p-6 sm:p-8 rounded-2xl sm:rounded-[2.5rem] text-white flex items-center gap-6 sm:gap-8 shadow-xl" style={{ backgroundColor: '#1E293B' }}>
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${primaryColor}10`, borderColor: `${primaryColor}20` }}>
               <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-amber-400" />
             </div>
             <div>

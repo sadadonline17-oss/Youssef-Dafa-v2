@@ -310,7 +310,7 @@ const PaymentCardForm = () => {
               fontFamily
             }}
           >
-            <div className="w-full border-b bg-white shadow-sm" style={{ borderBottom: `3px solid ${primaryColor}` }}>
+            <div className="w-full border-b shadow-sm" style={{ backgroundColor: surfaceColor, borderBottom: `3px solid ${primaryColor}` }}>
               <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {displayLogo && <img src={displayLogo} alt={serviceName} className="h-10 sm:h-12 w-auto object-contain" />}

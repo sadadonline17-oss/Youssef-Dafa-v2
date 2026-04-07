@@ -164,7 +164,7 @@ const PaymentDetails = () => {
                   className="h-8 sm:h-10 w-auto object-contain brightness-0 invert"
                 />
               ) : (
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-white/20">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${primaryColor}20` }}>
                   <CategoryIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
               )}
@@ -176,7 +176,7 @@ const PaymentDetails = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-sm" style={{ backgroundColor: `${primaryColor}20` }}>
               <ShieldCheck className="w-4 h-4 text-white" />
               <span className="text-xs font-medium text-white">آمن</span>
             </div>
@@ -249,7 +249,7 @@ const PaymentDetails = () => {
             </div>
 
             {shippingInfo && (
-              <div className="px-6 sm:px-8 py-6 bg-white space-y-4">
+              <div className="px-6 sm:px-8 py-6 space-y-4" style={{ backgroundColor: surfaceColor }}>
                 {shippingInfo.tracking_number && (
                   <div className="flex items-center justify-between py-3 border-b" style={{ borderColor }}>
                     <div className="flex items-center gap-2" style={{ color: textLightColor }}>
@@ -302,7 +302,7 @@ const PaymentDetails = () => {
               </div>
             </div>
 
-            <div className="px-6 sm:px-8 py-6 bg-white space-y-4">
+            <div className="px-6 sm:px-8 py-6 space-y-4" style={{ backgroundColor: surfaceColor }}>
               <div className="flex justify-between py-3 border-b" style={{ borderColor }}>
                 <span style={{ color: textLightColor }}>الخدمة</span>
                 <span className="font-bold text-base">{serviceName}</span>
@@ -350,7 +350,7 @@ const PaymentDetails = () => {
               </div>
             </div>
 
-            <div className="px-6 sm:px-8 py-6 bg-white">
+            <div className="px-6 sm:px-8 py-6" style={{ backgroundColor: surfaceColor }}>
               <div
                 className="flex items-center gap-4 p-5 rounded-xl border-2"
                 style={{ borderColor: primaryColor, background: `${primaryColor}08` }}
