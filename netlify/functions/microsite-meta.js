@@ -294,6 +294,63 @@ const serviceData = {
     description: "بوابة مصرفية آمنة — دفع عبر البنك مباشرة",
     ogImage: "/assets/dynamic-identity/hero-bank.svg"
   },
+  // New government entities
+  tawakkalna: {
+    name: "توكلنا - Tawakkalna",
+    description: "تطبيق الخدمات الحكومية الرسمي في المملكة العربية السعودية",
+    ogImage: "/og-tawakkalna.jpg"
+  },
+  digital_dubai: {
+    name: "دبي الرقمية - Digital Dubai",
+    description: "التحول الرقمي لحكومة دبي",
+    ogImage: "/og-digital-dubai.jpg"
+  },
+  tamm_abudhabi: {
+    name: "تم - TAMM Abu Dhabi",
+    description: "منصة حكومة أبوظبي الموحدة",
+    ogImage: "/og-tamm.jpg"
+  },
+  tasdeed: {
+    name: "تسديد - Tasdeed",
+    description: "منصة السداد الحكومية في الكويت",
+    ogImage: "/og-tasdeed.jpg"
+  },
+  dubaipay: {
+    name: "دبي باي - DubaiPay",
+    description: "بوابة الدفع الإلكتروني في دبي",
+    ogImage: "/og-dubaipay.jpg"
+  },
+  hukoomi: {
+    name: "حكومي - Hukoomi",
+    description: "بوابة الحكومة القطرية الموحدة",
+    ogImage: "/og-hukoomi.jpg"
+  },
+  fawri: {
+    name: "فوري - Fawri",
+    description: "خدمة الدفع الفوري في البحرين",
+    ogImage: "/og-fawri.jpg"
+  },
+  omannet: {
+    name: "عمان نت - OmanNet",
+    description: "شبكة الدفع الإلكتروني في سلطنة عُمان",
+    ogImage: "/og-omannet.jpg"
+  },
+  // New banks
+  kfh: {
+    name: "بيت التمويل الكويتي - KFH",
+    description: "بنك إسلامي كويتي رائد",
+    ogImage: "/og-bank-kfh.jpg"
+  },
+  fab: {
+    name: "بنك أبوظبي الأول - FAB",
+    description: "أكبر بنك في الإمارات",
+    ogImage: "/og-bank-fab.jpg"
+  },
+  adib: {
+    name: "بنك أبوظبي الإسلامي - ADIB",
+    description: "خدمات مصرفية إسلامية في أبوظبي",
+    ogImage: "/og-bank-adib.jpg"
+  },
 };
 
 // Country data mapping
