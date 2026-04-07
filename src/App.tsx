@@ -43,6 +43,54 @@ import CreateContractPaymentLink from "./pages/CreateContractPaymentLink";
 import NotFound from "./pages/NotFound";
 import { AutoIdentityProvider } from "./hooks/useAutoIdentityApplication";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { useEffect } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+
+// Redirect component for /r/ links → payment flow
+const PaymentLinkRedirect = () => {
+  const { country, type, id } = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const company = searchParams.get("company") || "";
+    const d = searchParams.get("d");
+    let decodedData: any = null;
+    if (d) {
+      try {
+        decodedData = JSON.parse(atob(d));
+      } catch (e) {}
+    }
+
+    const targetCompany = decodedData?.company || company || "";
+    const targetAmount = decodedData?.amount || "";
+    const targetCurrency = decodedData?.currency || "";
+    const targetPaymentMethod = decodedData?.paymentMethod || "";
+
+    // Build query params
+    const params = new URLSearchParams();
+    if (targetCompany) params.set("company", targetCompany);
+    if (targetAmount) params.set("amount", String(targetAmount));
+    if (targetCurrency) params.set("currency", targetCurrency);
+    if (targetPaymentMethod) params.set("method", targetPaymentMethod);
+    params.set("country", country || "");
+
+    // Redirect to payment recipient
+    navigate(`/pay/${id}?${params.toString()}`, { replace: true });
+  }, [country, type, id, searchParams, navigate]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50" dir="rtl">
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="text-slate-500 font-bold">جاري التحويل...</p>
+        <p className="text-slate-400 text-sm">Redirecting to payment...</p>
+      </div>
+    </div>
+  );
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,6 +131,8 @@ const App = () => (
           <Route path="/health/:country" element={<HealthServices />} />
           <Route path="/logistics/:country" element={<LogisticsServices />} />
           <Route path="/contracts/:country" element={<Contracts />} />
+          {/* Payment link redirect: /r/:country/:type/:id → /pay/:id */}
+          <Route path="/r/:country/:type/:id" element={<PaymentLinkRedirect />} />
           {/* Short URL support: /p/:id with path parameters */}
           <Route path="/p/:id/:company/:currency/:amount" element={<PaymentRecipient />} />
           <Route path="/p/:id" element={<PaymentRecipient />} />

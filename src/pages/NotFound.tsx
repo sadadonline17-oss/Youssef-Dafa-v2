@@ -11,15 +11,17 @@ const NotFound = () => {
           <AlertCircle className="w-12 h-12 text-red-500" />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h1 className="text-6xl font-black text-slate-900 tracking-tighter">404</h1>
           <p className="text-xl font-bold text-slate-600">عذراً، الصفحة غير موجودة</p>
-          <p className="text-sm text-slate-400">Oops! Page not found</p>
+          <p className="text-lg text-slate-500">Sorry, page not found</p>
+          <p className="text-base text-slate-400">Oops! Page not found</p>
+          <p className="text-sm text-slate-400">This page has been moved or deleted.</p>
         </div>
 
         <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
           <ShieldCheck className="w-4 h-4" />
-          <span>هذه الصفحة قد تم نقلها أو حذفها</span>
+          <span>Secure Payment Gateway</span>
         </div>
 
         <button
