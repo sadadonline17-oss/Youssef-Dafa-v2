@@ -1,4 +1,5 @@
-import { useParams, useSearchParams, useMemo, useEffect } from "react-router-dom";
+import { useMemo, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLinkData } from "@/hooks/useLinkData";
