@@ -66,7 +66,7 @@ const Index = () => {
               <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">اختر نوع الخدمة لإنشاء رابط دفع خاص بها</p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
               {services.map((service, idx) => (
                 <Link key={idx} to={service.path} className="group">
                   <Card className="p-6 h-full border-2 border-white rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all text-center">
