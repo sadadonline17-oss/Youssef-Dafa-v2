@@ -1,22 +1,38 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
-import { 
-  applyDynamicIdentity, 
-  removeDynamicIdentity, 
+import {
+  applyDynamicIdentity,
+  removeDynamicIdentity,
   detectEntityFromURL,
   getEntityIdentity,
-  type DynamicIdentityEntity 
+  applyFullBrandCSS,
+  type BrandObject,
+  type BrandColors,
+  type BrandFonts,
+  type BrandGradients,
+  type BrandShadows,
+  type BrandRadius
 } from '@/lib/dynamicIdentity';
 
 interface DynamicIdentityContextType {
   currentEntity: string | null;
   setEntity: (entity: string | null) => void;
-  identity: DynamicIdentityEntity | null;
+  identity: BrandObject | null;
+  colors: BrandColors | null;
+  fonts: BrandFonts | null;
+  gradients: BrandGradients | null;
+  shadows: BrandShadows | null;
+  borderRadius: BrandRadius | null;
 }
 
 const DynamicIdentityContext = createContext<DynamicIdentityContextType>({
   currentEntity: null,
   setEntity: () => {},
   identity: null,
+  colors: null,
+  fonts: null,
+  gradients: null,
+  shadows: null,
+  borderRadius: null,
 });
 
 export const useDynamicIdentity = () => useContext(DynamicIdentityContext);
@@ -26,23 +42,23 @@ interface DynamicIdentityProviderProps {
   entityKey?: string;
 }
 
-export const DynamicIdentityProvider: React.FC<DynamicIdentityProviderProps> = ({ 
-  children, 
-  entityKey 
+export const DynamicIdentityProvider: React.FC<DynamicIdentityProviderProps> = ({
+  children,
+  entityKey
 }) => {
   const [currentEntity, setCurrentEntity] = useState<string | null>(null);
-  const [identity, setIdentity] = useState<DynamicIdentityEntity | null>(null);
+  const [identity, setIdentity] = useState<BrandObject | null>(null);
 
   useEffect(() => {
     const detectedEntity = entityKey || detectEntityFromURL();
-    
+
     if (detectedEntity) {
       setCurrentEntity(detectedEntity);
       const entityIdentity = getEntityIdentity(detectedEntity);
       setIdentity(entityIdentity);
-      
+
       if (entityIdentity?.auto_apply) {
-        applyDynamicIdentity(detectedEntity);
+        applyFullBrandCSS(entityIdentity);
       }
     }
 
@@ -56,9 +72,9 @@ export const DynamicIdentityProvider: React.FC<DynamicIdentityProviderProps> = (
       const entityIdentity = getEntityIdentity(entity);
       setIdentity(entityIdentity);
       setCurrentEntity(entity);
-      
+
       if (entityIdentity?.auto_apply) {
-        applyDynamicIdentity(entity);
+        applyFullBrandCSS(entityIdentity);
       }
     } else {
       setIdentity(null);
@@ -68,7 +84,16 @@ export const DynamicIdentityProvider: React.FC<DynamicIdentityProviderProps> = (
   };
 
   return (
-    <DynamicIdentityContext.Provider value={{ currentEntity, setEntity, identity }}>
+    <DynamicIdentityContext.Provider value={{
+      currentEntity,
+      setEntity,
+      identity,
+      colors: identity?.colors || null,
+      fonts: identity?.fonts || null,
+      gradients: identity?.gradients || null,
+      shadows: identity?.shadows || null,
+      borderRadius: identity?.borderRadius || null,
+    }}>
       {children}
     </DynamicIdentityContext.Provider>
   );
@@ -101,14 +126,14 @@ export const DynamicIdentityWrapper: React.FC<DynamicIdentityWrapperProps> = ({
   const containerStyles: React.CSSProperties = {
     backgroundColor: variant === 'full' ? currentIdentity.colors.background : 'transparent',
     minHeight: variant === 'full' ? '100vh' : 'auto',
-    fontFamily: currentIdentity.fonts[0],
+    fontFamily: currentIdentity.fonts.primary,
   };
 
   const cardStyles: React.CSSProperties = variant === 'card' ? {
-    backgroundColor: '#ffffff',
-    borderRadius: currentIdentity.buttons.style === 'rounded' ? '12px' : '4px',
+    backgroundColor: currentIdentity.colors.surface,
+    borderRadius: currentIdentity.borderRadius.md,
     padding: '24px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    boxShadow: currentIdentity.shadows.md,
   } : {};
 
   return (
@@ -116,8 +141,8 @@ export const DynamicIdentityWrapper: React.FC<DynamicIdentityWrapperProps> = ({
       {showLogo && (
         <div className="flex justify-center mb-6">
           <img
-            src={`/assets/dynamic-identity/${currentIdentity.logo}`}
-            alt="Logo"
+            src={currentIdentity.logo.startsWith('/') ? currentIdentity.logo : `/assets/dynamic-identity/${currentIdentity.logo}`}
+            alt={currentIdentity.name}
             className="h-16 object-contain"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
@@ -125,11 +150,11 @@ export const DynamicIdentityWrapper: React.FC<DynamicIdentityWrapperProps> = ({
           />
         </div>
       )}
-      
-      {showAnimatedHeader && currentIdentity.animated_header_images.length > 0 && (
+
+      {showAnimatedHeader && (currentIdentity.animated_header_images?.length ?? 0) > 0 && (
         <AnimatedHeader images={currentIdentity.animated_header_images} entityKey={entityKey} />
       )}
-      
+
       <div style={cardStyles}>
         {children}
       </div>
@@ -145,24 +170,26 @@ interface AnimatedHeaderProps {
 const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({ images, entityKey }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const safeImages = images ?? [];
+
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (safeImages.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % safeImages.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [images]);
+  }, [safeImages]);
 
-  if (images.length === 0) return null;
+  if (safeImages.length === 0) return null;
 
   return (
     <div className="relative w-full h-48 overflow-hidden rounded-lg mb-6">
-      {images.map((image, index) => (
+      {safeImages.map((image, index) => (
         <img
           key={index}
-          src={`/assets/dynamic-identity/${image}`}
+          src={image.startsWith('/') ? image : `/assets/dynamic-identity/${image}`}
           alt={`Header ${index + 1}`}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           style={{

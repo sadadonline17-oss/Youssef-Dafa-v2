@@ -18,33 +18,30 @@ const CountrySelector = ({ onSelect, selectedCountry }: CountrySelectorProps) =>
             className={`
               relative overflow-hidden cursor-pointer transition-all duration-300
               hover:scale-105 hover:shadow-elevated group
-              ${isSelected ? "ring-2 ring-primary shadow-glow" : ""}
+              ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}
             `}
-            style={{
-              background: isSelected
-                ? `linear-gradient(135deg, ${country.primaryColor}15 0%, ${country.secondaryColor}10 100%)`
-                : undefined,
-            }}
             onClick={() => onSelect(country)}
           >
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="text-5xl">{country.flag}</div>
                 {isSelected && (
-                  <CheckCircle2 className="w-6 h-6 text-primary animate-fade-in" />
+                  <CheckCircle2 className="w-6 h-6 text-blue-500 animate-fade-in" />
                 )}
               </div>
-              
-              <h3 className="text-lg font-bold mb-1 group-hover:text-primary transition-colors">
+
+              <h3 className="text-lg font-bold mb-1 group-hover:text-blue-600 transition-colors">
                 {country.nameAr}
               </h3>
-              <p className="text-sm text-muted-foreground">{country.name}</p>
-              
+              <p className="text-sm text-gray-500">{country.name}</p>
+
               <div
-                className="absolute bottom-0 left-0 right-0 h-1 transition-all duration-300"
+                className={`
+                  absolute bottom-0 left-0 right-0 h-1 transition-all duration-300
+                  ${isSelected ? 'opacity-100' : 'opacity-0'}
+                `}
                 style={{
                   background: `linear-gradient(90deg, ${country.primaryColor}, ${country.secondaryColor})`,
-                  opacity: isSelected ? 1 : 0,
                 }}
               />
             </div>

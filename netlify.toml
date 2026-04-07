@@ -1,49 +1,14 @@
 [build]
-  command = "npm run build"
+  command = "npm ci --force && npm run build"
   publish = "dist"
   functions = "netlify/functions"
-  edge_functions = "netlify/edge-functions"
 
 [build.environment]
-  NODE_VERSION = "20.12.1"
-  NPM_FLAGS = "--legacy-peer-deps"
-
-# Senior Config: Each path MUST be a separate block with a string path
-[[edge_functions]]
-  function = "dynamic-meta"
-  path = "/p/*"
-
-[[edge_functions]]
-  function = "dynamic-meta"
-  path = "/pay/*"
-
-[[edge_functions]]
-  function = "dynamic-meta"
-  path = "/recipient/*"
-
-[[edge_functions]]
-  function = "dynamic-meta"
-  path = "/payment-data/*"
-
-[[redirects]]
-  from = "/r/*"
-  to = "/.netlify/functions/microsite-meta"
-  status = 200
-
-[[redirects]]
-  from = "/pay/*"
-  to = "/.netlify/functions/microsite-meta"
-  status = 200
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--force"
+  NETLIFY_USE_X64 = "true"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"

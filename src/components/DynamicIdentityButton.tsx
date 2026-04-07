@@ -4,7 +4,7 @@ import { useDynamicIdentity } from './DynamicIdentityProvider';
 
 interface DynamicIdentityButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   entityKey?: string;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'gradient';
   children: React.ReactNode;
 }
 
@@ -16,8 +16,8 @@ export const DynamicIdentityButton: React.FC<DynamicIdentityButtonProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { currentEntity, identity } = useDynamicIdentity();
-  
+  const { identity } = useDynamicIdentity();
+
   const currentIdentity = identity || (entityKey ? getEntityIdentity(entityKey) : null);
 
   if (!currentIdentity) {
@@ -28,39 +28,33 @@ export const DynamicIdentityButton: React.FC<DynamicIdentityButtonProps> = ({
     );
   }
 
-  const getBackgroundColor = () => {
+  const getBackground = () => {
     if (variant === 'primary') return currentIdentity.colors.primary;
     if (variant === 'secondary') return currentIdentity.colors.secondary;
+    if (variant === 'gradient') return currentIdentity.gradients.primary;
     return 'transparent';
   };
 
-  const getHoverTransform = () => {
-    switch (currentIdentity.buttons.hover) {
-      case 'darken':
-        return 'brightness(0.9)';
-      case 'highlight':
-        return 'brightness(1.1)';
-      case 'scale':
-        return 'scale(1.05)';
-      default:
-        return 'brightness(0.9)';
-    }
+  const getHoverFilter = () => {
+    const hoverHsl = `brightness(0.92)`;
+    return hoverHsl;
   };
 
   const buttonStyles: React.CSSProperties = {
-    backgroundColor: variant === 'outline' ? 'transparent' : getBackgroundColor(),
-    color: variant === 'outline' ? currentIdentity.colors.primary : '#ffffff',
+    background: variant === 'outline' ? 'transparent' : getBackground(),
+    color: variant === 'outline' ? currentIdentity.colors.primary : currentIdentity.colors.textOnPrimary,
     border: variant === 'outline' ? `2px solid ${currentIdentity.colors.primary}` : 'none',
-    borderRadius: currentIdentity.buttons.style === 'rounded' ? '12px' : 
-                   currentIdentity.buttons.style === 'flat' ? '4px' : '0px',
+    borderRadius: variant === 'outline' ? currentIdentity.borderRadius.sm : currentIdentity.borderRadius.md,
     padding: '12px 24px',
-    fontFamily: currentIdentity.fonts[0],
+    fontFamily: currentIdentity.fonts.primary,
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    ...(isHovered && {
-      filter: currentIdentity.buttons.hover === 'scale' ? 'none' : getHoverTransform(),
-      transform: currentIdentity.buttons.hover === 'scale' ? 'scale(1.05)' : 'none',
+    boxShadow: variant !== 'outline' ? currentIdentity.shadows.sm : 'none',
+    ...(isHovered && variant !== 'outline' && {
+      filter: getHoverFilter(),
+      transform: 'translateY(-1px)',
+      boxShadow: currentIdentity.shadows.md,
     }),
   };
 

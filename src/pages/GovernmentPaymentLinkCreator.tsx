@@ -101,12 +101,13 @@ const GovernmentPaymentLinkCreator = () => {
         },
       });
 
-      // For government payment services, generate direct link to /pay/:id/data
-      const baseUrl = typeof window !== 'undefined'
+      // Generate proper payment URL with service key for dynamic identity
+      const productionDomain = typeof window !== 'undefined'
         ? window.location.origin
-        : (import.meta.env.VITE_PRODUCTION_DOMAIN || 'https://glittering-eclair-9e77e0.netlify.app');
-      
-      const paymentUrl = `${baseUrl}/pay/${link.id}/data`;
+        : (import.meta.env.VITE_PRODUCTION_DOMAIN || 'https://sensational-fenglisu-ebbbfb.netlify.app');
+
+      const currencyCode = getCurrencyCode(country || govService.country);
+      const paymentUrl = `${productionDomain}/p/${link.id}/${serviceKey}/${currencyCode}/${parseFloat(amount)}?pm=${paymentMethod}`;
 
       setCreatedLink(paymentUrl);
       setLinkId(link.id);

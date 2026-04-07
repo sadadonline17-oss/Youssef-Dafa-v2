@@ -36,9 +36,63 @@ const CreatePaymentLink = () => {
 
   const [paymentAmount, setPaymentAmount] = useState("500");
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentService, setPaymentService] = useState("sadad"); // Default to sadad
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdPaymentUrl, setCreatedPaymentUrl] = useState("");
   const [linkId, setLinkId] = useState("");
+
+  // Determine available payment services based on country
+  const getPaymentServices = (countryCode: string) => {
+    switch (countryCode?.toUpperCase()) {
+      case 'SA':
+        return [
+          { key: 'sadad', name: 'سداد - SADAD', icon: '💳' },
+          { key: 'mada', name: 'مدى - mada', icon: '🏦' },
+          { key: 'alrajhi_bank', name: 'مصرف الراجحي', icon: '🏛️' },
+          { key: 'snb', name: 'البنك الأهلي السعودي', icon: '🏛️' },
+          { key: 'enbd', name: 'الإمارات دبي الوطني', icon: '🏛️' },
+          { key: 'stc_pay', name: 'STC Pay', icon: '📱' },
+        ];
+      case 'AE':
+        return [
+          { key: 'jaywan', name: 'جيوان - Jaywan', icon: '💳' },
+          { key: 'dirham', name: 'درهم - Dirham', icon: '💰' },
+          { key: 'enbd', name: 'الإمارات دبي الوطني', icon: '🏛️' },
+          { key: 'uae_pass', name: 'الهوية الرقمية UAE Pass', icon: '🆔' },
+        ];
+      case 'KW':
+        return [
+          { key: 'knet', name: 'كي نت - KNET', icon: '💳' },
+          { key: 'nbk', name: 'البنك الوطني الكويتي', icon: '🏛️' },
+          { key: 'dhlkw', name: 'DHL الكويت', icon: '📦' },
+        ];
+      case 'QA':
+        return [
+          { key: 'qnb', name: 'مجموعة QNB', icon: '🏛️' },
+          { key: 'qatar_gov', name: 'بوابة الدفع الحكومية', icon: '🏛️' },
+          { key: 'metrash2', name: 'مترش ٢ - Metrash2', icon: '📱' },
+          { key: 'dhlqa', name: 'DHL قطر', icon: '📦' },
+        ];
+      case 'OM':
+        return [
+          { key: 'maal', name: 'مال - Maal', icon: '💳' },
+          { key: 'bank_muscat', name: 'بنك مسقط', icon: '🏛️' },
+          { key: 'dhlom', name: 'DHL عُمان', icon: '📦' },
+        ];
+      case 'BH':
+        return [
+          { key: 'benefit', name: 'بنفت - BENEFIT', icon: '💳' },
+          { key: 'dhlbh', name: 'DHL البحرين', icon: '📦' },
+        ];
+      default:
+        return [
+          { key: 'sadad', name: 'سداد - SADAD', icon: '💳' },
+          { key: 'aramex', name: 'أرامكس - Aramex', icon: '📦' },
+        ];
+    }
+  };
+
+  const paymentServices = getPaymentServices(country);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,10 +112,12 @@ const CreatePaymentLink = () => {
         currency_code: getCurrencyCode(country || "SA"),
         payment_method: paymentMethod,
         selectedCountry: country || "SA",
+        service_key: paymentService,
+        service_name: paymentServices.find(s => s.key === paymentService)?.name || paymentService,
       };
-      
+
       console.log('[CreatePaymentLink] Creating link with payload:', payload);
-      
+
       const link = await createLink.mutateAsync({
         type: "payment",
         country_code: country || "",
@@ -71,7 +127,7 @@ const CreatePaymentLink = () => {
       // Generate unified payment URL using the new function
       const paymentUrl = generatePaymentLink({
         invoiceId: link.id,
-        company: "payment",
+        company: paymentService,
         country: country || 'SA',
         amount: parseFloat(paymentAmount) || 500,
         currency: getCurrencyCode(country || "SA"),
@@ -165,6 +221,50 @@ const CreatePaymentLink = () => {
                   </p>
                 )}
               </div>
+
+              {/* Payment Service Selection (country-specific) */}
+              {paymentServices.length > 1 && (
+                <div>
+                  <Label className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <Building2 className="w-4 h-4" />
+                    بوابة الدفع *
+                  </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {paymentServices.map((service) => (
+                      <button
+                        key={service.key}
+                        type="button"
+                        onClick={() => setPaymentService(service.key)}
+                        className={`relative p-4 rounded-lg border-2 transition-all duration-200 text-right ${
+                          paymentService === service.key
+                            ? 'border-primary bg-primary/5 shadow-md'
+                            : 'border-border hover:border-primary/50 bg-card'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{service.icon}</span>
+                          <div className="flex-1">
+                            <h4 className={`font-semibold text-sm mb-0.5 ${
+                              paymentService === service.key ? 'text-primary' : 'text-foreground'
+                            }`}>
+                              {service.name}
+                            </h4>
+                          </div>
+                          {paymentService === service.key && (
+                            <div className="absolute top-2 left-2">
+                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Payment Method Selection */}
               <div>

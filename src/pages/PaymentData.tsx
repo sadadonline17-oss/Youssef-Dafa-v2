@@ -16,6 +16,9 @@ import BrandedCarousel from "@/components/BrandedCarousel";
 import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
 import { getServiceBranding } from "@/lib/serviceLogos";
 import { shippingCompanyBranding } from "@/lib/brandingSystem";
+import { detectEntityFromURL, getEntityLogo, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 import PageLoader from "@/components/PageLoader";
 
 const PaymentData = () => {
@@ -23,6 +26,9 @@ const PaymentData = () => {
   const navigate = useNavigate();
   const { data: linkData, isLoading, isError } = useLink(id);
   const [showPage, setShowPage] = useState(false);
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
 
   useEffect(() => {
     const timer = setTimeout(() => {

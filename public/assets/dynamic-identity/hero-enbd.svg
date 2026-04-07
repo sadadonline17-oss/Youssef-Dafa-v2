@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400">
+  <defs>
+    <linearGradient id="grad-enbd" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F37021;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#F37021;stop-opacity:0.3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="400" fill="url(#grad-enbd)"/>
+  <text x="50%" y="45%" font-family="Arial,sans-serif" font-size="42" font-weight="bold" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">ENBD</text>
+  <text x="50%" y="60%" font-family="Arial,sans-serif" font-size="18" fill="rgba(255,255,255,0.8)" text-anchor="middle" dominant-baseline="middle">GCC Chameleon Sovereign Mirror — Entity Header</text>
+</svg>

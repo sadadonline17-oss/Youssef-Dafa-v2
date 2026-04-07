@@ -92,10 +92,31 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html, body {
+    height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: 'cv11', 'ss01';
     font-family: 'Almarai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* التأكد من ظهور المحتوى */
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Fallback للخطوط */
+  @supports not (font-feature-settings: 'cv11') {
+    body {
+      font-feature-settings: normal;
+    }
   }
 
   /* RTL Support */
@@ -653,4 +674,28 @@ All colors MUST be HSL.
     font-size: 0.875rem;
     font-weight: 600;
   }
+}
+
+/* ========================================
+   PURGE: Apple Pay / Google Pay / Global Wallets
+   These rules ensure no Apple Pay or Google Pay
+   visuals ever appear in the GCC payment UI.
+   ======================================== */
+.apple-pay,
+.google-pay,
+.apple-pay-button,
+.google-pay-button,
+.visa-checkout,
+.global-wallet,
+.international-icons,
+[class*="apple-pay"],
+[class*="google-pay"],
+[class*="applePay"],
+[class*="googlePay"],
+[id*="apple-pay"],
+[id*="google-pay"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

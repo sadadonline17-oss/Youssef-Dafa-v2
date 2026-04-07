@@ -1,0 +1,392 @@
+{
+  "version": "1.0.0",
+  "description": "GCC Entity Visual Specifications — 1:1 Identity Mirroring",
+  "entities": {
+    "aramex": {
+      "theme": {
+        "layout": "Shipping & Tracking",
+        "colors": {
+          "primary": "#D71920",
+          "secondary": "#FFFFFF",
+          "bg": "#F8F8F8"
+        },
+        "font": "DIN_Next_Arabic_Medium",
+        "logo": "aramex-logo.svg",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-aramex.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay", ".visa-checkout"]
+    },
+    "nafath": {
+      "theme": {
+        "layout": "Single Sign-On Portal",
+        "colors": {
+          "primary": "#006C35",
+          "secondary": "#FFFFFF",
+          "bg": "#F5F5F5"
+        },
+        "font": "Taysir",
+        "logo": "gov-nafath.png",
+        "dimensions": {
+          "container_width": "400px",
+          "button_height": "48px",
+          "radius": "8px"
+        }
+      },
+      "assets_to_inject": ["security_badge.svg", "gov-nafath.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay", ".global-wallet"]
+    },
+    "sadad": {
+      "theme": {
+        "layout": "SADAD Bills",
+        "colors": {
+          "primary": "#FF6B00",
+          "secondary": "#54565B",
+          "bg": "#F4F4F4"
+        },
+        "font": "DIN_Next_Arabic_Bold",
+        "logo": "gov-sadad.png",
+        "dimensions": {
+          "container_width": "450px",
+          "button_height": "54px",
+          "radius": "16px"
+        }
+      },
+      "assets_to_inject": ["hero-sadad.svg", "gov-sadad.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay", ".international-icons"]
+    },
+    "absher": {
+      "theme": {
+        "layout": "Government Services",
+        "colors": {
+          "primary": "#006C35",
+          "secondary": "#E8F5E9",
+          "bg": "#F5F5F5"
+        },
+        "font": "Taysir",
+        "logo": "gov-absher.png",
+        "dimensions": {
+          "container_width": "400px",
+          "button_height": "48px",
+          "radius": "8px"
+        }
+      },
+      "assets_to_inject": ["hero-absher.svg", "gov-absher.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "uae_pass": {
+      "theme": {
+        "layout": "Digital Identity Portal",
+        "colors": {
+          "primary": "#007CC2",
+          "secondary": "#C8A961",
+          "bg": "#F5F5F5"
+        },
+        "font": "Dubai_Font",
+        "logo": "gov-uae-pass.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-uae-pass.svg", "gov-uae-pass.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "jaywan": {
+      "theme": {
+        "layout": "UAE Payment Gateway",
+        "colors": {
+          "primary": "#CE1126",
+          "secondary": "#FFFFFF",
+          "bg": "#FFF5F5"
+        },
+        "font": "Inter",
+        "logo": "gov-jaywan.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-jaywan.svg", "gov-jaywan.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "dirham": {
+      "theme": {
+        "layout": "UAE Payment Gateway",
+        "colors": {
+          "primary": "#007CC2",
+          "secondary": "#006C35",
+          "bg": "#E3F2FD"
+        },
+        "font": "Inter",
+        "logo": "gov-dirham.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-dirham.svg", "gov-dirham.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "knet": {
+      "theme": {
+        "layout": "Kuwait Payment Network",
+        "colors": {
+          "primary": "#007A3D",
+          "secondary": "#FFFFFF",
+          "bg": "#E8F5E9"
+        },
+        "font": "Inter",
+        "logo": "gov-knet.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-knet.svg", "gov-knet.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "benefit": {
+      "theme": {
+        "layout": "Bahrain Payment Network",
+        "colors": {
+          "primary": "#CE1126",
+          "secondary": "#FFFFFF",
+          "bg": "#FFF5F5"
+        },
+        "font": "Inter",
+        "logo": "gov-benefit.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-benefit.svg", "gov-benefit.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "maal": {
+      "theme": {
+        "layout": "Oman Payment Gateway",
+        "colors": {
+          "primary": "#D0032C",
+          "secondary": "#FFFFFF",
+          "bg": "#FFF5F5"
+        },
+        "font": "Inter",
+        "logo": "gov-maal.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-maal.svg", "gov-maal.png"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "dhl": {
+      "theme": {
+        "layout": "Shipping & Tracking",
+        "colors": {
+          "primary": "#FFCC00",
+          "secondary": "#D40511",
+          "bg": "#FFFDE7"
+        },
+        "font": "DIN_Next_Arabic_Medium",
+        "logo": "dhl-logo.svg",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-dhl.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "smsa": {
+      "theme": {
+        "layout": "Shipping & Tracking",
+        "colors": {
+          "primary": "#662D91",
+          "secondary": "#FF6600",
+          "bg": "#EDE7F6"
+        },
+        "font": "DIN_Next_Arabic_Medium",
+        "logo": "smsa-logo.svg",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-smsa.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "naqel": {
+      "theme": {
+        "layout": "Shipping & Tracking",
+        "colors": {
+          "primary": "#E61838",
+          "secondary": "#002E60",
+          "bg": "#FFF5F5"
+        },
+        "font": "DIN_Next_Arabic_Medium",
+        "logo": "og-naqel.jpg",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-naqel.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "fedex": {
+      "theme": {
+        "layout": "Shipping & Tracking",
+        "colors": {
+          "primary": "#4D148C",
+          "secondary": "#FF6600",
+          "bg": "#F3E8FF"
+        },
+        "font": "DIN_Next_Arabic_Medium",
+        "logo": "fedex-logo.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-fedex.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "ups": {
+      "theme": {
+        "layout": "Shipping & Tracking",
+        "colors": {
+          "primary": "#351C15",
+          "secondary": "#FFB500",
+          "bg": "#FFF3E0"
+        },
+        "font": "DIN_Next_Arabic_Medium",
+        "logo": "ups-logo.png",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-ups.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "alrajhi_bank": {
+      "theme": {
+        "layout": "Islamic Banking",
+        "colors": {
+          "primary": "#1B3A6B",
+          "secondary": "#F7C24A",
+          "bg": "#F0F4F8"
+        },
+        "font": "Inter",
+        "logo": "bank-logos/alrajhi-bank.svg",
+        "dimensions": {
+          "container_width": "400px",
+          "button_height": "48px",
+          "radius": "8px"
+        }
+      },
+      "assets_to_inject": ["hero-alrajhi.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "snb": {
+      "theme": {
+        "layout": "National Banking",
+        "colors": {
+          "primary": "#1A1A6E",
+          "secondary": "#D4AF37",
+          "bg": "#F0F0FF"
+        },
+        "font": "Inter",
+        "logo": "bank-logos/snb.svg",
+        "dimensions": {
+          "container_width": "400px",
+          "button_height": "48px",
+          "radius": "8px"
+        }
+      },
+      "assets_to_inject": ["hero-snb.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "enbd": {
+      "theme": {
+        "layout": "Emirates Banking",
+        "colors": {
+          "primary": "#F37021",
+          "secondary": "#333333",
+          "bg": "#FFF8F0"
+        },
+        "font": "Inter",
+        "logo": "bank-logos/emirates-nbd.svg",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-enbd.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "mada": {
+      "theme": {
+        "layout": "Saudi Payment Network",
+        "colors": {
+          "primary": "#004D8F",
+          "secondary": "#69BE28",
+          "bg": "#E3F2FD"
+        },
+        "font": "Inter",
+        "logo": "bank-logos/mada.svg",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-mada.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    },
+    "stc_pay": {
+      "theme": {
+        "layout": "Digital Wallet",
+        "colors": {
+          "primary": "#5F259F",
+          "secondary": "#FFFFFF",
+          "bg": "#F3E8FF"
+        },
+        "font": "Inter",
+        "logo": "bank-logos/stc-pay.svg",
+        "dimensions": {
+          "container_width": "428px",
+          "button_height": "52px",
+          "radius": "12px"
+        }
+      },
+      "assets_to_inject": ["hero-stc-pay.svg"],
+      "remove_from_ui": [".apple-pay", ".google-pay"]
+    }
+  },
+  "global_rules": {
+    "always_remove": [".apple-pay", ".google-pay", ".visa-checkout", ".global-wallet", ".international-icons"],
+    "default_fallback": "aramex",
+    "rtl_default": true,
+    "default_font": "Almarai"
+  }
+}

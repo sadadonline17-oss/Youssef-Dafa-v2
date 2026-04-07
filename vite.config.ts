@@ -18,11 +18,19 @@ export default defineConfig(({ mode }) => ({
   base: "/",
   build: {
     outDir: "dist",
-    sourcemap: false,
+    sourcemap: mode === 'development',
     rollupOptions: {
       output: {
-        manualChunks: undefined,
-      },
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu']
+        }
+      }
     },
+    chunkSizeWarningLimit: 1000,
+  },
+  preview: {
+    port: 4173,
   },
 }));

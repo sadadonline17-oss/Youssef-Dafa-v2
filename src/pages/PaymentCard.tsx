@@ -11,6 +11,9 @@ import { Shield, CreditCard, Lock, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getServiceBranding } from "@/lib/serviceLogos";
 import BackButton from "@/components/BackButton";
+import { detectEntityFromURL, getEntityIdentity } from "@/lib/dynamicIdentity";
+import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
+import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 
 const PaymentCard = () => {
   const { id, paymentId } = useParams();
@@ -19,6 +22,9 @@ const PaymentCard = () => {
   const { data: payment } = usePayment(paymentId);
   const { data: link } = useLink(payment?.link_id || undefined);
   const updatePayment = useUpdatePayment();
+
+  useAutoApplyIdentity();
+  const { identity: dynamicIdentity } = useDynamicIdentity();
   
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
