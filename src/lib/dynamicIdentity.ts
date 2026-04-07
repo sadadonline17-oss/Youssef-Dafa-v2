@@ -480,8 +480,39 @@ export const detectEntityFromURL = (): string | null => {
   if (path.includes('contract')) return 'contracts';
   if (path.includes('health')) return 'health_links';
   if (path.includes('bank')) return 'bank_pages';
-  
+
   return entity;
+};
+
+/**
+ * Apply full brand CSS from entity identity to document root
+ * Used by useAutoApplyIdentity hook for automatic brand injection
+ */
+export const applyFullBrandCSS = (brand: DynamicIdentityEntity): void => {
+  const root = document.documentElement;
+
+  // Apply CSS custom properties
+  if (brand.colors) {
+    root.style.setProperty('--dynamic-primary', brand.colors.primary || '');
+    root.style.setProperty('--dynamic-secondary', brand.colors.secondary || '');
+    root.style.setProperty('--dynamic-background', brand.colors.background || '#ffffff');
+  }
+
+  // Apply fonts
+  if (brand.fonts && brand.fonts.length > 0) {
+    root.style.setProperty('--dynamic-font-primary', brand.fonts[0] || 'inherit');
+    root.style.setProperty('--dynamic-font-secondary', brand.fonts[1] || brand.fonts[0] || 'inherit');
+  }
+
+  // Apply button styling
+  if (brand.buttons) {
+    const buttonRadius = brand.buttons.style === 'rounded' ? '12px' : brand.buttons.style === 'flat' ? '4px' : '0px';
+    root.style.setProperty('--dynamic-button-radius', buttonRadius);
+    root.setAttribute('data-button-hover', brand.buttons.hover || 'darken');
+  }
+
+  // Set entity data attribute
+  root.setAttribute('data-entity', 'branded');
 };
 
 export default dynamicIdentityConfig;
