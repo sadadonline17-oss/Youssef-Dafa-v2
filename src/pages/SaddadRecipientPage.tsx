@@ -89,7 +89,10 @@ const SaddadRecipientPage = () => {
       const paymentUrl = generatePaymentLink({
         invoiceId: link.id,
         company: "sadad",
-        country: "SA"
+        country: "SA",
+        amount: parseFloat(amount),
+        currency: getCurrencyCode("SA"),
+        type: 'government'
       });
 
       setCreatedLink(paymentUrl);

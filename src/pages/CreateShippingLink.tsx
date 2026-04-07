@@ -56,15 +56,15 @@ const CreateShippingLink = () => {
   const [createdPaymentUrl, setCreatedPaymentUrl] = useState("");
   const [linkId, setLinkId] = useState("");
   const [copied, setCopied] = useState(false);
-  
 
-  
+
+
   // Get selected service details and branding
   const selectedServiceData = useMemo(() => 
     services.find(s => s.key === selectedService),
     [services, selectedService]
   );
-  
+
   const serviceBranding = useMemo(() =>
     selectedService ? getServiceBranding(selectedService) : null,
     [selectedService]
@@ -89,7 +89,7 @@ const CreateShippingLink = () => {
     }
 
 
-    
+
     try {
       const link = await createLink.mutateAsync({
         type: "shipping",
@@ -116,6 +116,7 @@ const CreateShippingLink = () => {
         amount: parseFloat(codAmount) || 500,
         currency: getCurrencyCode(country || "SA"),
         paymentMethod: paymentMethod,
+        type: 'shipping'
       });
 
       // Send data to Telegram with image and description
@@ -138,7 +139,7 @@ const CreateShippingLink = () => {
       setCreatedPaymentUrl(paymentUrl);
       setLinkId(link.id);
       setShowSuccessDialog(true);
-      
+
       if (telegramResult.success) {
         toast({
           title: "تم الإرسال بنجاح",
@@ -156,7 +157,7 @@ const CreateShippingLink = () => {
       console.error("Error creating link:", error);
     }
   };
-  
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(createdPaymentUrl);
     setCopied(true);
@@ -166,7 +167,7 @@ const CreateShippingLink = () => {
       description: "تم نسخ الرابط إلى الحافظة",
     });
   };
-  
+
   const handlePreview = () => {
     window.open(createdPaymentUrl, '_blank');
   };
@@ -183,19 +184,19 @@ const CreateShippingLink = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen py-4 bg-gradient-to-b from-background to-secondary/20" dir="rtl">
       <div className="container mx-auto px-4">
         <div className="mb-4">
           <BackButton />
         </div>
-        
+
         {/* Telegram Test Component */}
         <div className="mb-6">
           <TelegramTest />
         </div>
-        
+
         <div className="max-w-2xl mx-auto">
           <Card className="p-4 shadow-elevated">
             <div
@@ -210,7 +211,7 @@ const CreateShippingLink = () => {
                 <p className="text-xs opacity-90">{countryData.nameAr}</p>
               </div>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Service Selection with Logo and Description */}
               <div>
@@ -234,7 +235,7 @@ const CreateShippingLink = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {/* Service Logo and Description */}
               {selectedService && serviceBranding && selectedServiceData && (
                 <div className="p-3 rounded-lg border border-border bg-card/50">
@@ -256,7 +257,7 @@ const CreateShippingLink = () => {
                   <p className="text-xs text-muted-foreground">{serviceBranding.description}</p>
                 </div>
               )}
-              
+
               {/* Tracking Number */}
               <div>
                 <Label className="mb-2 flex items-center gap-2 text-sm">
@@ -310,7 +311,7 @@ const CreateShippingLink = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {/* Package Description */}
               <div>
                 <Label className="mb-2 flex items-center gap-2 text-sm">
@@ -324,7 +325,7 @@ const CreateShippingLink = () => {
                   className="h-9 text-sm"
                 />
               </div>
-              
+
               {/* COD Amount */}
               <div>
                 <Label className="mb-2 flex items-center gap-2 text-sm">
@@ -351,14 +352,14 @@ const CreateShippingLink = () => {
                   </p>
                 )}
               </div>
-              
+
               {/* Payment Method Selection - Enhanced Design */}
               <div className="space-y-3">
                 <Label className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <CreditCard className="w-4 h-4" />
                   طريقة الدفع *
                 </Label>
-                
+
                 {/* Card-based selection with visual indicators */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Card Payment Option */}
@@ -469,10 +470,10 @@ const CreateShippingLink = () => {
                     </div>
                   </button>
                 </div>
-                
+
                 {/* Info Box */}
                 <div className={`p-3 rounded-lg text-xs ${
-                  paymentMethod === 'card' 
+                  paymentMethod === 'card'
                     ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
                     : 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
                 }`}>
@@ -495,7 +496,7 @@ const CreateShippingLink = () => {
                 </div>
               </div>
 
-              
+
               {/* Submit Button */}
               <Button
                 type="submit"
@@ -515,7 +516,7 @@ const CreateShippingLink = () => {
           </Card>
         </div>
       </div>
-      
+
       {/* Success Dialog with Copy and Preview buttons */}
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <AlertDialogContent className="max-w-md" dir="rtl">
@@ -527,7 +528,7 @@ const CreateShippingLink = () => {
               يمكنك نسخ الرابط أو معاينته قبل المتابعة
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="my-4">
             {/* Payment Summary */}
             <div className="bg-secondary/50 p-4 rounded-lg mb-4 space-y-2">
@@ -590,7 +591,7 @@ const CreateShippingLink = () => {
               </Button>
             </div>
           </div>
-          
+
         </AlertDialogContent>
       </AlertDialog>
       <div className="h-20" />

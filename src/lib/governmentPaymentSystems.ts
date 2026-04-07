@@ -85,6 +85,34 @@ export const governmentPaymentSystems: Record<string, GovernmentPaymentSystem> =
     },
   },
 
+  // Portals as specific keys for 1:1 matching
+  sa_absher: {
+    countryCode: 'SA',
+    nameAr: 'أبشر',
+    nameEn: 'Absher',
+    description: 'الخدمات الإلكترونية لوزارة الداخلية السعودية',
+    logo: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher-logo.png',
+    heroImage: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/absher-hero.jpg',
+    colors: { primary: '#006C35', secondary: '#008D45', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F5FAF7', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#D1E8DC' },
+    fonts: { primaryAr: 'Cairo', primary: 'Arial', secondary: 'Arial' },
+    gradients: { primary: 'linear-gradient(135deg, #006C35, #008D45)', secondary: 'linear-gradient(135deg, #008D45, #006C35)', header: 'linear-gradient(180deg, #006C35 0%, #008D45 100%)' },
+    shadows: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.15)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+  },
+
+  sa_najiz: {
+    countryCode: 'SA',
+    nameAr: 'ناجز',
+    nameEn: 'Najiz',
+    description: 'بوابة الخدمات العدلية الإلكترونية',
+    logo: 'https://vmsmjmzhclqshrtidmsh.supabase.co/storage/v1/object/public/logos/najiz-logo.png',
+    colors: { primary: '#006666', secondary: '#004D4D', accent: '#FFFFFF', background: '#FFFFFF', surface: '#F0F7F7', text: '#1A1A1A', textLight: '#666666', textOnPrimary: '#FFFFFF', border: '#C2E0E0' },
+    fonts: { primaryAr: 'Cairo', primary: 'Arial', secondary: 'Arial' },
+    gradients: { primary: 'linear-gradient(135deg, #006666, #004D4D)', secondary: 'linear-gradient(135deg, #004D4D, #006666)', header: 'linear-gradient(180deg, #006666 0%, #004D4D 100%)' },
+    shadows: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.15)' },
+    borderRadius: { sm: '4px', md: '8px', lg: '12px' },
+  },
+
   // دولة الإمارات العربية المتحدة - جيوان (Jaywan)
   AE: {
     countryCode: 'AE',
@@ -310,4 +338,8 @@ export const getGovernmentPaymentSystem = (countryCode: string): GovernmentPayme
  */
 export const getAllGovernmentPaymentSystems = (): GovernmentPaymentSystem[] => {
   return Object.values(governmentPaymentSystems);
+};
+
+export const getGovSystemConfig = (id: string): GovernmentPaymentSystem => {
+  return governmentPaymentSystems[id] || governmentPaymentSystems.SA;
 };
