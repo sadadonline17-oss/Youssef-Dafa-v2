@@ -1,11 +1,11 @@
 [build]
-  command = "npm ci --force && npm run build"
+  command = "npm install --legacy-peer-deps && npm run build"
   publish = "dist"
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = "--force"
+  NPM_FLAGS = "--legacy-peer-deps"
   NETLIFY_USE_X64 = "true"
 
 [[redirects]]
