@@ -10,36 +10,38 @@
 
 /* ══════════════════════════════════════════════
    SADAD (Saudi Arabia) — Exact Production Match
+   Primary: #FF6B00 (Orange) — Official SADAD OLP
    ══════════════════════════════════════════════ */
 
 .entity-sadad-sa .payment-header {
-  background: linear-gradient(135deg, #006633 0%, #004D26 100%) !important;
-  border-bottom: 3px solid #F58220 !important;
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8A33 100%) !important;
+  border-bottom: 3px solid #FF6B00 !important;
 }
 
 .entity-sadad-sa .payment-card {
   border-radius: 12px !important;
-  box-shadow: 0 1px 3px rgba(0, 102, 51, 0.08), 0 1px 2px rgba(0, 102, 51, 0.06) !important;
-  border: 1px solid #C2E0D1 !important;
+  box-shadow: 0 1px 3px rgba(255, 107, 0, 0.08), 0 1px 2px rgba(255, 107, 0, 0.06) !important;
+  border: 1px solid #E5E5E5 !important;
 }
 
 .entity-sadad-sa .payment-button,
 .entity-sadad-sa button[type="submit"],
 .entity-sadad-sa [data-variant="primary"] {
-  background: #006633 !important;
+  background: #FF6B00 !important;
   color: #FFFFFF !important;
-  border-radius: 10px !important;
-  height: 52px !important;
+  border-radius: 12px !important;
+  height: 56px !important;
   font-weight: 600 !important;
-  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
-  box-shadow: 0 4px 14px -2px rgba(0, 102, 51, 0.30) !important;
+  font-family: 'DIN Next Arabic Medium', 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 15px -2px rgba(255, 107, 0, 0.30) !important;
   transition: all 0.2s ease !important;
 }
 
 .entity-sadad-sa .payment-button:hover,
 .entity-sadad-sa button[type="submit"]:hover {
-  box-shadow: 0 6px 20px -2px rgba(0, 102, 51, 0.40) !important;
+  box-shadow: 0 6px 20px -2px rgba(255, 107, 0, 0.40) !important;
   transform: translateY(-1px) !important;
+  filter: brightness(1.05) !important;
 }
 
 .entity-sadad-sa .payment-input,
@@ -48,20 +50,20 @@
 .entity-sadad-sa textarea {
   border-radius: 8px !important;
   border: 1px solid #D1D5DB !important;
-  padding: 14px 16px !important;
+  padding: 16px 20px !important;
   font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
 }
 
 .entity-sadad-sa .payment-input:focus,
 .entity-sadad-sa input:focus,
 .entity-sadad-sa select:focus {
-  border-color: #006633 !important;
-  box-shadow: 0 0 0 3px rgba(0, 102, 51, 0.20) !important;
+  border-color: #FF6B00 !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.20) !important;
 }
 
 .entity-sadad-sa .amount-display {
   font-family: 'DIN Next', 'DIN Next Arabic', monospace !important;
-  color: #006633 !important;
+  color: #FF6B00 !important;
   font-weight: 700 !important;
 }
 
@@ -108,28 +110,29 @@
 
 /* ══════════════════════════════════════════════
    KNET (Kuwait) — Exact Production Match
+   Primary: #005696 (Blue) — Official KNET
    ══════════════════════════════════════════════ */
 
 .entity-knet-kw .payment-header {
-  background: linear-gradient(135deg, #003366 0%, #CE1126 100%) !important;
-  border-bottom: 3px solid #003366 !important;
+  background: linear-gradient(135deg, #005696 0%, #0078C2 100%) !important;
+  border-bottom: 3px solid #005696 !important;
 }
 
 .entity-knet-kw .payment-card {
   border-radius: 10px !important;
-  box-shadow: 0 1px 3px rgba(0, 51, 102, 0.08), 0 1px 2px rgba(0, 51, 102, 0.04) !important;
+  box-shadow: 0 1px 3px rgba(0, 86, 150, 0.08), 0 1px 2px rgba(0, 86, 150, 0.04) !important;
   border: 1px solid #D4DDE6 !important;
 }
 
 .entity-knet-kw .payment-button,
 .entity-knet-kw button[type="submit"] {
-  background: #003366 !important;
+  background: #005696 !important;
   color: #FFFFFF !important;
   border-radius: 6px !important;
   height: 54px !important;
   font-weight: 600 !important;
-  font-family: 'Kuwait Standard', 'DIN Next Arabic', sans-serif !important;
-  box-shadow: 0 4px 14px -2px rgba(0, 51, 102, 0.25) !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 86, 150, 0.25) !important;
 }
 
 .entity-knet-kw .payment-input,
@@ -138,13 +141,13 @@
   border-radius: 8px !important;
   border: 1px solid #D1D5DB !important;
   padding: 14px 16px !important;
-  font-family: 'Kuwait Standard', 'DIN Next Arabic', sans-serif !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
 }
 
 .entity-knet-kw .payment-input:focus,
 .entity-knet-kw input:focus {
-  border-color: #003366 !important;
-  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.20) !important;
+  border-color: #005696 !important;
+  box-shadow: 0 0 0 3px rgba(0, 86, 150, 0.20) !important;
 }
 
 /* ══════════════════════════════════════════════
