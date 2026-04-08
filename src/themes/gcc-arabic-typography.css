@@ -1,0 +1,295 @@
+/**
+ * GCC Arabic Typography — Font Loading & Fallbacks
+ * 
+ * Loads official Arabic fonts used across GCC government apps:
+ * - DIN Next Arabic (Saudi Arabia — SADAD, Nafath, Al Rajhi)
+ * - Taysir Arabic (Saudi Arabia — Absher, Government portals)
+ * - Dubai Font (UAE — UAE Pass, DubaiPay, Sahel)
+ * - Kuwait Standard (Kuwait — KNET, Tasdeed)
+ * - Cairo (Universal fallback — all GCC)
+ * - Tajawal (Secondary fallback — all GCC)
+ * 
+ * STRICT NON-INVASIVE: Only @font-face declarations. Zero logic.
+ */
+
+/* ──────────────────────────────────────────────
+   DIN Next Arabic — Saudi Government Standard
+   Used by: SADAD, Nafath, Al Rajhi Bank, SNB
+   ────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'DIN Next Arabic';
+  src:
+    local('DIN Next Arabic'),
+    local('DINNextArabic'),
+    local('DIN Next Arabic Regular'),
+    url('/assets/mirrors/fonts/DINNextArabic-Regular.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/DINNextArabic-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'DIN Next Arabic';
+  src:
+    local('DIN Next Arabic Medium'),
+    local('DINNextArabic-Medium'),
+    url('/assets/mirrors/fonts/DINNextArabic-Medium.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/DINNextArabic-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'DIN Next Arabic';
+  src:
+    local('DIN Next Arabic Bold'),
+    local('DINNextArabic-Bold'),
+    url('/assets/mirrors/fonts/DINNextArabic-Bold.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/DINNextArabic-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* ──────────────────────────────────────────────
+   Taysir Arabic — Saudi Government Portals
+   Used by: Nafath, Absher, Ministry portals
+   ────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Taysir Arabic';
+  src:
+    local('Taysir Arabic'),
+    local('TaysirArabic'),
+    local('Taysir'),
+    url('/assets/mirrors/fonts/TaysirArabic-Regular.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/TaysirArabic-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'Taysir Arabic';
+  src:
+    local('Taysir Arabic Bold'),
+    local('TaysirArabic-Bold'),
+    url('/assets/mirrors/fonts/TaysirArabic-Bold.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/TaysirArabic-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* ──────────────────────────────────────────────
+   Dubai Font — UAE Government Standard
+   Used by: UAE Pass, DubaiPay, Sahel, Digital Dubai
+   ────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Dubai Font';
+  src:
+    local('Dubai'),
+    local('Dubai Regular'),
+    local('DubaiFont'),
+    url('/assets/mirrors/fonts/Dubai-Regular.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/Dubai-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+0020-007E;
+}
+
+@font-face {
+  font-family: 'Dubai Font';
+  src:
+    local('Dubai Medium'),
+    local('DubaiFont-Medium'),
+    url('/assets/mirrors/fonts/Dubai-Medium.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/Dubai-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+0020-007E;
+}
+
+@font-face {
+  font-family: 'Dubai Font';
+  src:
+    local('Dubai Bold'),
+    local('DubaiFont-Bold'),
+    url('/assets/mirrors/fonts/Dubai-Bold.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/Dubai-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+0020-007E;
+}
+
+/* ──────────────────────────────────────────────
+   Kuwait Standard — Kuwait Government
+   Used by: KNET, Tasdeed, PACI
+   ────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Kuwait Standard';
+  src:
+    local('Kuwait Standard'),
+    local('KuwaitStandard'),
+    local('Kuwait'),
+    url('/assets/mirrors/fonts/KuwaitStandard-Regular.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/KuwaitStandard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'Kuwait Standard';
+  src:
+    local('Kuwait Standard Bold'),
+    local('KuwaitStandard-Bold'),
+    url('/assets/mirrors/fonts/KuwaitStandard-Bold.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/KuwaitStandard-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* ──────────────────────────────────────────────
+   Cairo — Universal GCC Fallback
+   Used by: All GCC countries as secondary
+   ────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Cairo';
+  src:
+    local('Cairo'),
+    local('Cairo Regular'),
+    url('https://fonts.gstatic.com/s/cairo/v28/SLXGc1d-6K8e0NpAq7qJYQ.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src:
+    local('Cairo Bold'),
+    url('https://fonts.gstatic.com/s/cairo/v28/SLXGc1d-6K8e0NpAq7qJYQ.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* ──────────────────────────────────────────────
+   Tajawal — Secondary GCC Fallback
+   Used by: All GCC countries as secondary
+   ────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    local('Tajawal'),
+    local('Tajawal Regular'),
+    url('https://fonts.gstatic.com/s/tajawal/v9/Iura6YBj_oCad4k1lZqkHJ4.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    local('Tajawal Bold'),
+    url('https://fonts.gstatic.com/s/tajawal/v9/Iura6YBj_oCad4k1lZqkHJ4.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* ──────────────────────────────────────────────
+   DIN Next (Latin) — Numeric & English Text
+   Used by: All GCC for numbers and English labels
+   ────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'DIN Next';
+  src:
+    local('DIN Next'),
+    local('DINNext'),
+    local('DIN Next Regular'),
+    url('/assets/mirrors/fonts/DINNext-Regular.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/DINNext-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DIN Next';
+  src:
+    local('DIN Next Medium'),
+    local('DINNext-Medium'),
+    url('/assets/mirrors/fonts/DINNext-Medium.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/DINNext-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DIN Next';
+  src:
+    local('DIN Next Bold'),
+    local('DINNext-Bold'),
+    url('/assets/mirrors/fonts/DINNext-Bold.woff2') format('woff2'),
+    url('/assets/mirrors/fonts/DINNext-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ──────────────────────────────────────────────
+   Global Arabic Font Defaults
+   ────────────────────────────────────────────── */
+
+html[lang="ar"],
+html[dir="rtl"],
+body[dir="rtl"] {
+  font-family: 'Cairo', 'Tajawal', 'DIN Next Arabic', 'Dubai Font', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Ensure Arabic text renders correctly */
+.arabic-text,
+[dir="rtl"] *,
+[lang="ar"] * {
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Number formatting for GCC currencies */
+.gcc-amount,
+[data-gcc-amount] {
+  font-family: 'DIN Next', 'DIN Next Arabic', 'Tajawal', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}

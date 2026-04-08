@@ -1,0 +1,188 @@
+/**
+ * GCC Sovereign Visual Purge — Global Payment Icons Removal
+ * 
+ * STRICT PURGE: Hides Apple Pay, Google Pay, and all non-GCC payment visuals.
+ * Ensures 100% "sovereign" GCC identity on payment pages.
+ * 
+ * Commit Lock: fd3b9de — FROZEN. CSS-only, zero logic.
+ */
+
+/* ── Apple Pay Purge ── */
+[class*="apple-pay"],
+[class*="applepay"],
+[class*="ApplePay"],
+[class*="apple_pay"],
+[id*="apple-pay"],
+[id*="applepay"],
+[id*="ApplePay"],
+[data-testid*="apple-pay"],
+[data-testid*="applepay"],
+img[alt*="Apple Pay" i],
+img[alt*="apple-pay" i],
+img[alt*="applepay" i],
+svg[aria-label*="Apple Pay" i],
+svg[aria-label*="apple-pay" i],
+.apple-pay-button,
+.apple-pay-badge,
+.-apple-pay,
+[data-payment-method*="apple_pay"],
+[data-payment-type*="apple"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+/* ── Google Pay Purge ── */
+[class*="google-pay"],
+[class*="googlepay"],
+[class*="GooglePay"],
+[class*="google_pay"],
+[class*="gpay"],
+[class*="GPay"],
+[id*="google-pay"],
+[id*="googlepay"],
+[id*="GooglePay"],
+[id*="gpay"],
+[id*="GPay"],
+[data-testid*="google-pay"],
+[data-testid*="googlepay"],
+[data-testid*="gpay"],
+img[alt*="Google Pay" i],
+img[alt*="google-pay" i],
+img[alt*="gpay" i],
+svg[aria-label*="Google Pay" i],
+svg[aria-label*="google-pay" i],
+.google-pay-button,
+.google-pay-badge,
+.gpay-button,
+[data-payment-method*="google_pay"],
+[data-payment-type*="google"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+/* ── Samsung Pay Purge ── */
+[class*="samsung-pay"],
+[class*="samsungpay"],
+[class*="SamsungPay"],
+[id*="samsung-pay"],
+[id*="samsungpay"],
+[data-testid*="samsung-pay"],
+img[alt*="Samsung Pay" i],
+svg[aria-label*="Samsung Pay" i],
+.samsung-pay-button,
+[data-payment-method*="samsung_pay"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+/* ── PayPal Purge (non-GCC) ── */
+[class*="paypal"],
+[class*="PayPal"],
+[id*="paypal"],
+[data-testid*="paypal"],
+img[alt*="PayPal" i],
+svg[aria-label*="PayPal" i],
+.paypal-button,
+.paypal-badge,
+[data-payment-method*="paypal"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+/* ── Stripe Purge (non-GCC) ── */
+[class*="stripe"],
+[class*="Stripe"],
+[id*="stripe"],
+[data-testid*="stripe"],
+img[alt*="Stripe" i],
+svg[aria-label*="Stripe" i],
+.stripe-button,
+.stripe-badge,
+[data-payment-method*="stripe"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+/* ── Visa/Mastercard Icon Purge (keep text, hide logos) ── */
+/* Only hide standalone icon images, not text references */
+img.visa-logo,
+img.mastercard-logo,
+img[class*="visa-logo"],
+img[class*="mastercard-logo"],
+img[class*="visa-icon"],
+img[class*="mastercard-icon"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* ── Generic Global Payment Method Purge ── */
+[data-payment-provider*="global"],
+[data-payment-type*="international"],
+[class*="international-payment"],
+[class*="global-payment"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ── Ensure GCC payment methods remain visible ── */
+/* Whitelist: SADAD, KNET, Benefit, Mada, Nafath, etc. */
+[class*="sadad"],
+[class*="knet"],
+[class*="benefit"],
+[class*="mada"],
+[class*="nafath"],
+[class*="absher"],
+[class*="fawri"],
+[class*="maal"],
+[class*="jaywan"],
+[class*="dirham"],
+[class*="hukoomi"],
+[class*="sahel"],
+[class*="dubai-pay"],
+[class*="uae-pass"],
+[class*="tasdeed"],
+[class*="kahramaa"],
+[class*="stc-pay"],
+[class*="stcpay"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

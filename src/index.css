@@ -2,7 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
+/* ── GCC Chameleon System — Arabic Typography ── */
+@import './themes/gcc-arabic-typography.css';
+
+/* ── GCC Chameleon System — Entity-Specific Overrides ── */
+@import './themes/gcc-entity-overrides.css';
+
+/* ── GCC Chameleon System — Sovereign Visual Purge ── */
+@import './themes/gcc-sovereign-purge.css';
+
+/* Definition of the design system. All colors, gradients, gradients, etc should be defined here.
 All colors MUST be HSL.
 */
 

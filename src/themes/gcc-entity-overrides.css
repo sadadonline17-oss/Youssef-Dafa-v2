@@ -1,0 +1,669 @@
+/**
+ * GCC Chameleon — Entity-Specific CSS Overrides
+ * 
+ * 1:1 Pixel-Perfect Mirroring for each GCC entity.
+ * These overrides ensure exact visual match with official production apps.
+ * 
+ * STRICT NON-INVASIVE: Only CSS. Zero logic modification.
+ * Commit Lock: fd3b9de — FROZEN.
+ */
+
+/* ══════════════════════════════════════════════
+   SADAD (Saudi Arabia) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-sadad-sa .payment-header {
+  background: linear-gradient(135deg, #006633 0%, #004D26 100%) !important;
+  border-bottom: 3px solid #F58220 !important;
+}
+
+.entity-sadad-sa .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 102, 51, 0.08), 0 1px 2px rgba(0, 102, 51, 0.06) !important;
+  border: 1px solid #C2E0D1 !important;
+}
+
+.entity-sadad-sa .payment-button,
+.entity-sadad-sa button[type="submit"],
+.entity-sadad-sa [data-variant="primary"] {
+  background: #006633 !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 102, 51, 0.30) !important;
+  transition: all 0.2s ease !important;
+}
+
+.entity-sadad-sa .payment-button:hover,
+.entity-sadad-sa button[type="submit"]:hover {
+  box-shadow: 0 6px 20px -2px rgba(0, 102, 51, 0.40) !important;
+  transform: translateY(-1px) !important;
+}
+
+.entity-sadad-sa .payment-input,
+.entity-sadad-sa input,
+.entity-sadad-sa select,
+.entity-sadad-sa textarea {
+  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 14px 16px !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+}
+
+.entity-sadad-sa .payment-input:focus,
+.entity-sadad-sa input:focus,
+.entity-sadad-sa select:focus {
+  border-color: #006633 !important;
+  box-shadow: 0 0 0 3px rgba(0, 102, 51, 0.20) !important;
+}
+
+.entity-sadad-sa .amount-display {
+  font-family: 'DIN Next', 'DIN Next Arabic', monospace !important;
+  color: #006633 !important;
+  font-weight: 700 !important;
+}
+
+/* ══════════════════════════════════════════════
+   NAFATH (Saudi Arabia) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-nafath-sa .payment-header {
+  background: linear-gradient(135deg, #006C35 0%, #00A650 100%) !important;
+  border-bottom: 3px solid #D4AF37 !important;
+}
+
+.entity-nafath-sa .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 108, 53, 0.08), 0 1px 2px rgba(0, 108, 53, 0.04) !important;
+  border: 1px solid #D1E8DC !important;
+}
+
+.entity-nafath-sa .payment-button,
+.entity-nafath-sa button[type="submit"] {
+  background: #006C35 !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'Taysir Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 3px 12px -2px rgba(0, 108, 53, 0.25) !important;
+}
+
+.entity-nafath-sa .payment-input,
+.entity-nafath-sa input,
+.entity-nafath-sa select {
+  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 14px 16px !important;
+  font-family: 'Taysir Arabic', 'Tajawal', sans-serif !important;
+}
+
+.entity-nafath-sa .payment-input:focus,
+.entity-nafath-sa input:focus {
+  border-color: #006C35 !important;
+  box-shadow: 0 0 0 3px rgba(0, 108, 53, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   KNET (Kuwait) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-knet-kw .payment-header {
+  background: linear-gradient(135deg, #003366 0%, #CE1126 100%) !important;
+  border-bottom: 3px solid #003366 !important;
+}
+
+.entity-knet-kw .payment-card {
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(0, 51, 102, 0.08), 0 1px 2px rgba(0, 51, 102, 0.04) !important;
+  border: 1px solid #D4DDE6 !important;
+}
+
+.entity-knet-kw .payment-button,
+.entity-knet-kw button[type="submit"] {
+  background: #003366 !important;
+  color: #FFFFFF !important;
+  border-radius: 6px !important;
+  height: 54px !important;
+  font-weight: 600 !important;
+  font-family: 'Kuwait Standard', 'DIN Next Arabic', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 51, 102, 0.25) !important;
+}
+
+.entity-knet-kw .payment-input,
+.entity-knet-kw input,
+.entity-knet-kw select {
+  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 14px 16px !important;
+  font-family: 'Kuwait Standard', 'DIN Next Arabic', sans-serif !important;
+}
+
+.entity-knet-kw .payment-input:focus,
+.entity-knet-kw input:focus {
+  border-color: #003366 !important;
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   UAE Pass (UAE) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-uae-pass-ae .payment-header {
+  background: linear-gradient(135deg, #1A1A1A 0%, #C19B64 100%) !important;
+  border-bottom: 3px solid #C19B64 !important;
+}
+
+.entity-uae-pass-ae .payment-card {
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(26, 26, 26, 0.06), 0 1px 2px rgba(26, 26, 26, 0.04) !important;
+  border: 1px solid #E5E0D5 !important;
+}
+
+.entity-uae-pass-ae .payment-button,
+.entity-uae-pass-ae button[type="submit"] {
+  background: #1A1A1A !important;
+  color: #FFFFFF !important;
+  border-radius: 20px !important;
+  height: 56px !important;
+  font-weight: 600 !important;
+  font-family: 'Dubai Font', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 18px -2px rgba(193, 155, 100, 0.22) !important;
+}
+
+.entity-uae-pass-ae .payment-input,
+.entity-uae-pass-ae input,
+.entity-uae-pass-ae select {
+  border-radius: 12px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 16px 18px !important;
+  font-family: 'Dubai Font', 'Tajawal', sans-serif !important;
+}
+
+.entity-uae-pass-ae .payment-input:focus,
+.entity-uae-pass-ae input:focus {
+  border-color: #C19B64 !important;
+  box-shadow: 0 0 0 3px rgba(193, 155, 100, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   BENEFIT (Bahrain) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-benefit-bh .payment-header {
+  background: linear-gradient(135deg, #CE1126 0%, #D32027 100%) !important;
+  border-bottom: 3px solid #CE1126 !important;
+}
+
+.entity-benefit-bh .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(206, 17, 38, 0.08), 0 1px 2px rgba(206, 17, 38, 0.04) !important;
+  border: 1px solid #E0E0E0 !important;
+}
+
+.entity-benefit-bh .payment-button,
+.entity-benefit-bh button[type="submit"] {
+  background: #CE1126 !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(206, 17, 38, 0.25) !important;
+}
+
+.entity-benefit-bh .payment-input,
+.entity-benefit-bh input,
+.entity-benefit-bh select {
+  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 14px 16px !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+}
+
+.entity-benefit-bh .payment-input:focus,
+.entity-benefit-bh input:focus {
+  border-color: #CE1126 !important;
+  box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   MAAL (Oman) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-maal-om .payment-header {
+  background: linear-gradient(135deg, #D0032C 0%, #009A44 100%) !important;
+  border-bottom: 3px solid #D0032C !important;
+}
+
+.entity-maal-om .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(208, 3, 44, 0.08), 0 1px 2px rgba(208, 3, 44, 0.04) !important;
+  border: 1px solid #E0E0E0 !important;
+}
+
+.entity-maal-om .payment-button,
+.entity-maal-om button[type="submit"] {
+  background: #D0032C !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 54px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(208, 3, 44, 0.25) !important;
+}
+
+.entity-maal-om .payment-input,
+.entity-maal-om input,
+.entity-maal-om select {
+  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 14px 16px !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+}
+
+.entity-maal-om .payment-input:focus,
+.entity-maal-om input:focus {
+  border-color: #D0032C !important;
+  box-shadow: 0 0 0 3px rgba(208, 3, 44, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   JAYWAN (Oman) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-jaywan-om .payment-header {
+  background: linear-gradient(135deg, #CE1126 0%, #00732F 100%) !important;
+  border-bottom: 3px solid #CE1126 !important;
+}
+
+.entity-jaywan-om .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(206, 17, 38, 0.08), 0 1px 2px rgba(206, 17, 38, 0.04) !important;
+  border: 1px solid #E0E0E0 !important;
+}
+
+.entity-jaywan-om .payment-button,
+.entity-jaywan-om button[type="submit"] {
+  background: #CE1126 !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 54px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(206, 17, 38, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════
+   HUKOOMI (Qatar) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-hukoomi-qa .payment-header {
+  background: linear-gradient(135deg, #63194E 0%, #8B1A4A 100%) !important;
+  border-bottom: 3px solid #63194E !important;
+}
+
+.entity-hukoomi-qa .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(99, 25, 78, 0.08), 0 1px 2px rgba(99, 25, 78, 0.04) !important;
+  border: 1px solid #E8D1D8 !important;
+}
+
+.entity-hukoomi-qa .payment-button,
+.entity-hukoomi-qa button[type="submit"] {
+  background: #63194E !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(99, 25, 78, 0.25) !important;
+}
+
+.entity-hukoomi-qa .payment-input,
+.entity-hukoomi-qa input,
+.entity-hukoomi-qa select {
+  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 14px 16px !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+}
+
+.entity-hukoomi-qa .payment-input:focus,
+.entity-hukoomi-qa input:focus {
+  border-color: #63194E !important;
+  box-shadow: 0 0 0 3px rgba(99, 25, 78, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   DUBAI PAY (UAE) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-dubai-pay-ae .payment-header {
+  background: linear-gradient(135deg, #E21B2E 0%, #000000 100%) !important;
+  border-bottom: 3px solid #E21B2E !important;
+}
+
+.entity-dubai-pay-ae .payment-card {
+  border-radius: 14px !important;
+  box-shadow: 0 1px 3px rgba(226, 27, 46, 0.08), 0 1px 2px rgba(226, 27, 46, 0.04) !important;
+  border: 1px solid #FFD6D6 !important;
+}
+
+.entity-dubai-pay-ae .payment-button,
+.entity-dubai-pay-ae button[type="submit"] {
+  background: #E21B2E !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
+  height: 54px !important;
+  font-weight: 600 !important;
+  font-family: 'Dubai Font', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(226, 27, 46, 0.28) !important;
+}
+
+.entity-dubai-pay-ae .payment-input,
+.entity-dubai-pay-ae input,
+.entity-dubai-pay-ae select {
+  border-radius: 10px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 14px 16px !important;
+  font-family: 'Dubai Font', 'Tajawal', sans-serif !important;
+}
+
+.entity-dubai-pay-ae .payment-input:focus,
+.entity-dubai-pay-ae input:focus {
+  border-color: #E21B2E !important;
+  box-shadow: 0 0 0 3px rgba(226, 27, 46, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   AL RAJHI BANK — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-alrajhi-bank .payment-header {
+  background: linear-gradient(135deg, #006C35 0%, #008D45 100%) !important;
+  border-bottom: 3px solid #D4AF37 !important;
+}
+
+.entity-alrajhi-bank .payment-card {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px -15px rgba(0, 108, 53, 0.20), 0 4px 6px -2px rgba(0, 108, 53, 0.06) !important;
+  border: 1px solid #D1E8DC !important;
+}
+
+.entity-alrajhi-bank .payment-button,
+.entity-alrajhi-bank button[type="submit"] {
+  background: #006C35 !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
+  height: 56px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 108, 53, 0.25) !important;
+}
+
+.entity-alrajhi-bank .payment-input,
+.entity-alrajhi-bank input,
+.entity-alrajhi-bank select {
+  border-radius: 10px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 16px 18px !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+}
+
+.entity-alrajhi-bank .payment-input:focus,
+.entity-alrajhi-bank input:focus {
+  border-color: #006C35 !important;
+  box-shadow: 0 0 0 3px rgba(0, 108, 53, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   SNB (Saudi National Bank) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-snb-bank .payment-header {
+  background: linear-gradient(135deg, #034638 0%, #84bd00 100%) !important;
+  border-bottom: 3px solid #D4AF37 !important;
+}
+
+.entity-snb-bank .payment-card {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px -15px rgba(3, 70, 56, 0.20), 0 4px 6px -2px rgba(3, 70, 56, 0.06) !important;
+  border: 1px solid #D1E8DC !important;
+}
+
+.entity-snb-bank .payment-button,
+.entity-snb-bank button[type="submit"] {
+  background: #034638 !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
+  height: 56px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(3, 70, 56, 0.25) !important;
+}
+
+.entity-snb-bank .payment-input,
+.entity-snb-bank input,
+.entity-snb-bank select {
+  border-radius: 10px !important;
+  border: 1px solid #D1D5DB !important;
+  padding: 16px 18px !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+}
+
+.entity-snb-bank .payment-input:focus,
+.entity-snb-bank input:focus {
+  border-color: #034638 !important;
+  box-shadow: 0 0 0 3px rgba(3, 70, 56, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════
+   SAHEL (UAE) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-sahel-ae .payment-header {
+  background: linear-gradient(135deg, #00573F 0%, #00A3E0 100%) !important;
+  border-bottom: 3px solid #00573F !important;
+}
+
+.entity-sahel-ae .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 87, 63, 0.08), 0 1px 2px rgba(0, 87, 63, 0.04) !important;
+  border: 1px solid #C2E0D1 !important;
+}
+
+.entity-sahel-ae .payment-button,
+.entity-sahel-ae button[type="submit"] {
+  background: #00573F !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'Dubai Font', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 87, 63, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════
+   TASDEED (Kuwait) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-tasdeed-kw .payment-header {
+  background: linear-gradient(135deg, #003087 0%, #00A3E0 100%) !important;
+  border-bottom: 3px solid #003087 !important;
+}
+
+.entity-tasdeed-kw .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 48, 135, 0.08), 0 1px 2px rgba(0, 48, 135, 0.04) !important;
+  border: 1px solid #D4E2F1 !important;
+}
+
+.entity-tasdeed-kw .payment-button,
+.entity-tasdeed-kw button[type="submit"] {
+  background: #003087 !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'Kuwait Standard', 'DIN Next Arabic', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 48, 135, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════
+   FAWRI (Bahrain) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-fawri-bh .payment-header {
+  background: linear-gradient(135deg, #0066CC 0%, #00A3E0 100%) !important;
+  border-bottom: 3px solid #0066CC !important;
+}
+
+.entity-fawri-bh .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 102, 204, 0.08), 0 1px 2px rgba(0, 102, 204, 0.04) !important;
+  border: 1px solid #BDE0F2 !important;
+}
+
+.entity-fawri-bh .payment-button,
+.entity-fawri-bh button[type="submit"] {
+  background: #0066CC !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 102, 204, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════
+   KAHRAMAA (Qatar) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-kahramaa-qa .payment-header {
+  background: linear-gradient(135deg, #0090DA 0%, #E31E24 100%) !important;
+  border-bottom: 3px solid #0090DA !important;
+}
+
+.entity-kahramaa-qa .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 144, 218, 0.08), 0 1px 2px rgba(0, 144, 218, 0.04) !important;
+  border: 1px solid #BDE0F2 !important;
+}
+
+.entity-kahramaa-qa .payment-button,
+.entity-kahramaa-qa button[type="submit"] {
+  background: #0090DA !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 144, 218, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════
+   STC Pay (Saudi Arabia) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-stc-pay-sa .payment-header {
+  background: linear-gradient(135deg, #4F008C 0%, #FF0000 100%) !important;
+  border-bottom: 3px solid #4F008C !important;
+}
+
+.entity-stc-pay-sa .payment-card {
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(79, 0, 140, 0.08), 0 1px 2px rgba(79, 0, 140, 0.04) !important;
+  border: 1px solid #E9D5FF !important;
+}
+
+.entity-stc-pay-sa .payment-button,
+.entity-stc-pay-sa button[type="submit"] {
+  background: #4F008C !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
+  height: 54px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(79, 0, 140, 0.28) !important;
+}
+
+/* ══════════════════════════════════════════════
+   MADA (Saudi Arabia) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-mada-sa .payment-header {
+  background: linear-gradient(135deg, #004B87 0%, #00A651 100%) !important;
+  border-bottom: 3px solid #004B87 !important;
+}
+
+.entity-mada-sa .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 75, 135, 0.08), 0 1px 2px rgba(0, 75, 135, 0.04) !important;
+  border: 1px solid #D4E2F1 !important;
+}
+
+.entity-mada-sa .payment-button,
+.entity-mada-sa button[type="submit"] {
+  background: #004B87 !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 75, 135, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════
+   ABSHER (Saudi Arabia) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-absher-sa .payment-header {
+  background: linear-gradient(135deg, #004B87 0%, #00A651 100%) !important;
+  border-bottom: 3px solid #004B87 !important;
+}
+
+.entity-absher-sa .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 75, 135, 0.08), 0 1px 2px rgba(0, 75, 135, 0.04) !important;
+  border: 1px solid #D4E2F1 !important;
+}
+
+.entity-absher-sa .payment-button,
+.entity-absher-sa button[type="submit"] {
+  background: #004B87 !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 52px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 75, 135, 0.25) !important;
+}
+
+/* ══════════════════════════════════════════════
+   DIRHAM (Oman) — Exact Production Match
+   ══════════════════════════════════════════════ */
+
+.entity-dirham-om .payment-header {
+  background: linear-gradient(135deg, #CE1126 0%, #00732F 100%) !important;
+  border-bottom: 3px solid #CE1126 !important;
+}
+
+.entity-dirham-om .payment-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(206, 17, 38, 0.08), 0 1px 2px rgba(206, 17, 38, 0.04) !important;
+  border: 1px solid #E0E0E0 !important;
+}
+
+.entity-dirham-om .payment-button,
+.entity-dirham-om button[type="submit"] {
+  background: #CE1126 !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  height: 54px !important;
+  font-weight: 600 !important;
+  font-family: 'DIN Next Arabic', 'Tajawal', sans-serif !important;
+  box-shadow: 0 4px 14px -2px rgba(206, 17, 38, 0.25) !important;
+}

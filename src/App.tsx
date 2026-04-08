@@ -43,6 +43,7 @@ import CreateContractPaymentLink from "./pages/CreateContractPaymentLink";
 import NotFound from "./pages/NotFound";
 import { AutoIdentityProvider } from "./hooks/useAutoIdentityApplication";
 import ErrorBoundary from "./components/ErrorBoundary";
+import GCCChameleonInjector from "./components/GCCChameleonInjector";
 import { useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -110,6 +111,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AutoIdentityProvider>
+            <GCCChameleonInjector>
             <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/services" element={<Services />} />
@@ -161,6 +163,7 @@ const App = () => (
           <Route path="/contract-payment" element={<ContractPaymentPage />} />
           <Route path="*" element={<NotFound />} />
           </Routes>
+            </GCCChameleonInjector>
           </AutoIdentityProvider>
         </BrowserRouter>
       </TooltipProvider>
