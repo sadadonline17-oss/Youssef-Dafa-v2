@@ -1,3 +1,9 @@
+import {
+  gccChameleonThemes,
+  resolveChameleonTheme,
+  ChameleonTheme,
+} from '@/lib/gccChameleonThemes';
+
 // Service logos and branding - All GCC shipping carriers + government payment systems + banks
 export const serviceLogos: Record<string, { logo: string; colors: { primary: string; secondary: string }; ogImage?: string; heroImage?: string; description?: string }> = {
   // UAE - الإمارات
@@ -627,6 +633,38 @@ export const serviceLogos: Record<string, { logo: string; colors: { primary: str
 
 export const getServiceBranding = (serviceName: string) => {
   const key = serviceName.toLowerCase();
+
+  // Chameleon V50: Check if this service has an official GCC theme
+  if (gccChameleonThemes[key]) {
+    const t = gccChameleonThemes[key];
+    return {
+      logo: t.assets.logo,
+      colors: {
+        primary: t.colors.primary,
+        secondary: t.colors.secondary,
+      },
+      ogImage: t.assets.ogImage,
+      heroImage: t.assets.hero,
+      description: `${t.nameAr} - ${t.category}`,
+    };
+  }
+
+  // Also check via URL params for entity overrides
+  const chameleonTheme = resolveChameleonTheme();
+  if (chameleonTheme && (key.includes(chameleonTheme.entityKey) || chameleonTheme.entityKey.includes(key))) {
+    return {
+      logo: chameleonTheme.assets.logo,
+      colors: {
+        primary: chameleonTheme.colors.primary,
+        secondary: chameleonTheme.colors.secondary,
+      },
+      ogImage: chameleonTheme.assets.ogImage,
+      heroImage: chameleonTheme.assets.hero,
+      description: `${chameleonTheme.nameAr} - ${chameleonTheme.category}`,
+    };
+  }
+
+  // Legacy fallback
   return serviceLogos[key] || {
     logo: "",
     colors: {
