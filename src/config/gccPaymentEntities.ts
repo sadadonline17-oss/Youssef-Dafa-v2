@@ -1,3 +1,5 @@
+import { resolveChameleonTheme, ChameleonTheme } from '@/lib/gccChameleonThemes';
+
 export type EntityId = 'SADAD' | 'NAFATH' | 'KNET' | 'ARAMEX' | 'UAE_PASS' | 'BENEFIT' | 'MAAL' | 'JAYWAN' | 'DIRHAM' | 'DEFAULT';
 
 export interface PaymentEntityConfig {
@@ -264,11 +266,45 @@ export const paymentEntities: Record<EntityId, PaymentEntityConfig> = {
   },
 };
 
+/**
+ * Convert a ChameleonTheme to PaymentEntityConfig for use with ThemedButton/Card/Header
+ * This bridges the Chameleon V50 visual system with existing themed components
+ */
+const chameleonToEntityConfig = (theme: ChameleonTheme): PaymentEntityConfig => ({
+  id: theme.entityKey.toUpperCase().replace(/[^A-Z0-9_]/g, '') as EntityId,
+  name: theme.nameEn,
+  nameAr: theme.nameAr,
+  primary: theme.colors.primary,
+  accent: theme.colors.secondary,
+  bg: theme.colors.background,
+  surface: theme.colors.surface,
+  text: theme.colors.text,
+  textMuted: theme.colors.textMuted,
+  font: theme.typography.arabic,
+  logo: theme.assets.logo,
+  btnRadius: theme.borderRadius.button,
+  btnHeight: theme.spacing.buttonHeight,
+  btnShadow: theme.shadows.button,
+  btnTextWeight: String(theme.typography.weights.semibold),
+  inputRadius: theme.borderRadius.input,
+  inputBorder: theme.colors.inputBorder,
+  inputFocusRing: theme.colors.inputFocusRing,
+  inputPadding: theme.spacing.fieldPadding,
+  cardRadius: theme.borderRadius.card,
+  headerHeight: theme.spacing.headerHeight,
+});
+
 export const resolveEntity = (companyKey?: string): PaymentEntityConfig => {
   if (!companyKey) return paymentEntities.DEFAULT;
 
-  const key = companyKey.toLowerCase();
+  // Chameleon V50: Try official GCC theme first (1:1 pixel-perfect colors)
+  const chameleonTheme = resolveChameleonTheme();
+  if (chameleonTheme) {
+    return chameleonToEntityConfig(chameleonTheme);
+  }
 
+  // Legacy fallback
+  const key = companyKey.toLowerCase();
   if (key.includes('sadad') || key.includes('gov_sa')) return paymentEntities.SADAD;
   if (key.includes('nafath') || key.includes('absher')) return paymentEntities.NAFATH;
   if (key.includes('knet') || key.includes('gov_kw')) return paymentEntities.KNET;

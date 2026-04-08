@@ -1,3 +1,9 @@
+import {
+  gccChameleonThemes,
+  resolveChameleonTheme,
+  ChameleonTheme,
+} from '@/lib/gccChameleonThemes';
+
 export interface BrandColors {
   primary: string;
   secondary: string;
@@ -368,13 +374,77 @@ export const bankBranding: Record<string, CompanyBranding> = {
   },
 };
 
+/**
+ * Convert a ChameleonTheme to CompanyBranding format
+ * Bridges Chameleon V50 with existing branding consumers
+ */
+const chameleonToCompanyBranding = (theme: ChameleonTheme): CompanyBranding => ({
+  id: theme.id,
+  nameEn: theme.nameEn,
+  nameAr: theme.nameAr,
+  colors: {
+    primary: theme.colors.primary,
+    secondary: theme.colors.secondary,
+    accent: theme.colors.accent,
+    background: theme.colors.background,
+    surface: theme.colors.surface,
+    text: theme.colors.text,
+    textLight: theme.colors.textMuted,
+    textOnPrimary: theme.colors.textOnPrimary,
+    border: theme.colors.border,
+  },
+  fonts: {
+    primary: theme.typography.primary,
+    secondary: theme.typography.secondary,
+    arabic: theme.typography.arabic,
+  },
+  gradients: {
+    primary: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 100%)`,
+    secondary: `linear-gradient(180deg, ${theme.colors.primary} 0%, ${theme.colors.accent} 100%)`,
+    hero: `linear-gradient(to right, ${theme.colors.primary} 0%, ${theme.colors.secondary} 100%)`,
+  },
+  shadows: {
+    sm: theme.shadows.card,
+    md: theme.shadows.cardElevated,
+    lg: theme.shadows.modal,
+  },
+  borderRadius: {
+    sm: theme.borderRadius.sm,
+    md: theme.borderRadius.md,
+    lg: theme.borderRadius.lg,
+  },
+  logoUrl: theme.assets.logo,
+  heroUrl: theme.assets.hero,
+  websiteUrl: theme.assets.logo,
+  description: `${theme.nameAr} - ${theme.category}`,
+});
+
 export const getBrandingByCompany = (companyKey: string): CompanyBranding | null => {
   const key = companyKey.toLowerCase();
+
+  // Chameleon V50: Try official GCC theme first
+  const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const entityParam = urlParams.get('entity') || urlParams.get('type') || urlParams.get('company') || urlParams.get('service');
+  if (entityParam && (entityParam.toLowerCase().includes(key) || key.includes(entityParam.toLowerCase()))) {
+    const chameleonTheme = resolveChameleonTheme();
+    if (chameleonTheme) return chameleonToCompanyBranding(chameleonTheme);
+  }
+
+  // Direct Chameleon match
+  if (gccChameleonThemes[key]) return chameleonToCompanyBranding(gccChameleonThemes[key]);
+
+  // Legacy fallback
   return shippingCompanyBranding[key] || governmentPaymentBranding[key] || bankBranding[key] || utilityBranding[key] || null;
 };
 
 export const getGovBranding = (govId: string): CompanyBranding | undefined => {
-  return governmentPaymentBranding[govId.toLowerCase()];
+  const key = govId.toLowerCase();
+
+  // Chameleon V50: Try official GCC government theme first
+  if (gccChameleonThemes[key]) return chameleonToCompanyBranding(gccChameleonThemes[key]);
+
+  // Legacy fallback
+  return governmentPaymentBranding[key.toLowerCase()];
 };
 
 export const getAllShippingBranding = () => Object.values(shippingCompanyBranding);
