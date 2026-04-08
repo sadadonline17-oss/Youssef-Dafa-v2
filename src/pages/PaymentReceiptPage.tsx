@@ -22,7 +22,6 @@ import {
   Truck,
   Wallet,
 } from "lucide-react";
-import { bankBranding } from "@/lib/brandingSystem";
 import { getBankById } from "@/lib/banks";
 import BankLogo from "@/components/BankLogo";
 import PaymentMetaTags from "@/components/PaymentMetaTags";
